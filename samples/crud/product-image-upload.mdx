@@ -1,6 +1,5 @@
 ---
 title: "Product CRUD: upload ảnh, preview và progress"
-description: "Nâng Product CRUD với ảnh sản phẩm: preview tức thì, FormData, upload progress, validation server-side, replace/remove image, method spoofing và cleanup an toàn."
 ---
 
 # Product CRUD: upload ảnh, preview và progress
@@ -302,3 +301,9 @@ examples/product-crud/backend/UpdateProductRequest.php
 <Warning>
 Sample dùng local `public` disk để dễ copy và học. Production có thể dùng S3/object storage; khi đó vẫn giữ nguyên mental model Inertia, chỉ thay storage implementation và cách sinh `image_url`.
 </Warning>
+
+---
+
+## Tài liệu chính thức
+
+Nội dung thực chiến trong bài được xây dựng dựa trên API và nguyên lý của [Inertia.js v3 Documentation](https://inertiajs.com/docs/v3/getting-started). Khi áp dụng vào dự án, hãy đối chiếu API cụ thể với tài liệu chính thức theo phiên bản bạn đang sử dụng.
