@@ -1,6 +1,5 @@
 ---
 title: Kiểm thử
-description: "Có nhiều cách khác nhau để kiểm thử một ứng dụng Inertia. Trang này cung cấp cái nhìn tổng quan nhanh về các công cụ hiện có."
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
@@ -263,3 +262,9 @@ $response->assertRedirect('/dashboard')
     ->assertInertiaFlash('notification.type', 'success')
     ->assertInertiaFlashMissing('error');
 ```
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v2 chính thức](https://inertiajs.com/docs/v2/advanced/testing). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.

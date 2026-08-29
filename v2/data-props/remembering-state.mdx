@@ -1,6 +1,5 @@
 ---
 title: Ghi nhớ state
-description: "Khi điều hướng lịch sử trình duyệt, Inertia khôi phục các trang bằng dữ liệu props được cache trong history state. Tuy nhiên, Inertia không khôi phục state…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
@@ -205,3 +204,9 @@ let data = router.restore('my-key')
 <Warning>
 Một số trình duyệt giới hạn số lần gọi `history.replaceState()` trong thời gian ngắn. Inertia bắt lỗi và log ra console, nhưng cập nhật state sẽ bị mất. Tránh gọi `router.remember()` quá thường xuyên và cân nhắc debounce hoặc batch update state trong tình huống tần suất cao.
 </Warning>
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v2 chính thức](https://inertiajs.com/docs/v2/data-props/remembering-state). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.

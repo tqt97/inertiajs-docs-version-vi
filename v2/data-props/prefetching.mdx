@@ -1,6 +1,5 @@
 ---
 title: Prefetching
-description: "Inertia hỗ trợ prefetch dữ liệu cho những trang có khả năng được truy cập tiếp theo. Điều này giúp cải thiện hiệu năng cảm nhận của ứng dụng bằng cách cho…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
@@ -449,3 +448,9 @@ Nếu request được thực hiện trong khoảng dữ liệu còn mới (trư
 Nếu request được thực hiện trong khoảng stale (giữa hai giá trị), giá trị cũ được trả cho người dùng đồng thời một request chạy nền sẽ làm mới dữ liệu cache. Khi dữ liệu mới được trả về, nó được gộp vào trang để người dùng có dữ liệu cập nhật nhất.
 
 Nếu request được thực hiện sau giá trị thứ hai, cache được xem là hết hạn và trang cùng dữ liệu sẽ được tải từ server như một request thông thường.
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v2 chính thức](https://inertiajs.com/docs/v2/data-props/prefetching). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.

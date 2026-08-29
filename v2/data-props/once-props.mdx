@@ -1,6 +1,5 @@
 ---
 title: Once Props
-description: "Một số dữ liệu hiếm khi thay đổi, tốn chi phí tính toán hoặc đơn giản là rất lớn. Thay vì gửi dữ liệu này trong mọi response, bạn có thể dùng once props. Các…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
@@ -146,3 +145,9 @@ return Inertia::render('Dashboard', [
     'categories' => Inertia::optional(fn () => Category::all())->once(),
 ]);
 ```
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v2 chính thức](https://inertiajs.com/docs/v2/data-props/once-props). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.

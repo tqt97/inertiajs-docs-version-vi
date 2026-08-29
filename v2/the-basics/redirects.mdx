@@ -1,6 +1,5 @@
 ---
 title: Redirect
-description: "Khi thực hiện request Inertia không phải GET theo cách thủ công hoặc thông qua phần tử , bạn cần đảm bảo luôn phản hồi bằng một response redirect Inertia hợp…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
@@ -50,3 +49,9 @@ return Inertia::location($url);
 ```
 
 Phương thức `Inertia::location()` sẽ tạo response `409 Conflict` và đặt URL đích trong header `X-Inertia-Location`. Khi phía client nhận được response này, Inertia sẽ tự động thực hiện truy cập bằng `window.location = url`.
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v2 chính thức](https://inertiajs.com/docs/v2/the-basics/redirects). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.

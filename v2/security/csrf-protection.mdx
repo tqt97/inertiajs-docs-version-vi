@@ -1,6 +1,5 @@
 ---
 title: Bảo vệ CSRF
-description: "Laravel tự động thêm CSRF token phù hợp khi thực hiện request qua Inertia hoặc Axios. Tuy nhiên, nếu dùng Laravel, hãy nhớ bỏ thẻ meta csrf-token khỏi dự án…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
@@ -92,3 +91,9 @@ use Symfony\Component\HttpFoundation\Response;
 Kết quả cuối cùng mang lại trải nghiệm tốt hơn nhiều. Thay vì nhìn thấy modal lỗi, người dùng sẽ nhận thông báo rằng trang đã "hết hạn" và được yêu cầu thử lại.
 
 <video controls className="w-full rounded-xl" src="/mp4/csrf-mismatch-warning.mp4"></video>
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v2 chính thức](https://inertiajs.com/docs/v2/security/csrf-protection). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.

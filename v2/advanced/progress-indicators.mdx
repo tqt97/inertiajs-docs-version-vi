@@ -1,6 +1,5 @@
 ---
 title: Chỉ báo tiến trình
-description: "Vì request Inertia được thực hiện qua XHR, trình duyệt thường không hiển thị chỉ báo tải khi điều hướng từ trang này sang trang khác. Để giải quyết, Inertia…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
@@ -387,3 +386,9 @@ router.get('/settings', {}, { async: true })
 // Enable the progress indicator with async requests
 router.get('/settings', {}, { async: true, showProgress: true })
 ```
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v2 chính thức](https://inertiajs.com/docs/v2/advanced/progress-indicators). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.
