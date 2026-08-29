@@ -1,18 +1,19 @@
 ---
-title: Progress Indicators
+title: Chỉ báo tiến trình
+description: "Vì request Inertia được thực hiện qua XHR nên trình duyệt thường không hiển thị chỉ báo tải khi điều hướng từ trang này sang trang khác. Để giải quyết…"
 ---
 
 import V1EOLWarning from "/snippets/v1-eol-warning.mdx";
 
 <V1EOLWarning />
 
-Since Inertia requests are made via XHR, there would typically not be a browser loading indicator when navigating from one page to another. To solve this, Inertia displays a progress indicator at the top of the page whenever you make an Inertia visit.
+Vì request Inertia được thực hiện qua XHR nên trình duyệt thường không hiển thị chỉ báo tải khi điều hướng từ trang này sang trang khác. Để giải quyết, Inertia hiển thị progress indicator ở đầu trang mỗi khi bạn thực hiện một Inertia visit.
 
-Of course, if you prefer, you can disable Inertia's default loading indicator and provide your own custom implementation. We'll discuss both approaches below.
+Tất nhiên, nếu muốn, bạn có thể tắt loading indicator mặc định của Inertia và tự triển khai. Chúng ta sẽ trình bày cả hai cách bên dưới.
 
-## Default
+## Mặc định
 
-Inertia's default progress indicator is a light-weight wrapper around the [NProgress](https://ricostacruz.com/nprogress/) library. You can customize it via the `progress` property of the `createInertiaApp()` function.
+Progress indicator mặc định của Inertia là một lớp bọc nhẹ quanh thư viện [NProgress](https://ricostacruz.com/nprogress/). Bạn có thể tùy chỉnh thông qua property `progress` của hàm `createInertiaApp()`.
 
 ```js
 createInertiaApp({
@@ -30,7 +31,7 @@ showSpinner: false,
 })
 ```
 
-You can disable Inertia's default loading indicator by setting the `progress` property to `false`.
+Bạn có thể tắt loading indicator mặc định của Inertia bằng cách đặt property `progress` thành `false`.
 
 ```js
 createInertiaApp({
@@ -39,11 +40,11 @@ progress: false,
 })
 ```
 
-## Custom
+## Tùy chỉnh
 
-It's also possible to setup your own custom page loading indicators using Inertia [events](/v1/advanced/events). Let's explore how to do this using the [NProgress](https://ricostacruz.com/nprogress/) library as an example.
+Bạn cũng có thể tự thiết lập chỉ báo tải trang tùy chỉnh bằng [events](/v1/advanced/events) của Inertia. Hãy xem cách thực hiện với thư viện [NProgress](https://ricostacruz.com/nprogress/) làm ví dụ.
 
-First, disable Inertia's default loading indicator.
+Trước tiên, hãy tắt loading indicator mặc định của Inertia.
 
 ```js
 createInertiaApp({
@@ -52,19 +53,19 @@ progress: false,
 })
 ```
 
-Next, install the NProgress library.
+Tiếp theo, cài thư viện NProgress.
 
 ```bash
 npm install nprogress
 ```
 
-After installation, you'll need to add the NProgress [styles](https://github.com/rstacruz/nprogress/blob/master/nprogress.css) to your project. You can do this using a CDN hosted copy of the styles.
+Sau khi cài đặt, bạn cần thêm [style](https://github.com/rstacruz/nprogress/blob/master/nprogress.css) của NProgress vào dự án. Bạn có thể dùng bản style được host trên CDN.
 
 ```html
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" />
 ```
 
-Next, import both `NProgress` and the Inertia `router` into your application.
+Tiếp theo, import cả `NProgress` và `router` của Inertia vào ứng dụng.
 
 <CodeGroup>
 
@@ -90,25 +91,25 @@ import { router } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-Next, let's add a `start` event listener. We'll use this listener to show the progress bar when a new Inertia visit begins.
+Sau đó, hãy thêm listener cho sự kiện `start`. Chúng ta sẽ dùng listener này để hiển thị progress bar khi một Inertia visit mới bắt đầu.
 
 ```js
 router.on('start', () => NProgress.start())
 ```
 
-Then, let's add a `finish` event listener to hide the progress bar when the page visit finishes.
+Tiếp theo, thêm listener cho sự kiện `finish` để ẩn progress bar khi visit hoàn tất.
 
 ```js
 router.on('finish', () => NProgress.done())
 ```
 
-That's it! Now, as you navigate from one page to another, the progress bar will be added and removed from the page.
+Vậy là xong. Giờ khi điều hướng giữa các trang, progress bar sẽ tự động được thêm vào và loại bỏ khỏi trang.
 
-### Handling Cancelled Visits
+### Xử lý visit bị hủy
 
-While this custom progress implementation works great for page visits that finish properly, it would be nice to handle cancelled visits as well. First, for interrupted visits (those that get cancelled as a result of a new visit), the progress bar should simply be reset back to the start position. Second, for manually cancelled visits, the progress bar should be immediately removed from the page.
+Mặc dù phần triển khai progress tùy chỉnh này hoạt động tốt với các page visit hoàn tất bình thường, sẽ tốt hơn nếu xử lý cả visit bị hủy. Thứ nhất, với visit bị gián đoạn (bị hủy do một visit mới bắt đầu), progress bar chỉ nên được reset về vị trí bắt đầu. Thứ hai, với visit bị hủy thủ công, progress bar nên được loại bỏ khỏi trang ngay lập tức.
 
-We can accomplish this by inspecting the `event.detail.visit` object that's provided to the finish event.
+Chúng ta có thể thực hiện bằng cách kiểm tra object `event.detail.visit` được cung cấp cho sự kiện finish.
 
 ```js
 router.on('finish', (event) => {
@@ -123,9 +124,9 @@ NProgress.remove()
 })
 ```
 
-### File Upload Progress
+### Tiến trình tải file
 
-Let's take this a step further. When files are being uploaded, it would be great to update the loading indicator to reflect the upload progress. This can be done using the `progress` event.
+Hãy tiến thêm một bước. Khi file đang được tải lên, sẽ rất hữu ích nếu loading indicator phản ánh đúng tiến trình upload. Bạn có thể làm việc này bằng sự kiện `progress`.
 
 ```js
 router.on('progress', (event) => {
@@ -135,19 +136,19 @@ NProgress.set((event.detail.progress.percentage / 100) * 0.9)
 })
 ```
 
-Now, instead of the progress bar "trickling" while the files are being uploaded, it will actually update it's position based on the progress of the request. We limit the progress here to 90%, since we still need to wait for a response from the server.
+Giờ thay vì progress bar chỉ tăng dần mang tính ước lượng trong lúc file được tải lên, vị trí của nó sẽ thực sự cập nhật theo tiến trình request. Ở đây chúng ta giới hạn tiến trình ở 90% vì vẫn còn phải chờ response từ máy chủ.
 
-### Loading Indicator Delay
+### Trì hoãn loading indicator
 
-The last thing we're going to implement is a loading indicator delay. It's often preferable to delay showing the loading indicator until a request has taken longer than 250-500 milliseconds. This prevents the loading indicator from appearing constantly on quick page visits, which can be visually distracting.
+Phần cuối cùng chúng ta sẽ triển khai là độ trễ trước khi hiển thị loading indicator. Thông thường nên trì hoãn việc hiển thị cho đến khi request kéo dài hơn 250–500 mili giây. Điều này tránh loading indicator xuất hiện liên tục ở các page visit rất nhanh, vốn có thể gây rối mắt.
 
-To implement the delay behavior, we'll use the `setTimeout` and `clearTimeout` functions. Let's start by defining a variable to keep track of the timeout.
+Để triển khai độ trễ, chúng ta sẽ dùng các hàm `setTimeout` và `clearTimeout`. Trước tiên, hãy định nghĩa một biến để theo dõi timeout.
 
 ```js
 let timeout = null
 ```
 
-Next, let's update the `start` event listener to start a new timeout that will show the progress bar after 250 milliseconds.
+Tiếp theo, cập nhật listener `start` để tạo timeout mới, hiển thị progress bar sau 250 mili giây.
 
 ```js
 router.on('start', () => {
@@ -155,7 +156,7 @@ timeout = setTimeout(() => NProgress.start(), 250)
 })
 ```
 
-Next, we'll update the `finish` event listener to clear any existing timeouts in the event that the page visit finishes before the timeout does.
+Sau đó, cập nhật listener `finish` để xóa mọi timeout còn tồn tại nếu page visit hoàn tất trước khi timeout kết thúc.
 
 ```js
 router.on('finish', (event) => {
@@ -164,7 +165,7 @@ clearTimeout(timeout)
 })
 ```
 
-In the `finish` event listener, we need to determine if the progress bar has actually started displaying progress, otherwise we'll inadvertently cause it to show before the timeout has finished.
+Trong listener `finish`, chúng ta cần xác định progress bar đã thực sự bắt đầu hiển thị tiến trình hay chưa; nếu không, vô tình chúng ta sẽ khiến nó xuất hiện trước khi timeout kết thúc.
 
 ```js
 router.on('finish', (event) => {
@@ -176,7 +177,7 @@ return
 })
 ```
 
-And, finally, we need to do the same check in the `progress` event listener.
+Cuối cùng, chúng ta cũng cần thực hiện cùng phép kiểm tra đó trong listener `progress`.
 
 ```js
 router.on('progress', event => {
@@ -187,11 +188,11 @@ return
 }
 ```
 
-That's it, you now have a beautiful custom page loading indicator!
+Vậy là bạn đã có một loading indicator tùy chỉnh đẹp mắt cho trang.
 
-### Complete Example
+### Ví dụ hoàn chỉnh
 
-For convenience, here is the full source code of the final version of our custom loading indicator.
+Để tiện tham khảo, dưới đây là toàn bộ source code của phiên bản cuối cùng cho loading indicator tùy chỉnh.
 
 <CodeGroup>
 

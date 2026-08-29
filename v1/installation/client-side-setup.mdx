@@ -1,20 +1,21 @@
 ---
-title: Client-side Setup
+title: Thiết lập phía client
+description: "Sau khi đã cấu hình framework phía máy chủ, bước tiếp theo là thiết lập framework phía client. Hiện Inertia hỗ trợ React, Vue và Svelte."
 ---
 
 import V1EOLWarning from "/snippets/v1-eol-warning.mdx";
 
 <V1EOLWarning />
 
-Once you have your [server-side framework configured](/v1/installation/server-side-setup), you then need to setup your client-side framework. Inertia currently provides support for React, Vue, and Svelte.
+Sau khi đã [cấu hình framework phía máy chủ](/v1/installation/server-side-setup), bước tiếp theo là thiết lập framework phía client. Hiện Inertia hỗ trợ React, Vue và Svelte.
 
-## Laravel Starter Kits
+## Laravel Starter Kit
 
-Laravel's [starter kits](https://laravel.com/docs/starter-kits), Breeze and Jetstream, provide out-of-the-box scaffolding for new Inertia applications. These starter kits are the absolute fastest way to start building a new Inertia project using Laravel and Vue or React. However, if you would like to manually install Inertia into your application, please consult the documentation below.
+Các [starter kit](https://laravel.com/docs/starter-kits) của Laravel, Breeze và Jetstream, cung cấp sẵn scaffold cho ứng dụng Inertia mới. Đây là cách nhanh nhất để bắt đầu xây dựng dự án Inertia mới bằng Laravel cùng Vue hoặc React. Tuy nhiên, nếu muốn cài Inertia thủ công vào ứng dụng, hãy xem tài liệu bên dưới.
 
-## Install Dependencies
+## Cài đặt dependency
 
-First, install the Inertia client-side adapter corresponding to your framework of choice.
+Trước tiên, hãy cài adapter phía client của Inertia tương ứng với framework bạn lựa chọn.
 
 <CodeGroup>
 
@@ -36,9 +37,9 @@ npm install @inertiajs/svelte
 
 </CodeGroup>
 
-## Initialize the Inertia App
+## Khởi tạo ứng dụng Inertia
 
-Next, update your main JavaScript file to boot your Inertia app. To accomplish this, we'll initialize the client-side framework with the base Inertia component.
+Tiếp theo, cập nhật file JavaScript chính để khởi động ứng dụng Inertia. Để làm việc này, chúng ta sẽ khởi tạo framework phía client với component Inertia cơ sở.
 
 <CodeGroup>
 
@@ -109,11 +110,11 @@ createInertiaApp({
 
 </CodeGroup>
 
-The `setup` callback receives everything necessary to initialize the client-side framework, including the root Inertia `App` component.
+Callback `setup` nhận mọi thứ cần thiết để khởi tạo framework phía client, bao gồm root component `App` của Inertia.
 
-## Resolving Components
+## Resolve component
 
-The `resolve` callback tells Inertia how to load a page component. It receives a page name (string), and returns a page component module. How you implement this callback depends on which bundler (Vite or Webpack) you're using.
+Callback `resolve` cho Inertia biết cách tải một page component. Nó nhận tên trang (chuỗi) và trả về module page component. Cách triển khai callback này phụ thuộc vào bundler bạn đang sử dụng (Vite hoặc Webpack).
 
 <CodeGroup>
 
@@ -163,11 +164,11 @@ resolve: name => require(`./Pages/${name}.svelte`),
 
 </CodeGroup>
 
-By default we recommend eager loading your components, which will result in a single JavaScript bundle. However, if you'd like to lazy-load your components, see our [code splitting](/code-splitting) documentation.
+Mặc định, chúng tôi khuyến nghị eager load các component, kết quả là một JavaScript bundle duy nhất. Tuy nhiên, nếu muốn lazy-load component, hãy xem tài liệu [code splitting](/code-splitting).
 
-## Defining a Root Element
+## Định nghĩa root element
 
-By default, Inertia assumes that your application's root template has a root element with an `id` of `app`. If your application's root element has a different `id`, you can provide it using the `id` property.
+Mặc định, Inertia giả định root template của ứng dụng có root element với `id` là `app`. Nếu root element của ứng dụng có `id` khác, bạn có thể cung cấp nó bằng thuộc tính `id`.
 
 ```js
 createInertiaApp({

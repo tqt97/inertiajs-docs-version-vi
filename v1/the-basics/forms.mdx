@@ -1,14 +1,15 @@
 ---
-title: Forms
+title: Form
+description: "Mặc dù có thể submit form HTML truyền thống với Inertia, cách này không được khuyến nghị vì sẽ làm tải lại toàn bộ trang. Thay vào đó, tốt hơn là chặn việc…"
 ---
 
 import V1EOLWarning from "/snippets/v1-eol-warning.mdx";
 
 <V1EOLWarning />
 
-## Submitting Forms
+## Submit form
 
-While it's possible to make classic HTML form submissions with Inertia, it's not recommended since they cause full-page reloads. Instead, it's better to intercept form submissions and then make the [request using Inertia](/v1/the-basics/manual-visits).
+Mặc dù có thể submit form HTML truyền thống với Inertia, cách này không được khuyến nghị vì sẽ làm tải lại toàn bộ trang. Thay vào đó, tốt hơn là chặn việc submit form rồi thực hiện [request bằng Inertia](/v1/the-basics/manual-visits).
 
 <CodeGroup>
 
@@ -146,9 +147,9 @@ export default function Edit() {
 
 </CodeGroup>
 
-As you may have noticed in the example above, when using Inertia, you don't typically need to inspect form responses client-side like you would when making XHR / fetch requests manually.
+Như bạn có thể đã nhận thấy trong ví dụ trên, khi dùng Inertia, thông thường bạn không cần kiểm tra response của form ở phía client như khi tự thực hiện request XHR / fetch.
 
-Instead, your server-side route / controller typically issues a [redirect](/v1/the-basics/redirects) response. And, Of course, there is nothing stopping you from redirecting the user right back to the page they were previously on. Using this approach, handling Inertia form submissions feels very similar to handling classic HTML form submissions.
+Thay vào đó, route / controller phía máy chủ thường trả về một response [redirect](/v1/the-basics/redirects). Và tất nhiên, không có gì ngăn bạn redirect người dùng quay lại đúng trang trước đó. Với cách tiếp cận này, việc xử lý submit form trong Inertia rất giống xử lý submit form HTML truyền thống.
 
 ```php
 class UsersController extends Controller
@@ -173,17 +174,17 @@ class UsersController extends Controller
 }
 ```
 
-## Server-side Validation
+## Validation phía máy chủ
 
-Handling server-side validation errors in Inertia works a little different than handling errors from manual XHR / fetch requests. When making XHR / fetch requests, you typically inspect the response for a `422`status code and manually update the form's error state.
+Xử lý lỗi validation phía máy chủ trong Inertia hơi khác so với xử lý lỗi từ request XHR / fetch thủ công. Khi thực hiện request XHR / fetch, bạn thường kiểm tra response có status code `422` rồi tự cập nhật state lỗi của form.
 
-However, when using Inertia, a `422` response is never returned by your server. Instead, as we saw in the example above, your routes / controllers will typically return a redirect response - much like a classic, full-page form submission.
+Tuy nhiên, khi dùng Inertia, máy chủ không bao giờ trả response `422`. Thay vào đó, như ví dụ trên, route / controller thường trả về response redirect — tương tự một lần submit form tải toàn bộ trang truyền thống.
 
-For a full discussion on handling and displaying validation errors with Inertia, please consult the [validation](/v1/the-basics/validation) documentation.
+Để tìm hiểu đầy đủ về cách xử lý và hiển thị lỗi validation với Inertia, hãy xem tài liệu [validation](/v1/the-basics/validation).
 
-## Form Helper
+## Form helper
 
-Since working with forms is so common, Inertia includes a form helper designed to help reduce the amount of boilerplate code needed for handling typical form submissions.
+Vì làm việc với form là nhu cầu rất phổ biến, Inertia cung cấp form helper nhằm giảm lượng boilerplate code cần thiết khi xử lý các lần submit form thông thường.
 
 <CodeGroup>
 
@@ -304,7 +305,7 @@ function submit() {
 
 </CodeGroup>
 
-To submit the form, you may use the `get`, `post`, `put`, `patch`and `delete` methods.
+Để submit form, bạn có thể dùng các phương thức `get`, `post`, `put`, `patch` và `delete`.
 
 <CodeGroup>
 
@@ -348,7 +349,7 @@ $form.delete(url, options)
 
 </CodeGroup>
 
-The submit methods support all of the typical [visit options](/v1/the-basics/manual-visits), such as `preserveState`, `preserveScroll`, and event callbacks, which can be helpful for performing tasks on successful form submissions. For example, you might use the `onSuccess` callback to reset inputs to their original state.
+Các phương thức submit hỗ trợ mọi [tùy chọn visit](/v1/the-basics/manual-visits) thông thường như `preserveState`, `preserveScroll` và callback sự kiện; các callback này hữu ích để thực hiện tác vụ sau khi submit form thành công. Ví dụ, bạn có thể dùng callback `onSuccess` để reset input về trạng thái ban đầu.
 
 <CodeGroup>
 
@@ -384,7 +385,7 @@ $form.post('/profile', {
 
 </CodeGroup>
 
-If you need to modify the form data before it's sent to the server, you can do so via the `transform()` method.
+Nếu cần thay đổi dữ liệu form trước khi gửi đến máy chủ, bạn có thể thực hiện thông qua phương thức `transform()`.
 
 <CodeGroup>
 
@@ -426,7 +427,7 @@ $form
 
 </CodeGroup>
 
-You can use the `processing` property to track if a form is currently being submitted. This can be helpful for preventing double form submissions by disabling the submit button.
+Bạn có thể dùng thuộc tính `processing` để theo dõi form có đang được submit hay không. Điều này hữu ích để ngăn submit hai lần bằng cách disable nút submit.
 
 <CodeGroup>
 
@@ -450,7 +451,7 @@ const { processing } = useForm({ ... })
 
 </CodeGroup>
 
-If your form is uploading files, the current progress event is available via the `progress` property, allowing you to easily display the upload progress.
+Nếu form đang tải file lên, sự kiện tiến trình hiện tại có sẵn thông qua thuộc tính `progress`, giúp bạn dễ dàng hiển thị tiến độ tải lên.
 
 <CodeGroup>
 
@@ -486,7 +487,7 @@ const { progress } = useForm({ ... })
 
 </CodeGroup>
 
-If there are form validation errors, they are available via the `errors` property. When building Laravel powered Inertia applications, form errors will automatically be populated when your application throws instances of `ValidationException`, such as when using `{'$request->validate()'}`.
+Nếu có lỗi validation của form, chúng có sẵn thông qua thuộc tính `errors`. Khi xây dựng ứng dụng Inertia dùng Laravel, lỗi form sẽ tự động được điền khi ứng dụng ném ra instance `ValidationException`, chẳng hạn khi dùng `{'$request->validate()'}`.
 
 <CodeGroup>
 
@@ -512,9 +513,9 @@ const { errors } = useForm({ ... })
 
 </CodeGroup>
 
-For a more thorough discussion of form validation and errors, please consult the [validation documentation](/v1/the-basics/validation).
+Để tìm hiểu kỹ hơn về validation và lỗi của form, hãy xem [tài liệu validation](/v1/the-basics/validation).
 
-To determine if a form has any errors, you may use the `hasErrors` property. To clear form errors, use the `clearErrors()` method.
+Để xác định form có lỗi hay không, bạn có thể dùng thuộc tính `hasErrors`. Để xóa lỗi form, dùng phương thức `clearErrors()`.
 
 <CodeGroup>
 
@@ -554,7 +555,7 @@ $form.clearErrors('field', 'anotherfield')
 
 </CodeGroup>
 
-If you're using a client-side input validation libraries or do client-side validation manually, you can set your own errors on the form using the `setErrors()` method.
+Nếu sử dụng thư viện validation input phía client hoặc tự validation phía client, bạn có thể tự đặt lỗi cho form bằng phương thức `setErrors()`.
 
 <CodeGroup>
 
@@ -606,11 +607,11 @@ $form.setError({
 
 </CodeGroup>
 
-Unlike an actual form submission, the page's props remain unchanged when manually setting errors on a form instance.
+Khác với một lần submit form thực tế, props của trang không thay đổi khi bạn tự đặt lỗi trên một instance form.
 
-When a form has been successfully submitted, the `wasSuccessful` property will be `true`. In addition to this, forms have a `recentlySuccessful` property, which will be set to `true` for two seconds after a successful form submission. This property can be utilized to show temporary success messages.
+Khi form được submit thành công, thuộc tính `wasSuccessful` sẽ là `true`. Ngoài ra, form còn có thuộc tính `recentlySuccessful`, được đặt thành `true` trong hai giây sau một lần submit thành công. Bạn có thể dùng thuộc tính này để hiển thị thông báo thành công tạm thời.
 
-To reset the form's values back to their default values, you can use the `reset()` method.
+Để reset các giá trị của form về giá trị mặc định, bạn có thể dùng phương thức `reset()`.
 
 <CodeGroup>
 
@@ -650,7 +651,7 @@ $form.reset('field', 'anotherfield')
 
 </CodeGroup>
 
-If your form's default values become outdated, you can use the `defaults()` method to update them. Then, the form will be reset to the correct values the next time the `reset()` method is invoked.
+Nếu các giá trị mặc định của form không còn phù hợp, bạn có thể dùng phương thức `defaults()` để cập nhật chúng. Sau đó, form sẽ được reset về đúng các giá trị này trong lần tiếp theo phương thức `reset()` được gọi.
 
 <CodeGroup>
 
@@ -714,7 +715,7 @@ $form.defaults({
 
 </CodeGroup>
 
-To determine if a form has any changes, you may use the `isDirty` property.
+Để xác định form có thay đổi nào hay không, bạn có thể dùng thuộc tính `isDirty`.
 
 <CodeGroup>
 
@@ -740,7 +741,7 @@ const { isDirty } = useForm({ ... })
 
 </CodeGroup>
 
-To cancel a form submission, use the `cancel()` method.
+Để hủy một lần submit form, dùng phương thức `cancel()`.
 
 <CodeGroup>
 
@@ -764,7 +765,7 @@ $form.cancel()
 
 </CodeGroup>
 
-To instruct Inertia to store a form's data and errors in [history state](/v1/advanced/remembering-state), you can provide a unique form key as the first argument when instantiating your form.
+Để yêu cầu Inertia lưu dữ liệu và lỗi của form vào [history state](/v1/advanced/remembering-state), bạn có thể truyền một form key duy nhất làm đối số đầu tiên khi khởi tạo form.
 
 <CodeGroup>
 
@@ -798,12 +799,12 @@ const form = useForm(`EditUser:${user.id}\
 
 </CodeGroup>
 
-## File Uploads
+## Tải file lên
 
-When making requests or form submissions that include files, Inertia will automatically convert the request data into a `FormData` object.
+Khi thực hiện request hoặc submit form có chứa file, Inertia sẽ tự động chuyển dữ liệu request thành object `FormData`.
 
-For a more thorough discussion of file uploads, please consult the [file uploads documentation](/v1/the-basics/file-uploads).
+Để tìm hiểu kỹ hơn về tải file, hãy xem [tài liệu tải file](/v1/the-basics/file-uploads).
 
-## XHR / Fetch Submissions
+## Submit bằng XHR / Fetch
 
-Using Inertia to submit forms works great for the vast majority of situations; however, in the event that you need more control over the form submission, you're free to make plain XHR or `fetch` requests instead using the library of your choice.
+Dùng Inertia để submit form phù hợp với phần lớn tình huống; tuy nhiên, nếu cần kiểm soát quá trình submit chi tiết hơn, bạn hoàn toàn có thể thực hiện request XHR hoặc `fetch` thuần bằng thư viện mình lựa chọn.

@@ -1,28 +1,29 @@
 ---
-title: Upgrade Guide for v1.0
+title: Hướng dẫn nâng cấp lên v1.0
+description: "Bạn có thể xem tài liệu cũ của Inertia.js v0.11 tại legacy.inertiajs.com."
 ---
 
 import V1EOLWarning from "/snippets/v1-eol-warning.mdx";
 
 <V1EOLWarning />
 
-You can find the legacy docs for Inertia.js v0.11 at [legacy.inertiajs.com](https://legacy.inertiajs.com).
+Bạn có thể xem tài liệu cũ của Inertia.js v0.11 tại [legacy.inertiajs.com](https://legacy.inertiajs.com).
 
-## What's New
+## Có gì mới
 
-Inertia.js v1.0 focuses on simplifying the overall architecture of the project with the goal of making Inertia easier to maintain and easier to use.
+Inertia.js v1.0 tập trung đơn giản hóa kiến trúc tổng thể của dự án với mục tiêu giúp Inertia dễ bảo trì và dễ sử dụng hơn.
 
-It includes a number of breaking changes, mostly related to package names and updated named exports. This guide explains how to upgrade your project to v1.0.
+Phiên bản này bao gồm một số breaking change, chủ yếu liên quan đến tên package và các named export được cập nhật. Hướng dẫn này giải thích cách nâng cấp dự án lên v1.0.
 
-For a complete list of all the changes, see the [release notes](https://github.com/inertiajs/inertia/releases/tag/v1.0.0).
+Để xem danh sách đầy đủ mọi thay đổi, hãy đọc [release note](https://github.com/inertiajs/inertia/releases/tag/v1.0.0).
 
-## New Dependencies
+## Dependency mới
 
-To use previous Inertia releases, you had to install a number of libraries, including the core library (`@inertiajs/inertia`), the adapter of your choice (`@inertiajs/inertia-vue|vue3|react|svelte`), the progress library (`@inertiajs/progress`), and if you were using server-side rendering, the server library (`@inertiajs/server`).
+Ở các bản Inertia trước đây, bạn phải cài nhiều thư viện, bao gồm thư viện core (`@inertiajs/inertia`), adapter lựa chọn (`@inertiajs/inertia-vue|vue3|react|svelte`), thư viện progress (`@inertiajs/progress`) và nếu dùng server-side rendering thì cả thư viện server (`@inertiajs/server`).
 
-**Moving forward you are now only required to install a single library** — the adapter of your choice (Vue, React, or Svelte), and all other core libraries are automatically installed for you.
+**Từ phiên bản này, bạn chỉ cần cài một thư viện duy nhất** — adapter bạn lựa chọn (Vue, React hoặc Svelte); mọi thư viện core còn lại sẽ được cài tự động.
 
-To get started, remove *all* of the old Inertia libraries.
+Để bắt đầu, hãy gỡ *tất cả* thư viện Inertia cũ.
 
 <CodeGroup>
 
@@ -44,7 +45,7 @@ npm remove @inertiajs/inertia @inertiajs/inertia-svelte @inertiajs/progress @ine
 
 </CodeGroup>
 
-Next, install the new Inertia adapter of your choice. The new adapter libraries have been renamed, and no longer include `inertia-` in them.
+Tiếp theo, cài adapter Inertia mới mà bạn muốn dùng. Các thư viện adapter mới đã được đổi tên và không còn chứa `inertia-` trong tên package.
 
 <CodeGroup>
 
@@ -66,13 +67,13 @@ npm install @inertiajs/svelte
 
 </CodeGroup>
 
-## Renamed Imports
+## Import được đổi tên
 
-Next, update all the Inertia related imports in your project to use the new adapter library name. All imports are now available from the adapter library, meaning you no longer import anything from the Inertia core library, progress library, or server library.
+Tiếp theo, cập nhật toàn bộ import liên quan đến Inertia trong dự án để dùng tên thư viện adapter mới. Mọi import hiện đều có sẵn từ thư viện adapter, nghĩa là bạn không còn import gì trực tiếp từ thư viện core Inertia, thư viện progress hay thư viện server.
 
-Additionally, some exports have been renamed and previously deprecated exports have been removed. For example, the `Inertia` export has been renamed to `router`.
+Ngoài ra, một số export đã được đổi tên và các export từng bị deprecated đã bị loại bỏ. Ví dụ, export `Inertia` được đổi tên thành `router`.
 
-Here is a complete list of all the import changes:
+Dưới đây là danh sách đầy đủ các thay đổi về import:
 
 <CodeGroup>
 
@@ -197,13 +198,13 @@ import { Link } from '@inertiajs/svelte' // [!code ++]
 
 </CodeGroup>
 
-It is no longer possible to manually configure Inertia using the `App` export. Instead, you should use the `createInertiaApp()` helper. See the [client-side setup](/client-side-setup#initialize-the-inertia-app) documentation for more information.
+Không còn có thể cấu hình Inertia thủ công bằng export `App`. Thay vào đó, bạn nên dùng helper `createInertiaApp()`. Xem tài liệu [thiết lập phía client](/client-side-setup#initialize-the-inertia-app) để biết thêm thông tin.
 
 ## Progress
 
-Previously, the progress indicator was available as a separate plugin (`@inertiajs/progress`). It is now installed and enabled by default.
+Trước đây, progress indicator có dưới dạng plugin riêng (`@inertiajs/progress`). Hiện nó được cài và bật mặc định.
 
-If you haven't yet, remove the old progress library.
+Nếu chưa thực hiện, hãy gỡ thư viện progress cũ.
 
 <CodeGroup>
 
@@ -225,14 +226,14 @@ npm remove @inertiajs/progress
 
 </CodeGroup>
 
-Next, remove the `InertiaProgress` import and `InertiaProgress.init()` call, as they are no longer required.
+Tiếp theo, bỏ import `InertiaProgress` và lời gọi `InertiaProgress.init()` vì chúng không còn cần thiết.
 
 ```js
 import { InertiaProgress } from '@inertiajs/progress' // [!code --:2]
 InertiaProgress.init()
 ```
 
-Finally, if you have defined any progress customizations, you can move them to the `progress`property of the `createInertiaApp()` helper.
+Cuối cùng, nếu đã có tùy chỉnh progress, bạn có thể chuyển chúng sang property `progress` của helper `createInertiaApp()`.
 
 ```js
 createInertiaApp({
@@ -243,7 +244,7 @@ createInertiaApp({
 })
 ```
 
-If you're using a custom progress indicator, you can disable the default progress indicator by setting the `progress` property to `false`.
+Nếu dùng progress indicator tùy chỉnh, bạn có thể tắt progress indicator mặc định bằng cách đặt property `progress` thành `false`.
 
 ```js
 createInertiaApp({
@@ -252,9 +253,9 @@ createInertiaApp({
 })
 ```
 
-## Setup Arguments
+## Đối số setup
 
-We've removed the previously deprecated lowercase `app` argument from the `setup()` method in `createInertiaApp()`. Use `App` instead.
+Chúng tôi đã loại bỏ đối số chữ thường `app` từng bị deprecated trong phương thức `setup()` của `createInertiaApp()`. Hãy dùng `App` thay thế.
 
 ```js
 createInertiaApp({
@@ -266,11 +267,11 @@ createInertiaApp({
 })
 ```
 
-## Simplified Usepage
+## usePage đơn giản hơn
 
-In the Vue 3 adapter, we simplified the `usePage()` hook to no longer require adding `.value` after the `component`, `props`, `url` and `version` properties.
+Trong adapter Vue 3, hook `usePage()` đã được đơn giản hóa để không còn yêu cầu thêm `.value` sau các property `component`, `props`, `url` và `version`.
 
-If you're using the `usePage()` hook, remove all instances of `.value`.
+Nếu đang dùng hook `usePage()`, hãy xóa toàn bộ `.value` tương ứng.
 
 ```js
 import { computed } from 'vue'

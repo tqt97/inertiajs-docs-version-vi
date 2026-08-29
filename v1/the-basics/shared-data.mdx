@@ -1,18 +1,19 @@
 ---
-title: Shared Data
+title: Dữ liệu dùng chung
+description: "Đôi khi bạn cần truy cập một số dữ liệu cụ thể trên nhiều trang trong ứng dụng. Ví dụ, bạn có thể cần hiển thị người dùng hiện tại trong header của website…"
 ---
 
 import V1EOLWarning from "/snippets/v1-eol-warning.mdx";
 
 <V1EOLWarning />
 
-Sometimes you need to access specific pieces of data on numerous pages within your application. For example, you may need to display the current user in the site header. Passing this data manually in each response across your entire application is cumbersome. Thankfully, there is a better option: shared data.
+Đôi khi bạn cần truy cập một số dữ liệu cụ thể trên nhiều trang trong ứng dụng. Ví dụ, bạn có thể cần hiển thị người dùng hiện tại trong header của website. Việc truyền thủ công dữ liệu này trong từng response trên toàn ứng dụng khá bất tiện. May mắn là có một lựa chọn tốt hơn: dữ liệu dùng chung.
 
-## Sharing Data
+## Chia sẻ dữ liệu
 
-Inertia's server-side adapters all provide a method of making shared data available for every request. This is typically done outside of your controllers. Shared data will be automatically merged with the page props provided in your controller.
+Tất cả adapter phía máy chủ của Inertia đều cung cấp một cách để đưa dữ liệu dùng chung vào mọi request. Việc này thường được thực hiện bên ngoài controller. Dữ liệu dùng chung sẽ tự động được merge với page props mà controller cung cấp.
 
-In Laravel applications, this is typically handled by the `HandleInertiaRequests` middleware that is automatically installed when installing the [server-side adapter](/server-side-setup#middleware).
+Trong ứng dụng Laravel, việc này thường do middleware `HandleInertiaRequests` xử lý; middleware này được tự động cài đặt khi bạn cài [adapter phía máy chủ](/server-side-setup#middleware).
 
 ```php
 class HandleInertiaRequests extends Middleware
@@ -32,7 +33,7 @@ class HandleInertiaRequests extends Middleware
 }
 ```
 
-Alternatively, you can manually share data using the `Inertia::share` method.
+Ngoài ra, bạn có thể chia sẻ dữ liệu thủ công bằng phương thức `Inertia::share`.
 
 ```php
 use Inertia\Inertia;
@@ -47,13 +48,13 @@ Inertia::share('user', fn (Request $request) => $request->user()
 );
 ```
 
-Shared data should be used sparingly as all shared data is included with every response.
+Nên sử dụng dữ liệu dùng chung một cách tiết chế vì toàn bộ dữ liệu dùng chung được gửi kèm trong mọi response.
 
-Page props and shared data are merged together, so be sure to namespace your shared data appropriately to avoid collisions.
+Page props và dữ liệu dùng chung được merge với nhau, vì vậy hãy namespace dữ liệu dùng chung phù hợp để tránh xung đột.
 
-## Accessing Shared Data
+## Truy cập dữ liệu dùng chung
 
-Once you have shared the data server-side, you will be able to access it within any of your pages or components. Here's an example of how to access shared data in a layout component.
+Sau khi chia sẻ dữ liệu ở phía máy chủ, bạn có thể truy cập dữ liệu đó trong bất kỳ trang hoặc component nào. Sau đây là ví dụ cách truy cập dữ liệu dùng chung trong một layout component.
 
 <CodeGroup>
 
@@ -138,11 +139,11 @@ export default function Layout({ children }) {
 
 </CodeGroup>
 
-## Flash Messages
+## Flash message
 
-Another great use-case for shared data is flash messages. These are messages stored in the session only for the next request. For example, it's common to set a flash message after completing a task and before redirecting to a different page.
+Một trường hợp sử dụng rất phù hợp khác của dữ liệu dùng chung là flash message. Đây là các message được lưu trong session chỉ cho request kế tiếp. Ví dụ, một cách phổ biến là đặt flash message sau khi hoàn tất một tác vụ và trước khi redirect sang trang khác.
 
-Here's a simple way to implement flash messages in your Inertia applications. First, share the flash message on each request.
+Sau đây là một cách đơn giản để triển khai flash message trong ứng dụng Inertia. Trước tiên, hãy chia sẻ flash message trên mỗi request.
 
 ```php
 class HandleInertiaRequests extends Middleware
@@ -158,7 +159,7 @@ class HandleInertiaRequests extends Middleware
 }
 ```
 
-Next, display the flash message in a frontend component, such as the site layout.
+Tiếp theo, hiển thị flash message trong một component frontend, chẳng hạn layout của website.
 
 <CodeGroup>
 

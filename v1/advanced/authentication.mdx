@@ -1,21 +1,22 @@
 ---
-title: Authentication
+title: Xác thực
+description: "Một lợi ích của Inertia là bạn không cần hệ thống xác thực chuyên biệt như OAuth để kết nối đến nguồn dữ liệu (API). Ngoài ra, vì dữ liệu được cung cấp qua…"
 ---
 
 import V1EOLWarning from "/snippets/v1-eol-warning.mdx";
 
 <V1EOLWarning />
 
-One of the benefits of using Inertia is that you don't need a special authentication system such as OAuth to connect to your data provider (API). Also, since your data is provided via your controllers, and housed on the same domain as your JavaScript components, you don't have to worry about setting up CORS.
+Một lợi ích của Inertia là bạn không cần hệ thống xác thực chuyên biệt như OAuth để kết nối đến nguồn dữ liệu (API). Ngoài ra, vì dữ liệu được cung cấp qua controller và nằm trên cùng domain với các component JavaScript, bạn không cần lo thiết lập CORS.
 
-Rather, when using Inertia, you can simply use whatever authentication system your server-side framework ships with. Typically, this will be a session based authentication system such as the authentication system included with Laravel.
+Thay vào đó, khi dùng Inertia, bạn chỉ cần sử dụng hệ thống xác thực mà framework phía máy chủ cung cấp sẵn. Thông thường đây sẽ là hệ thống xác thực dựa trên session, chẳng hạn hệ thống xác thực đi kèm Laravel.
 
 <Card
     icon="laravel"
-    title="Laravel Starter Kits"
+    title="Laravel Starter Kit"
     href="https://laravel.com/docs/starter-kits"
     arrow="true"
-    cta="Start building"
+    cta="Bắt đầu xây dựng"
 >
-Laravel's starter kits provide out-of-the-box scaffolding for new Inertia applications, including authentication.
+Các starter kit của Laravel cung cấp scaffold sẵn dùng cho ứng dụng Inertia mới, bao gồm cả xác thực.
 </Card>

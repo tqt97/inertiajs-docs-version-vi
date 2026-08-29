@@ -1,5 +1,6 @@
 ---
-title: Pages
+title: Trang
+description: "Khi xây dựng ứng dụng bằng Inertia, mỗi trang trong ứng dụng thường có controller / route riêng cùng một component JavaScript tương ứng. Nhờ đó, bạn chỉ cần…"
 ---
 
 import { ReactSpecific } from "/snippets/react-specific.jsx"
@@ -10,13 +11,13 @@ import V1EOLWarning from "/snippets/v1-eol-warning.mdx";
 
 <V1EOLWarning />
 
-When building applications using Inertia, each page in your application typically has its own controller / route and a corresponding JavaScript component. This allows you to retrieve just the data necessary for that page - no API required.
+Khi xây dựng ứng dụng bằng Inertia, mỗi trang trong ứng dụng thường có controller / route riêng cùng một component JavaScript tương ứng. Nhờ đó, bạn chỉ cần truy xuất dữ liệu cần thiết cho trang đó — không cần API.
 
-In addition, all of the data needed for the page can be retrieved before the page is ever rendered by the browser, eliminating the need for displaying "loading" states when users visit your application.
+Ngoài ra, toàn bộ dữ liệu mà trang cần có thể được truy xuất trước khi trình duyệt render trang, qua đó loại bỏ nhu cầu hiển thị trạng thái "đang tải" khi người dùng truy cập ứng dụng.
 
-## Creating Pages
+## Tạo trang
 
-Inertia pages are simply JavaScript components. If you have ever written a Vue, React, or Svelte component, you will feel right at home. As you can see in the example below, pages receive data from your application's controllers as props.
+Trang Inertia đơn giản chỉ là các component JavaScript. Nếu từng viết component Vue, React hoặc Svelte, bạn sẽ thấy rất quen thuộc. Như ví dụ bên dưới, các trang nhận dữ liệu từ controller của ứng dụng thông qua props.
 
 <CodeGroup>
 
@@ -96,7 +97,7 @@ export default function Welcome({ user }) {
 </CodeGroup>
 
 <ClientSpecific>
-Given the page above, you can render the page by returning an [Inertia response](/v1/the-basics/responses) from a controller or route. In this example, let's assume this page is stored at <VueSpecific>`resources/js/Pages/User/Show.vue`</VueSpecific><ReactSpecific>`resources/js/Pages/User/Show.jsx`</ReactSpecific><SvelteSpecific>`resources/js/Pages/User/Show.svelte`</SvelteSpecific>within a Laravel application.
+Với trang ở trên, bạn có thể render trang bằng cách trả về một [response Inertia](/v1/the-basics/responses) từ controller hoặc route. Trong ví dụ này, giả sử trang được lưu tại <VueSpecific>`resources/js/Pages/User/Show.vue`</VueSpecific><ReactSpecific>`resources/js/Pages/User/Show.jsx`</ReactSpecific><SvelteSpecific>`resources/js/Pages/User/Show.svelte`</SvelteSpecific> trong một ứng dụng Laravel.
 </ClientSpecific>
 
 ```php
@@ -113,9 +114,9 @@ class UserController extends Controller
 }
 ```
 
-## Creating Layouts
+## Tạo layout
 
-While not required, for most projects it makes sense to create a site layout that all of your pages can extend. You may have noticed in our page example above that we're wrapping the page content within a `<Layout>` component. Here's an example of such a component:
+Mặc dù không bắt buộc, với phần lớn dự án, việc tạo một layout chung để mọi trang kế thừa là hợp lý. Bạn có thể đã nhận thấy trong ví dụ trang ở trên rằng nội dung trang được bọc trong component `<Layout>`. Sau đây là ví dụ về component như vậy:
 
 <CodeGroup>
 
@@ -200,14 +201,14 @@ export default function Layout({ children }) {
 </CodeGroup>
 
 <ClientSpecific>
-As you can see, there is nothing Inertia specific within this template. This is just a typical <VueSpecific>Vue</VueSpecific><ReactSpecific>React</ReactSpecific><SvelteSpecific>Svelte</SvelteSpecific> component.
+Như bạn thấy, template này không có gì đặc thù riêng của Inertia. Đây chỉ là một component <VueSpecific>Vue</VueSpecific><ReactSpecific>React</ReactSpecific><SvelteSpecific>Svelte</SvelteSpecific> thông thường.
 </ClientSpecific>
 
-## Persistent Layouts
+## Layout duy trì xuyên suốt
 
-While it's simple to implement layouts as children of page components, it forces the layout instance to be destroyed and recreated between visits. This means you cannot have persistent layout state when navigating between pages.
+Mặc dù triển khai layout dưới dạng phần tử con của page component rất đơn giản, cách này khiến instance của layout bị hủy và tạo lại giữa các lần chuyển trang. Điều đó có nghĩa là bạn không thể duy trì state của layout khi điều hướng giữa các trang.
 
-For example, maybe you have an audio player on a podcast website that you want to continue playing as users navigate the site. Or, maybe you simply want to maintain the scroll position in your sidebar navigation between page visits. In these situations, the solution is to leverage Inertia's persistent layouts.
+Ví dụ, có thể website podcast của bạn có một trình phát âm thanh mà bạn muốn tiếp tục phát khi người dùng điều hướng trong website. Hoặc đơn giản bạn muốn giữ vị trí cuộn của thanh điều hướng sidebar giữa các lần chuyển trang. Trong những trường hợp này, giải pháp là sử dụng persistent layout của Inertia.
 
 <CodeGroup>
 
@@ -291,7 +292,7 @@ export default Home
 
 </CodeGroup>
 
-You can also create more complex layout arrangements using nested layouts.
+Bạn cũng có thể tạo các cách bố trí layout phức tạp hơn bằng nested layout.
 
 <CodeGroup>
 
@@ -391,7 +392,7 @@ export default Home
 </CodeGroup>
 
 <VueSpecific>
-If you're using Vue 2.7 or Vue 3, you can alternatively use the [defineOptions plugin](https://vue-macros.sxzz.moe/macros/define-options.html) to define a layout within `<script setup>`:
+Nếu đang dùng Vue 2.7 hoặc Vue 3, bạn cũng có thể dùng [plugin defineOptions](https://vue-macros.sxzz.moe/macros/define-options.html) để định nghĩa layout bên trong `<script setup>`:
 
 ```html
 <script setup>
@@ -401,9 +402,9 @@ defineOptions({ layout: Layout })
 ```
 </VueSpecific>
 
-## Default layouts
+## Layout mặc định
 
-If you're using persistent layouts, you may find it convenient to define the default page layout in the `resolve()` callback of your application's main JavaScript file.
+Nếu sử dụng persistent layout, bạn có thể thấy thuận tiện khi định nghĩa layout mặc định của trang trong callback `resolve()` ở file JavaScript chính của ứng dụng.
 
 <CodeGroup>
 
@@ -464,9 +465,9 @@ createInertiaApp({
 
 </CodeGroup>
 
-This will automatically set the page layout to `Layout` if a layout has not already been set for that page.
+Cách này sẽ tự động đặt layout của trang thành `Layout` nếu trang đó chưa được thiết lập layout.
 
-You can even go a step further and conditionally set the default page layout based on the page `name`, which is available to the `resolve()` callback. For example, maybe you don't want the default layout to be applied to your public pages.
+Bạn thậm chí có thể đi xa hơn bằng cách thiết lập layout mặc định có điều kiện dựa trên `name` của trang, vốn có sẵn trong callback `resolve()`. Ví dụ, bạn có thể không muốn áp dụng layout mặc định cho các trang công khai.
 
 <CodeGroup>
 

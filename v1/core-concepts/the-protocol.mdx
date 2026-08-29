@@ -1,21 +1,22 @@
 ---
-title: The Protocol
+title: Giao thức
+description: "Trang này trình bày đặc tả chi tiết của giao thức Inertia. Trước tiên, hãy đọc trang cách Inertia hoạt động để có cái nhìn tổng quan ở mức cao."
 ---
 
 import V1EOLWarning from "/snippets/v1-eol-warning.mdx";
 
 <V1EOLWarning />
 
-This page contains a detailed specification of the Inertia protocol. Be sure to read the [how it works](/v1/core-concepts/how-it-works) page first for a high-level overview.
+Trang này trình bày đặc tả chi tiết của giao thức Inertia. Trước tiên, hãy đọc trang [cách Inertia hoạt động](/v1/core-concepts/how-it-works) để có cái nhìn tổng quan ở mức cao.
 
-## HTML Responses
+## Response HTML
 
-The very first request to an Inertia app is just a regular, full-page browser request, with no special Inertia headers or data. For these requests, the server returns a full HTML document.
+Request đầu tiên đến một ứng dụng Inertia chỉ là request trình duyệt tải toàn bộ trang thông thường, không có header hoặc dữ liệu đặc biệt nào của Inertia. Với các request này, máy chủ trả về một tài liệu HTML đầy đủ.
 
-This HTML response includes the site assets (CSS, JavaScript) as well as a root `<div>` in the
-page's body. The root `<div>` serves as a mounting point for the client-side app, and includes a
-`data-page` attribute with a JSON encoded <a href="#the-page-object">page object</a> for the initial
-page. Inertia uses this information to boot your client-side framework and display the initial page component.
+Response HTML này bao gồm các tài nguyên của website (CSS, JavaScript) cùng với một thẻ `<div>` gốc trong
+phần body của trang. Thẻ `<div>` gốc đóng vai trò là điểm mount cho ứng dụng phía client và chứa một
+thuộc tính `data-page` với <a href="#the-page-object">page object</a> được mã hóa JSON dành cho
+trang ban đầu. Inertia sử dụng thông tin này để khởi động framework phía client và hiển thị page component đầu tiên.
 
 ```http
 http
@@ -40,17 +41,17 @@ Content-Type: text/html; charset=utf-8
 ```
 
 <Info>
-While the initial response is HTML, Inertia does not server-side render the JavaScript page components.
+Mặc dù response ban đầu là HTML, Inertia không render các page component JavaScript ở phía máy chủ.
 </Info>
 
-## Inertia responses
+## Response của Inertia
 
-Once the Inertia app has been booted, all subsequent requests to the site are made via XHR with a
-`X-Inertia` header set to `true`. This header indicates that the request is being made by
-Inertia and isn't a standard full-page visit.
+Sau khi ứng dụng Inertia đã được khởi động, mọi request tiếp theo đến website đều được thực hiện qua XHR với
+header `X-Inertia` được đặt thành `true`. Header này cho biết request được thực hiện bởi
+Inertia và không phải là một lần tải toàn bộ trang thông thường.
 
-When the server detects the `X-Inertia` header, instead of responding with a full HTML document, it
-returns a JSON response with an encoded <a href="#the-page-object">page object</a>.
+Khi máy chủ phát hiện header `X-Inertia`, thay vì phản hồi bằng một tài liệu HTML đầy đủ, nó
+trả về response JSON chứa <a href="#the-page-object">page object</a> đã được mã hóa.
 
 
 ```http
@@ -82,52 +83,52 @@ X-Inertia: true
 }
 ```
 
-## The page object
+## Page object
 
-Inertia shares data between the server and client via a page object. This object includes the necessary
-information required to render the page component, update the browser's history state, and track the site's
-asset version. The page object includes the following four properties:
+Inertia chia sẻ dữ liệu giữa máy chủ và client thông qua page object. Object này chứa các
+thông tin cần thiết để render page component, cập nhật history state của trình duyệt và theo dõi
+phiên bản asset của website. Page object bao gồm bốn thuộc tính sau:
 
-- **component:** The name of the JavaScript page component.
-- **props:** The page props (data).
-- **url:** The page URL.
-- **version:** The current asset version.
+- **component:** Tên của page component JavaScript.
+- **props:** Props (dữ liệu) của trang.
+- **url:** URL của trang.
+- **version:** Phiên bản asset hiện tại.
 
-On standard full page visits, the page object is JSON encoded into the `data-page` attribute in the
-root `<div>`. On Inertia visits, the page object is returned as the JSON payload.
+Trong các lần tải toàn bộ trang thông thường, page object được mã hóa JSON vào thuộc tính `data-page` của
+thẻ `<div>` gốc. Trong các lần truy cập Inertia, page object được trả về dưới dạng payload JSON.
 
-## Asset versioning
-
-
-One common challenge with single-page apps is refreshing site assets when they've been changed. Inertia makes
-this easy by optionally tracking the current version of the site's assets. In the event that an asset changes,
-Inertia will automatically make a full-page visit instead of an XHR visit.
+## Quản lý phiên bản asset
 
 
-The Inertia <a href="#the-page-object">page object</a> includes a `version` identifier. This version
-identifier is set server-side and can be a number, string, file hash, or any other value that represents the
-current "version" of your site's assets, as long as the value changes when the site's assets have been updated.
+Một thách thức phổ biến của ứng dụng một trang là làm mới các asset của website khi chúng thay đổi. Inertia giúp
+việc này trở nên đơn giản bằng cách cho phép theo dõi phiên bản hiện tại của asset trên website. Khi một asset thay đổi,
+Inertia sẽ tự động thực hiện một lần tải toàn bộ trang thay vì truy cập bằng XHR.
 
 
-Whenever an Inertia request is made, Inertia will include the current asset version in the
-`X-Inertia-Version` header. When the server receives the request, it compares the asset version
-provided in the `X-Inertia-Version` header with the current asset version. This is typically handled
-in the middleware layer of your server-side framework.
+<a href="#the-page-object">Page object</a> của Inertia chứa một định danh `version`. Phiên bản
+này được thiết lập ở phía máy chủ và có thể là số, chuỗi, hash của file hoặc bất kỳ giá trị nào đại diện cho
+"phiên bản" hiện tại của asset trên website, miễn là giá trị đó thay đổi khi asset của website được cập nhật.
 
 
-If the asset versions are the same, the request simply continues as expected. However, if the asset versions are
-different, the server immediately returns a `409 Conflict` response, and includes the URL in a
-`X-Inertia-Location` header. This header is necessary, since server-side redirects may have occurred.
-This tells Inertia what the final intended destination URL is.
+Mỗi khi một request Inertia được thực hiện, Inertia sẽ gửi kèm phiên bản asset hiện tại trong
+header `X-Inertia-Version`. Khi máy chủ nhận request, nó so sánh phiên bản asset
+được cung cấp trong header `X-Inertia-Version` với phiên bản asset hiện tại. Thông thường việc này được xử lý
+ở tầng middleware của framework phía máy chủ.
 
 
-Note, `409 Conflict` responses are only sent for `GET` requests, and not for
-`POST/PUT/PATCH/DELETE` requests. That said, they will be sent in the event that a `GET`
-redirect occurs after one of these requests.
+Nếu hai phiên bản asset giống nhau, request tiếp tục được xử lý như bình thường. Tuy nhiên, nếu các phiên bản asset
+khác nhau, máy chủ ngay lập tức trả về response `409 Conflict` và đặt URL trong
+header `X-Inertia-Location`. Header này là cần thiết vì có thể đã xảy ra redirect ở phía máy chủ.
+Thông tin này cho Inertia biết URL đích cuối cùng dự kiến là gì.
 
 
-If "flash" session data exists when a `409 Conflict` response occurs, Inertia's server-side framework
-adapters will automatically reflash this data.
+Lưu ý, response `409 Conflict` chỉ được gửi cho request `GET`, không áp dụng cho
+request `POST/PUT/PATCH/DELETE`. Tuy vậy, response này vẫn được gửi nếu sau một trong các request trên
+xảy ra redirect đến một request `GET`.
+
+
+Nếu tồn tại dữ liệu session dạng "flash" khi response `409 Conflict` xảy ra, các adapter framework phía máy chủ của Inertia
+sẽ tự động flash lại dữ liệu này.
 
 ```http
 REQUEST
@@ -142,22 +143,22 @@ RESPONSE
 X-Inertia-Location: http://example.com/events/80
 ```
 
-## Partial reloads
+## Tải lại một phần
 
-When making Inertia requests, the partial reload option allows you to request a subset of the props (data) from
-the server on subsequent visits to the _same_ page component. This can be a helpful performance
-optimization if it's acceptable that some page data becomes stale.
+Khi thực hiện request Inertia, tùy chọn tải lại một phần cho phép bạn chỉ yêu cầu một tập con props (dữ liệu) từ
+máy chủ trong các lần truy cập tiếp theo đến _cùng một_ page component. Đây có thể là một cách tối ưu hiệu năng hữu ích
+nếu việc một phần dữ liệu của trang trở nên cũ là chấp nhận được.
 
-When a partial reload request is made, Inertia includes two additional headers with the request:
-`X-Inertia-Partial-Data` and `X-Inertia-Partial-Component`.
+Khi một request tải lại một phần được thực hiện, Inertia gửi thêm hai header trong request:
+`X-Inertia-Partial-Data` và `X-Inertia-Partial-Component`.
 
-The `X-Inertia-Partial-Data` header is a comma separated list of the desired props (data) keys that
-should be returned.
+Header `X-Inertia-Partial-Data` là danh sách các key props (dữ liệu) mong muốn, phân tách bằng dấu phẩy,
+mà máy chủ cần trả về.
 
-The `X-Inertia-Partial-Component` header includes the name of the component that is being partially
-reloaded. This is necessary, since partial reloads only work for requests made to the same page component. If
-the final destination is different for some reason (eg. the user was logged out and is now on the login page),
-then no partial reloading will occur.
+Header `X-Inertia-Partial-Component` chứa tên component đang được
+tải lại một phần. Điều này là cần thiết vì tải lại một phần chỉ hoạt động với request đến cùng một page component. Nếu
+đích cuối cùng khác đi vì một lý do nào đó (ví dụ người dùng đã đăng xuất và hiện đang ở trang đăng nhập),
+thì việc tải lại một phần sẽ không diễn ra.
 
 
 ```http

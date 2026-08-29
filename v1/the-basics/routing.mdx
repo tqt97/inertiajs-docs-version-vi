@@ -1,28 +1,29 @@
 ---
 title: Routing
+description: "Khi sử dụng Inertia, toàn bộ route của ứng dụng được định nghĩa ở phía máy chủ. Điều này có nghĩa là bạn không cần Vue Router hoặc React Router. Thay vào đó…"
 ---
 
 import V1EOLWarning from "/snippets/v1-eol-warning.mdx";
 
 <V1EOLWarning />
 
-## Defining Routes
+## Định nghĩa route
 
-When using Inertia, all of your application's routes are defined server-side. This means that you don't need Vue Router or React Router. Instead, you can simply define Laravel routes and return [Inertia responses](/v1/the-basics/responses) from those routes.
+Khi sử dụng Inertia, toàn bộ route của ứng dụng được định nghĩa ở phía máy chủ. Điều này có nghĩa là bạn không cần Vue Router hoặc React Router. Thay vào đó, bạn chỉ cần định nghĩa các route Laravel và trả về [response Inertia](/v1/the-basics/responses) từ các route đó.
 
-## Shorthand Routes
+## Route rút gọn
 
-If you have a [page](/v1/the-basics/pages) that doesn't need a corresponding controller method, like an "FAQ" or "about" page, you can route directly to a component via the `Route::inertia()` method.
+Nếu bạn có một [trang](/v1/the-basics/pages) không cần phương thức controller tương ứng, chẳng hạn trang "FAQ" hoặc "giới thiệu", bạn có thể route trực tiếp đến một component thông qua phương thức `Route::inertia()`.
 
 ```php
 Route::inertia('/about', 'About');
 ```
 
-## Generating URLs
+## Tạo URL
 
-Some server-side frameworks allow you to generate URLs from named routes. However, you will not have access to those helpers client-side. Here are a couple ways to still use named routes with Inertia.
+Một số framework phía máy chủ cho phép tạo URL từ named route. Tuy nhiên, bạn sẽ không truy cập được các helper đó ở phía client. Sau đây là một vài cách để vẫn sử dụng named route với Inertia.
 
-The first option is to generate URLs server-side and include them as props. Notice in this example how we're passing the `edit_url` and `create_url` to the `Users/Index` component.
+Lựa chọn đầu tiên là tạo URL ở phía máy chủ và truyền chúng dưới dạng props. Hãy chú ý trong ví dụ này, chúng ta truyền `edit_url` và `create_url` vào component `Users/Index`.
 
 ```php
 class UsersController extends Controller
@@ -44,9 +45,9 @@ class UsersController extends Controller
 }
 ```
 
-However, when using Laravel, the [Ziggy](https://github.com/tightenco/ziggy) library can make your named, server-side routes available to you via a global `route()` function. In fact, if you are developing an application using one of Laravel's [starter kits](https://laravel.com/docs/starter-kits), Ziggy is already configured for you.
+Tuy nhiên, khi dùng Laravel, thư viện [Ziggy](https://github.com/tightenco/ziggy) có thể đưa các named route phía máy chủ sang phía client thông qua hàm `route()` toàn cục. Thực tế, nếu bạn phát triển ứng dụng bằng một trong các [starter kit](https://laravel.com/docs/starter-kits) của Laravel, Ziggy đã được cấu hình sẵn.
 
-If you're using Ziggy with Vue, it's helpful to make this function available as a custom `$route`property so you can use it directly in your templates.
+Nếu dùng Ziggy với Vue, sẽ rất tiện nếu bạn cung cấp hàm này dưới dạng thuộc tính tùy chỉnh `$route` để có thể gọi trực tiếp trong template.
 
 <CodeGroup>
 

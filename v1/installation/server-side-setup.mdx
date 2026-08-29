@@ -1,30 +1,31 @@
 ---
-title: Server-side Setup
+title: Thiết lập phía máy chủ
+description: "Bước đầu tiên khi cài Inertia là cấu hình framework phía máy chủ. Inertia duy trì một adapter phía máy chủ chính thức cho Laravel. Với các framework khác…"
 ---
 
 import V1EOLWarning from "/snippets/v1-eol-warning.mdx";
 
 <V1EOLWarning />
 
-The first step when installing Inertia is to configure your server-side framework. Inertia maintains an official server-side adapter for [Laravel](https://laravel.com/). For other frameworks, please see the [community adapters](/community-adapters).
+Bước đầu tiên khi cài Inertia là cấu hình framework phía máy chủ. Inertia duy trì một adapter phía máy chủ chính thức cho [Laravel](https://laravel.com/). Với các framework khác, hãy xem [community adapter](/community-adapters).
 
-Inertia is fine-tuned for Laravel, so the documentation examples on this website utilize Laravel. For examples of using Inertia with other server-side frameworks, please refer to the framework specific documentation maintained by that adapter.
+Inertia được tối ưu chặt chẽ cho Laravel, vì vậy các ví dụ trong tài liệu trên website này sử dụng Laravel. Với ví dụ sử dụng Inertia cùng framework phía máy chủ khác, hãy tham khảo tài liệu riêng của framework do adapter tương ứng duy trì.
 
-## Laravel Starter Kits
+## Laravel Starter Kit
 
-Laravel's [starter kits](https://laravel.com/docs/starter-kits), Breeze and Jetstream, provide out-of-the-box scaffolding for new Inertia applications. These starter kits are the absolute fastest way to start building a new Inertia project using Laravel and Vue or React. However, if you would like to manually install Inertia into your application, please consult the documentation below.
+Các [starter kit](https://laravel.com/docs/starter-kits) của Laravel, Breeze và Jetstream, cung cấp sẵn scaffold cho ứng dụng Inertia mới. Đây là cách nhanh nhất để bắt đầu xây dựng dự án Inertia mới bằng Laravel cùng Vue hoặc React. Tuy nhiên, nếu muốn cài Inertia thủ công vào ứng dụng, hãy xem tài liệu bên dưới.
 
-## Install Dependencies
+## Cài đặt dependency
 
-First, install the Inertia server-side adapter using the Composer package manager.
+Trước tiên, hãy cài adapter phía máy chủ của Inertia bằng Composer package manager.
 
 ```bash
 composer require inertiajs/inertia-laravel
 ```
 
-## Root Template
+## Root template
 
-Next, setup the root template that will be loaded on the first page visit to your application. This will be used to load your site assets (CSS and JavaScript), and will also contain a root `<div>` in which to boot your JavaScript application.
+Tiếp theo, thiết lập root template sẽ được tải trong lần truy cập trang đầu tiên của ứng dụng. Template này được dùng để tải các asset của website (CSS và JavaScript), đồng thời chứa root `<div>` để khởi động ứng dụng JavaScript.
 
 ```blade
 <html>
@@ -40,19 +41,19 @@ Next, setup the root template that will be loaded on the first page visit to you
 </html>
 ```
 
-This template should include your assets, as well as the `@inertia` and `@inertiaHead`directives.
+Template này cần bao gồm các asset cùng các directive `@inertia` và `@inertiaHead`.
 
-By default, Inertia's Laravel adapter will assume your root template is named `app.blade.php`. If you would like to use a different root view, you can change it using the `Inertia::setRootView()` method.
+Mặc định, adapter Laravel của Inertia giả định root template có tên `app.blade.php`. Nếu muốn dùng root view khác, bạn có thể thay đổi bằng phương thức `Inertia::setRootView()`.
 
 ## Middleware
 
-Next we need to setup the Inertia middleware. You can accomplish this by publishing the `HandleInertiaRequests` middleware to your application, which can be done using the following Artisan command.
+Tiếp theo, chúng ta cần thiết lập middleware Inertia. Bạn có thể thực hiện bằng cách publish middleware `HandleInertiaRequests` vào ứng dụng thông qua Artisan command sau.
 
 ```sh
 php artisan inertia:middleware
 ```
 
-Once the middleware has been published, append the `HandleInertiaRequests` middleware to the `web` middleware group in your application's `bootstrap/app.php` file.
+Sau khi middleware được publish, hãy thêm middleware `HandleInertiaRequests` vào group middleware `web` trong file `bootstrap/app.php` của ứng dụng.
 
 ```php
 use App\Http\Middleware\HandleInertiaRequests;
@@ -64,11 +65,11 @@ use App\Http\Middleware\HandleInertiaRequests;
 })
 ```
 
-This middleware provides a `version()` method for setting your [asset version](/v1/advanced/asset-versioning), as well as a `share()` method for defining [shared data](/v1/the-basics/shared-data).
+Middleware này cung cấp phương thức `version()` để thiết lập [phiên bản asset](/v1/advanced/asset-versioning), cùng phương thức `share()` để định nghĩa [dữ liệu dùng chung](/v1/the-basics/shared-data).
 
-## Creating Responses
+## Tạo response
 
-That's it, you're all ready to go server-side! Now you're ready to start creating Inertia [pages](/v1/the-basics/pages) and rendering them via [responses](/v1/the-basics/responses).
+Vậy là phần phía máy chủ đã sẵn sàng. Giờ bạn có thể bắt đầu tạo các [trang](/v1/the-basics/pages) Inertia và render chúng thông qua [response](/v1/the-basics/responses).
 
 ```php
 use Inertia\Inertia;

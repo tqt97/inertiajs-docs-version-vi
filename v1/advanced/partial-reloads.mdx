@@ -1,20 +1,21 @@
 ---
-title: Partial Reloads
+title: Tải lại một phần
+description: "Khi truy cập lại đúng trang hiện tại, không phải lúc nào cũng cần lấy lại toàn bộ dữ liệu của trang từ máy chủ. Thực tế, chỉ chọn một tập con dữ liệu có thể…"
 ---
 
 import V1EOLWarning from "/snippets/v1-eol-warning.mdx";
 
 <V1EOLWarning />
 
-When making visits to the same page you are already on, it's not always necessary to re-fetch all of the page's data from the server. In fact, selecting only a subset of the data can be a helpful performance optimization if it's acceptable that some page data becomes stale. Inertia makes this possible via its "partial reload" feature.
+Khi truy cập lại đúng trang hiện tại, không phải lúc nào cũng cần lấy lại toàn bộ dữ liệu của trang từ máy chủ. Thực tế, chỉ chọn một tập con dữ liệu có thể là một cách tối ưu hiệu năng hữu ích nếu bạn chấp nhận một phần dữ liệu trang trở nên cũ. Inertia hỗ trợ việc này thông qua tính năng "partial reload".
 
-As an example, consider a "user index" page that includes a list of users, as well as an option to filter the users by their company. On the first request to the page, both the `users` and `companies`props are passed to the page component. However, on subsequent visits to the same page (maybe to filter the users), you can request only the `users` data from the server without requesting the `companies` data. Inertia will then automatically merge the partial data returned from the server with the data it already has in memory client-side.
+Ví dụ, hãy xem một trang "danh sách người dùng" có danh sách người dùng cùng tùy chọn lọc theo công ty. Ở request đầu tiên đến trang, cả props `users` và `companies` đều được truyền vào page component. Tuy nhiên, ở những lần truy cập tiếp theo đến cùng trang đó (chẳng hạn để lọc người dùng), bạn có thể chỉ yêu cầu dữ liệu `users` từ máy chủ mà không yêu cầu `companies`. Sau đó Inertia sẽ tự động merge dữ liệu một phần trả về từ máy chủ với dữ liệu đã có sẵn trong bộ nhớ phía client.
 
-Partial reloads only work for visits made to the same page component.
+Partial reload chỉ hoạt động với các lần truy cập đến cùng một page component.
 
-## Only Certain Props
+## Chỉ lấy một số prop nhất định
 
-To perform a partial reload, use the `only` visit option to specify which data the server should return. This option should be an array of keys which correspond to the keys of the props.
+Để thực hiện partial reload, dùng tùy chọn visit `only` để chỉ định dữ liệu máy chủ cần trả về. Tùy chọn này là một mảng các key tương ứng với key của props.
 
 <CodeGroup>
 
@@ -52,9 +53,9 @@ router.visit(url, {
 
 </CodeGroup>
 
-## Except Certain Props
+## Loại trừ một số prop nhất định
 
-In addition to the `only` visit option you can also use the `except` option to specify which data the server should exclude. This option should also be an array of keys which correspond to the keys of the props.
+Ngoài tùy chọn visit `only`, bạn cũng có thể dùng tùy chọn `except` để chỉ định dữ liệu máy chủ cần loại trừ. Tùy chọn này cũng là một mảng key tương ứng với key của props.
 
 <CodeGroup>
 
@@ -92,9 +93,9 @@ router.visit(url, {
 
 </CodeGroup>
 
-## Router Shorthand
+## Cú pháp rút gọn của router
 
-Since partial reloads can only be made to the same page component the user is already on, it almost always makes sense to just use the `router.reload()` method, which automatically uses the current URL.
+Vì partial reload chỉ có thể thực hiện trên đúng page component mà người dùng đang ở, gần như lúc nào cũng hợp lý khi dùng phương thức `router.reload()`, phương thức này tự động dùng URL hiện tại.
 
 <CodeGroup>
 
@@ -124,9 +125,9 @@ router.reload({ only: ['users'] })
 
 </CodeGroup>
 
-## Using Links
+## Sử dụng liên kết
 
-It's also possible to perform partial reloads with Inertia links using the `only` property.
+Bạn cũng có thể thực hiện partial reload bằng liên kết Inertia thông qua thuộc tính `only`.
 
 <CodeGroup>
 
@@ -158,9 +159,9 @@ import { inertia, Link } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-## Lazy Data Evaluation
+## Đánh giá dữ liệu theo kiểu lazy
 
-For partial reloads to be most effective, be sure to also use lazy data evaluation when returning props from your server-side routes or controllers. This can be accomplished by wrapping all optional page data in a closure.
+Để partial reload đạt hiệu quả cao nhất, hãy dùng cả lazy data evaluation khi trả props từ route hoặc controller phía máy chủ. Bạn có thể thực hiện bằng cách bọc toàn bộ dữ liệu trang tùy chọn trong một closure.
 
 ```php
 return Inertia::render('Users/Index', [
@@ -169,9 +170,9 @@ return Inertia::render('Users/Index', [
 ]);
 ```
 
-When Inertia performs a request, it will determine which data is required and only then will it evaluate the closure. This can significantly increase the performance of pages that contain a lot of optional data.
+Khi Inertia thực hiện request, nó sẽ xác định dữ liệu nào thực sự cần thiết rồi mới evaluate closure. Điều này có thể cải thiện đáng kể hiệu năng của những trang có nhiều dữ liệu tùy chọn.
 
-Additionally, Inertia provides an `Inertia::lazy()` method to specify that a prop should never be included unless explicitly requested using the `only` option:
+Ngoài ra, Inertia cung cấp phương thức `Inertia::lazy()` để chỉ định rằng một prop sẽ không bao giờ được gửi kèm trừ khi được yêu cầu rõ ràng bằng tùy chọn `only`:
 
 ```php
 return Inertia::render('Users/Index', [
@@ -179,7 +180,7 @@ return Inertia::render('Users/Index', [
 ]);
 ```
 
-On the inverse, you can use the `Inertia::always()` method to specify that a prop should always be included, even if it has not been explicitly required in a partial reload.
+Ngược lại, bạn có thể dùng phương thức `Inertia::always()` để chỉ định một prop luôn phải được gửi kèm, kể cả khi prop đó không được yêu cầu rõ ràng trong partial reload.
 
 ```php
 return Inertia::render('Users/Index', [
@@ -187,7 +188,7 @@ return Inertia::render('Users/Index', [
 ]);
 ```
 
-Here's a summary of each approach:
+Dưới đây là tóm tắt của từng cách tiếp cận:
 
 ```php
 return Inertia::render('Users/Index', [
