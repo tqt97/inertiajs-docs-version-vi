@@ -1,0 +1,16 @@
+{
+  "name": "inertiajs-docs-vietnamese",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Unofficial Vietnamese translation of the Inertia.js documentation for learning and community reference.",
+  "scripts": {
+    "docs:dev": "mint dev",
+    "validate": "node scripts/validate-docs.mjs"
+  },
+  "devDependencies": {
+    "mint": "latest"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
