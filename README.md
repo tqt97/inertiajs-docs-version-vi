@@ -9,12 +9,14 @@ Dự án cố gắng giữ nội dung sát với tài liệu gốc, đồng th�
 
 ### Nguồn Inertia.js chính thức
 
+Mỗi bài dịch trong repository đều có mục **Tài liệu chính thức** ở cuối bài để người đọc có thể đối chiếu trực tiếp với trang nguồn đúng phiên bản.
+
 Bản dịch trong repository này được biên soạn và đối chiếu dựa trên tài liệu chính thức của Inertia.js. Khi học một chủ đề, bạn nên giữ các nguồn dưới đây để có thể kiểm tra API và hành vi mới nhất:
 
-- **Website Inertia.js:** <https://inertiajs.com/>
-- **Tài liệu chính thức:** <https://inertiajs.com/docs>
-- **Source code Inertia.js:** <https://github.com/inertiajs/inertia>
-- **Laravel adapter:** <https://github.com/inertiajs/inertia-laravel>
+- **Website Inertia.js:** https://inertiajs.com/
+- **Tài liệu chính thức:** https://inertiajs.com/docs
+- **Source code Inertia.js:** https://github.com/inertiajs/inertia
+- **Laravel adapter:** https://github.com/inertiajs/inertia-laravel
 
 Phần `v1/`, `v2/` và `v3/` là bản dịch theo từng phiên bản tài liệu. Tab **Samples & Thực chiến** là nội dung bổ sung do repository tự biên soạn dựa trên contract/API chính thức, nhằm giải thích cách kết hợp các tính năng trong tình huống thực tế. Nếu nội dung sample khác với tài liệu chính thức do framework thay đổi, **tài liệu và source code chính thức luôn là nguồn tham chiếu ưu tiên**.
 
@@ -24,7 +26,6 @@ Phần `v1/`, `v2/` và `v3/` là bản dịch theo từng phiên bản tài li�
 - Inertia.js **v2** — 44 trang.
 - Inertia.js **v3** — 50 trang.
 - Navigation theo version.
-- SEO description tiếng Việt cho từng trang.
 - Code sample và technical identifier được bảo toàn.
 - Typography dùng native system font stack để hiển thị tiếng Việt tốt trên macOS, Windows và Linux.
 - Tab **Samples & Thực chiến** với CRUD end-to-end, form UX, upload, performance, production error handling và testing.
@@ -45,7 +46,7 @@ Ngoài CRUD, `samples/scenarios/inertia-patterns.mdx` tổng hợp các pattern 
 
 Dự án này tồn tại trước hết để học tốt hơn. Nếu bản dịch giúp bạn hiểu Inertia.js nhanh hơn, dùng framework tự tin hơn hoặc tiết kiệm thời gian tra cứu thì dự án đã hoàn thành một phần mục tiêu của mình.
 
-Mình cũng rất vui khi dự án có thêm người đóng góp. Bạn có thể sửa lỗi chính tả, cải thiện cách diễn đạt, đối chiếu bản dịch với docs chính thức, bổ sung SEO, báo link hỏng hoặc đề xuất cách trình bày dễ hiểu hơn. Mọi đóng góp thiện chí đều được chào đón. ❤️
+Mình cũng rất vui khi dự án có thêm người đóng góp. Bạn có thể sửa lỗi chính tả, cải thiện cách diễn đạt, đối chiếu bản dịch với docs chính thức, cải thiện cấu trúc nội dung, báo link hỏng hoặc đề xuất cách trình bày dễ hiểu hơn. Mọi đóng góp thiện chí đều được chào đón. ❤️
 
 ## Chạy local
 
@@ -109,6 +110,8 @@ Kiểm tra lịch sử trước khi push:
 ```bash
 git log --oneline --decorate -10
 ```
+
+> Lịch sử mẫu trong ZIP dùng địa chỉ `noreply@users.noreply.github.com`. Sau khi clone/giải nén, hãy cấu hình Git identity thật của bạn cho các commit tiếp theo bằng `git config user.name` và `git config user.email`.
 
 ## Đóng góp
 
