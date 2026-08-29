@@ -1,6 +1,5 @@
 ---
 title: Server-Side Rendering (SSR)
-description: "Server-side rendering render trước các trang JavaScript trên máy chủ, nhờ đó người truy cập nhận được HTML đã được render đầy đủ khi truy cập ứng dụng. Vì…"
 ---
 
 import { ClientSpecific } from "/snippets/client-specific.jsx"
@@ -330,3 +329,9 @@ web: php artisan inertia:start-ssr & vendor/bin/heroku-php-apache2 public/
 ```
 
 Lưu ý, bạn phải cài buildpack `heroku/nodejs` bên cạnh `heroku/php` để SSR server có thể chạy.
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v1 chính thức](https://inertiajs.com/docs/v1/advanced/server-side-rendering). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.
