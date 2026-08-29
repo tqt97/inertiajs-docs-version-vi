@@ -1,6 +1,5 @@
 ---
 title: Validation
-description: "Việc xử lý lỗi validation phía máy chủ trong Inertia khác với form truyền thống điều khiển bằng XHR, nơi bạn phải bắt lỗi validation từ response 422 và tự…"
 ---
 
 ## Cách hoạt động
@@ -235,3 +234,9 @@ router.post("/users", data, {
 </CodeGroup>
 
 Khi chỉ định error bag, các lỗi validation từ máy chủ sẽ được trả về tương ứng trong `page.props.errors.createCompany` và `page.props.errors.createUser`.
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v3 chính thức](https://inertiajs.com/docs/v3/the-basics/validation). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.

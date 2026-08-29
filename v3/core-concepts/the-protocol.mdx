@@ -1,6 +1,5 @@
 ---
 title: Giao thức
-description: "Trang này đặc tả Inertia protocol: wire contract chính xác giữa Inertia client và server của bạn. Hãy đọc trang cách hoạt động trước để có cái nhìn tổng quan."
 ---
 
 Trang này đặc tả Inertia protocol: wire contract chính xác giữa Inertia client và server của bạn. Hãy đọc trang [cách hoạt động](/v3/core-concepts/how-it-works) trước để có cái nhìn tổng quan.
@@ -726,3 +725,9 @@ Render thất bại trả response `500` với JSON body phân loại lỗi thay
 Message `error`, `hint` và `timestamp` luôn có mặt, còn `component`, `url`, `stack` và `sourceLocation` xuất hiện khi SSR server có thể xác định. `type` thu hẹp nguyên nhân thành `browser-api` nếu một browser global bị truy cập trong lúc render, đồng thời đặt `browserApi` thành API gây lỗi; `component-resolution` nếu không resolve được page component; hoặc `render` với các exception khác do component ném ra.
 
 Adapter nên xem render thất bại là lỗi không fatal: báo payload qua error handling của ứng dụng rồi fallback về tài liệu client-side rendered tiêu chuẩn, để SSR build lỗi không làm site ngừng hoạt động. Laravel adapter phát lỗi này thành [`SsrRenderFailed` event](/v3/advanced/server-side-rendering#error-handling) và bổ sung type `connection` riêng khi hoàn toàn không kết nối được tới SSR server.
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v3 chính thức](https://inertiajs.com/docs/v3/core-concepts/the-protocol). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.

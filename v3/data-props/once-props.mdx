@@ -1,6 +1,5 @@
 ---
 title: Once Props
-description: "Một số dữ liệu hiếm khi thay đổi, tốn chi phí tính toán hoặc đơn giản là rất lớn. Thay vì đưa dữ liệu đó vào mọi response, bạn có thể dùng once props. Các…"
 ---
 
 Một số dữ liệu hiếm khi thay đổi, tốn chi phí tính toán hoặc đơn giản là rất lớn. Thay vì đưa dữ liệu đó vào mọi response, bạn có thể dùng once props. Các prop này được client ghi nhớ và tái sử dụng ở những page sau có cùng prop. Điều này đặc biệt phù hợp cho [shared data](/v3/data-props/shared-data).
@@ -163,3 +162,9 @@ return Inertia::render('Dashboard', [
     'categories' => Inertia::optional(fn () => Category::all())->once(),
 ]);
 ```
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v3 chính thức](https://inertiajs.com/docs/v3/data-props/once-props). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.

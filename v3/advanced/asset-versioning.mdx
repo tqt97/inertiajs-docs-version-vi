@@ -1,6 +1,5 @@
 ---
 title: Quản lý phiên bản asset
-description: "Một thách thức phổ biến khi xây single-page app là refresh site asset khi chúng thay đổi. Inertia giúp việc này đơn giản bằng cách tùy chọn theo dõi version…"
 ---
 
 Một thách thức phổ biến khi xây single-page app là refresh site asset khi chúng thay đổi. Inertia giúp việc này đơn giản bằng cách tùy chọn theo dõi version hiện tại của asset. Khi asset thay đổi, ở request tiếp theo Inertia tự động thực hiện full-page visit thay vì XHR visit.
@@ -66,3 +65,9 @@ class HandleInertiaRequests extends Middleware
 ```
 
 Ở frontend, có thể theo dõi property `version` và hiển thị thông báo khi phát hiện version mới.
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v3 chính thức](https://inertiajs.com/docs/v3/advanced/asset-versioning). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.

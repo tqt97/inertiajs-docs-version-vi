@@ -1,6 +1,5 @@
 ---
 title: HTTP Requests
-description: "Không phải request nào cũng cần kích hoạt Inertia page visit. Với request tới API bên ngoài hoặc lấy dữ liệu từ endpoint không phải Inertia, hook useHttp…"
 ---
 
 import { ClientSpecific } from "/snippets/client-specific.jsx"
@@ -572,3 +571,9 @@ const http = useHttp('Login', {
     token: '',
 }).dontRemember('token')
 ```
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v3 chính thức](https://inertiajs.com/docs/v3/the-basics/http-requests). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.

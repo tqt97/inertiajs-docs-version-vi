@@ -1,6 +1,5 @@
 ---
 title: DevTools
-description: "Inertia DevTools là Chrome extension ghi lại mọi Inertia visit và hiển thị trong DevTools panel riêng, cho biết chính xác mỗi visit đã gửi và nhận gì: prop…"
 ---
 
 Inertia DevTools là Chrome extension ghi lại mọi Inertia visit và hiển thị trong DevTools panel riêng, cho biết chính xác mỗi visit đã gửi và nhận gì: prop nào được trả về, chúng deferred hay merged, request header nào được gửi và route/controller nào xử lý.
@@ -126,3 +125,9 @@ INERTIA_DEVTOOLS_GATE=viewInertiaDevTools
 Ngoài local environment, DevTools endpoint authorize mỗi request qua gate và từ chối nếu không cấu hình gate. Local environment luôn được phép nên gate không thể khóa bạn khỏi DevTools khi làm việc local.
 
 Endpoint chạy middleware group `web` trước khi authorize, nên session đã resolve authenticated user khi gate chạy. Có thể điều chỉnh stack dưới `devtools.middleware` nếu ứng dụng xác thực user theo cách khác.
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v3 chính thức](https://inertiajs.com/docs/v3/advanced/devtools). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.

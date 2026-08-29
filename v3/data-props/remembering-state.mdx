@@ -1,6 +1,5 @@
 ---
 title: Ghi nhớ state
-description: "Khi điều hướng lịch sử trình duyệt, Inertia khôi phục các trang bằng dữ liệu props được cache trong history state. Tuy nhiên, Inertia không khôi phục state…"
 ---
 
 Khi điều hướng lịch sử trình duyệt, Inertia khôi phục các trang bằng dữ liệu props được cache trong history state. Tuy nhiên, Inertia không khôi phục state cục bộ của page component vì phần này nằm ngoài phạm vi quản lý của nó. Điều này có thể khiến các trang trong lịch sử trình duyệt trở nên lỗi thời.
@@ -223,3 +222,9 @@ let data = router.restore("my-key");
   quá thường xuyên và cân nhắc debounce hoặc batch state update trong
   các trường hợp tần suất cao.
 </Warning>
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v3 chính thức](https://inertiajs.com/docs/v3/data-props/remembering-state). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.

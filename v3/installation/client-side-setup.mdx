@@ -1,6 +1,5 @@
 ---
 title: Thiết lập phía client
-description: "Sau khi đã cấu hình server-side framework, bạn cần thiết lập client-side framework. Inertia hiện hỗ trợ React, Vue và Svelte."
 ---
 
 import { ReactSpecific } from "/snippets/react-specific.jsx"
@@ -688,3 +687,9 @@ Mỗi method `on*` trả cleanup function để xóa handler khi được gọi.
 ### Custom HTTP client
 
 Để toàn quyền kiểm soát cách request được thực hiện, bạn có thể cung cấp HTTP client hoàn toàn tùy chỉnh qua tùy chọn `http`. Custom client phải implement phương thức `request`, nhận `HttpRequestConfig` và trả promise resolve thành `HttpResponse`. Xem source [xhrHttpClient.ts](https://github.com/inertiajs/inertia/blob/3.x/packages/core/src/xhrHttpClient.ts) làm implementation tham chiếu.
+
+---
+
+## Tài liệu chính thức
+
+Bài dịch này được đối chiếu từ [tài liệu Inertia.js v3 chính thức](https://inertiajs.com/docs/v3/installation/client-side-setup). Nếu có khác biệt do phiên bản hoặc cập nhật mới, hãy ưu tiên tài liệu chính thức làm nguồn tham chiếu.
