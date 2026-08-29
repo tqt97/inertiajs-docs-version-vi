@@ -98,11 +98,11 @@ Quality gate hiện kiểm tra thêm:
 
 - `docs.json` parse được;
 - navigation page tồn tại;
-- description/frontmatter;
+- frontmatter/title;
 - code fence cân bằng;
 - version page count không drift;
 - sample internal links resolve;
-- toàn bộ sample page có frontmatter/description hợp lệ.
+- toàn bộ sample page có frontmatter/title hợp lệ, không dùng `description`.
 
 Ngoài ra companion PHP source được chạy `php -l` và repository được kiểm tra bằng `git diff --check` / `git fsck` trước khi đóng gói.
 
@@ -123,3 +123,13 @@ Vòng cuối còn đối chiếu lại `v1/`, `v2/`, `v3/` với source tiếng 
 - internal page links của ba version resolve được;
 - các label Card còn sót tiếng Anh trong upgrade guide v2/v3 được Việt hóa ở phần hiển thị, không thay đổi URL/API/code;
 - không thay đổi identifier, HTTP header hoặc code sample chỉ để “Việt hóa cho đẹp”.
+
+## Publication-source gate
+
+Toàn bộ sample page hiện phải:
+
+- không có `description` trong frontmatter;
+- có `title`;
+- có mục `Tài liệu chính thức` ở cuối bài;
+- dẫn về Inertia.js v3 official docs;
+- tiếp tục pass internal-link, code-fence và editorial checks.

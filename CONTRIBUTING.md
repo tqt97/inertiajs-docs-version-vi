@@ -8,7 +8,7 @@ Cảm ơn bạn muốn đóng góp. Dự án này hướng tới một bản d�
 - Làm câu văn tự nhiên và dễ hiểu hơn nhưng không đổi ý nghĩa kỹ thuật.
 - Đối chiếu bản dịch với tài liệu Inertia.js chính thức.
 - Sửa link nội bộ, navigation hoặc metadata.
-- Cải thiện SEO description.
+- Cải thiện tiêu đề, cấu trúc và khả năng tìm kiếm của nội dung.
 - Cải thiện accessibility hoặc khả năng đọc.
 - Bổ sung kiểm tra tự động cho documentation.
 
@@ -61,7 +61,7 @@ Một PR tốt thường làm một việc:
 Tốt:
 - sửa bản dịch cho v3 forms
 - sửa link hỏng trong v2
-- cải thiện SEO description cho nhóm security
+- cải thiện cách diễn đạt và cấu trúc cho nhóm security
 
 Không nên:
 - sửa 40 trang + đổi CSS + đổi navigation + refactor tooling trong cùng PR
