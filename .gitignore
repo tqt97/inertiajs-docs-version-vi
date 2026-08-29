@@ -1,1 +1,10 @@
 .DS_Store
+node_modules/
+.mintlify/
+.env
+.env.*
+!.env.example
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
