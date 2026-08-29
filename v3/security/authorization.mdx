@@ -1,10 +1,11 @@
 ---
-title: Authorization
+title: Phân quyền
+description: "Khi dùng Inertia, authorization nên được xử lý phía server trong authorization policy của ứng dụng. Tuy vậy, đôi khi bạn vẫn cần thực hiện kiểm tra quyền…"
 ---
 
-When using Inertia, authorization is best handled server-side in your application's authorization policies. You may still need to perform authorization checks in your Inertia page components, where your framework's server-side helpers are unavailable.
+Khi dùng Inertia, authorization nên được xử lý phía server trong authorization policy của ứng dụng. Tuy vậy, đôi khi bạn vẫn cần thực hiện kiểm tra quyền trong Inertia page component, nơi các helper phía server của framework không khả dụng.
 
-The simplest approach is to pass the results of your authorization checks directly to your page components as props.
+Cách đơn giản nhất là truyền trực tiếp kết quả kiểm tra authorization vào page component dưới dạng prop.
 
 ```php
 class UsersController extends Controller

@@ -1,12 +1,13 @@
 ---
 title: Polling
+description: "Polling server để lấy thông tin mới cho page hiện tại là nhu cầu phổ biến, vì vậy Inertia cung cấp helper để giảm boilerplate. Helper tự động dừng polling…"
 ---
 
-## Poll Helper
+## Poll helper
 
-Polling your server for new information on the current page is common, so Inertia provides a helper to reduce boilerplate. It automatically stops polling when the page is unmounted.
+Polling server để lấy thông tin mới cho page hiện tại là nhu cầu phổ biến, vì vậy Inertia cung cấp helper để giảm boilerplate. Helper tự động dừng polling khi page unmount.
 
-The only required argument is the polling interval in milliseconds.
+Đối số bắt buộc duy nhất là khoảng thời gian polling tính bằng mili giây.
 
 <CodeGroup>
 
@@ -30,7 +31,7 @@ usePoll(2000)
 
 </CodeGroup>
 
-If you need to pass additional request options to the poll helper, you can pass any of the `router.reload` options as the second parameter.
+Nếu cần truyền thêm request option cho poll helper, bạn có thể truyền bất kỳ option nào của `router.reload` làm tham số thứ hai.
 
 <CodeGroup>
 
@@ -75,7 +76,7 @@ usePoll(2000, {
 
 </CodeGroup>
 
-You may also pass a function that returns the request options. The function is evaluated on every tick, allowing the poll to reflect the latest component state.
+Bạn cũng có thể truyền function trả về request options. Function được evaluate ở mỗi tick, cho phép poll phản ánh component state mới nhất.
 
 <CodeGroup>
 
@@ -116,7 +117,7 @@ usePoll(2000, () => ({
 
 </CodeGroup>
 
-If you'd like more control over the polling behavior, the poll helper provides `stop` and `start` methods that allow you to manually start and stop polling. You can pass the `autoStart: false` option to the poll helper to prevent it from automatically starting polling when the component is mounted.
+Nếu muốn kiểm soát hành vi polling chi tiết hơn, poll helper cung cấp các method `stop` và `start` để bạn chủ động bắt đầu hoặc dừng. Có thể truyền option `autoStart: false` để ngăn helper tự bắt đầu polling khi component mount.
 
 <CodeGroup>
 
@@ -162,7 +163,7 @@ const { start, stop } = usePoll(2000, {}, {
 
 </CodeGroup>
 
-The poll helper also returns a reactive `polling` value that reflects whether the poll is running, making it ideal for rendering a pause or resume button. The value doesn't indicate whether a request is in flight.
+Poll helper cũng trả reactive value `polling` cho biết poll có đang chạy hay không, phù hợp để render nút pause/resume. Giá trị này không cho biết có request đang chạy hay không.
 
 <CodeGroup>
 
@@ -207,11 +208,11 @@ const poll = usePoll(2000)
 
 </CodeGroup>
 
-## Concurrency Mode
+## Chế độ concurrency
 
-By default, the poll helper fires a new request on every tick, even when the previous request is still in flight. You may control this behavior with the `mode` option, which accepts one of three values: `overlap`, `cancel`, or `rest`.
+Mặc định, poll helper gửi request mới ở mỗi tick kể cả khi request trước vẫn đang chạy. Bạn có thể kiểm soát bằng tùy chọn `mode`, nhận một trong ba giá trị: `overlap`, `cancel` hoặc `rest`.
 
-The default `overlap` mode allows requests to run in parallel. The `cancel` mode aborts any in-flight request when the next tick fires. The `rest` mode treats the interval as the time between the end of the previous request and the start of the next one, so requests never overlap.
+Mode `overlap` mặc định cho phép request chạy song song. Mode `cancel` hủy request đang chạy khi tick tiếp theo xảy ra. Mode `rest` xem interval là khoảng thời gian giữa lúc request trước kết thúc và request sau bắt đầu, vì vậy request không bao giờ overlap.
 
 <CodeGroup>
 
@@ -243,7 +244,7 @@ usePoll(2000, {}, {
 
 ## Throttling
 
-By default, the poll helper will throttle requests by 90% when the browser tab is in the background. If you'd like to disable this behavior, you can pass the `keepAlive` option to the poll helper.
+Mặc định, poll helper sẽ giảm 90% tần suất request khi tab trình duyệt ở background. Nếu muốn tắt hành vi này, truyền option `keepAlive`.
 
 <CodeGroup>
 

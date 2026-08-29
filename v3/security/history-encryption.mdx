@@ -1,42 +1,43 @@
 ---
-title: History Encryption
+title: Mã hóa lịch sử
+description: "Hãy hình dung người dùng đã đăng nhập, xem thông tin có quyền truy cập hạn chế trên website rồi đăng xuất. Nếu họ nhấn nút Back, họ vẫn có thể nhìn thấy…"
 ---
 
-Imagine a scenario where your user is authenticated, browses privileged information on your site, then logs out. If they press the back button, they can still see the privileged information that is stored in the window's history state. This is a security risk. To prevent this, Inertia.js provides a history encryption feature.
+Hãy hình dung người dùng đã đăng nhập, xem thông tin có quyền truy cập hạn chế trên website rồi đăng xuất. Nếu họ nhấn nút Back, họ vẫn có thể nhìn thấy thông tin đặc quyền đã được lưu trong history state của cửa sổ trình duyệt. Đây là rủi ro bảo mật. Để ngăn điều đó, Inertia.js cung cấp tính năng mã hóa lịch sử.
 
-## How It Works
+## Cách hoạt động
 
-When you instruct Inertia to encrypt your app's history, it uses the browser's built-in [`Crypto` API](https://developer.mozilla.org/en-US/docs/Web/API/Crypto) to encrypt the current page's data before pushing it to the history state. We store the corresponding key in the browser's session storage. When the user navigates back to a page, we decrypt the data using the key stored in the session storage.
+Khi bạn yêu cầu Inertia mã hóa history của ứng dụng, nó dùng [`Crypto` API](https://developer.mozilla.org/en-US/docs/Web/API/Crypto) tích hợp trong trình duyệt để mã hóa dữ liệu trang hiện tại trước khi đẩy vào history state. Khóa tương ứng được lưu trong session storage của trình duyệt. Khi người dùng quay lại trang, dữ liệu được giải mã bằng khóa lưu trong session storage.
 
-Once you instruct Inertia to clear your history state, it clears the existing key from session storage and generates a new one. If it attempts to decrypt the history state with the new key, it will fail and Inertia will make a fresh request back to your server for the page data.
+Khi bạn yêu cầu Inertia xóa history state, nó xóa khóa hiện có khỏi session storage và tạo khóa mới. Nếu sau đó cố giải mã history state bằng khóa mới, quá trình sẽ thất bại và Inertia sẽ gửi request mới về server để lấy lại dữ liệu trang.
 
-History encryption relies on `window.crypto.subtle` which is only available in secure environments (sites with SSL enabled).
+Mã hóa lịch sử dựa vào `window.crypto.subtle`, API chỉ khả dụng trong môi trường bảo mật (website đã bật SSL).
 
-## Opting in
+## Chủ động bật tính năng
 
-History encryption is an opt-in feature. There are several methods for enabling it:
+Mã hóa lịch sử là tính năng opt-in. Có một số cách để bật:
 
-### Global Encryption
+### Mã hóa toàn cục
 
-If you'd like to enable history encryption globally, set the `inertia.history.encrypt` config value to `true`.
+Nếu muốn bật mã hóa lịch sử trên toàn ứng dụng, hãy đặt giá trị config `inertia.history.encrypt` thành `true`.
 
-You are able to opt out of encryption on specific pages by calling the `Inertia::encryptHistory()`method before returning the response.
+Bạn có thể tắt mã hóa cho từng trang cụ thể bằng cách gọi phương thức `Inertia::encryptHistory()` trước khi trả response.
 
 ```php
 Inertia::encryptHistory(false);
 ```
 
-### Per-request Encryption
+### Mã hóa theo request
 
-To encrypt the history of an individual request, simply call the `Inertia::encryptHistory()` method before returning the response.
+Để mã hóa lịch sử của một request riêng lẻ, chỉ cần gọi phương thức `Inertia::encryptHistory()` trước khi trả response.
 
 ```php
 Inertia::encryptHistory();
 ```
 
-### Encrypt Middleware
+### Middleware mã hóa
 
-To encrypt a group of routes, you may use Inertia's included `EncryptHistory` middleware.
+Để mã hóa một nhóm route, bạn có thể dùng middleware `EncryptHistory` đi kèm Inertia.
 
 ```php
 Route::middleware([Inertia\Middleware\EncryptHistory::class])->get('/', function() {
@@ -48,14 +49,14 @@ Route::middleware(['inertia::encrypt'])->get('/', function() {
 });
 ```
 
-## Clearing History
+## Xóa lịch sử
 
-To clear the history state, you can call the `Inertia::clearHistory()` method before returning the response.
+Để xóa history state, bạn có thể gọi phương thức `Inertia::clearHistory()` trước khi trả response.
 
 ```php
 Inertia::clearHistory();
 ```
 
-Once the response has rendered on the client, the encryption key will be rotated, rendering the previous history state unreadable.
+Sau khi response được render ở phía client, encryption key sẽ được rotate, khiến history state trước đó không thể đọc được.
 
-You can also clear history on the client side by calling `router.clearHistory()`.
+Bạn cũng có thể xóa history ở phía client bằng cách gọi `router.clearHistory()`.

@@ -1,16 +1,17 @@
 ---
-title: CSRF Protection
+title: Bảo vệ CSRF
+description: "Laravel tự động thêm CSRF token phù hợp khi thực hiện request qua Inertia hoặc Axios. Tuy nhiên, nếu dùng Laravel, hãy nhớ bỏ thẻ meta csrf-token khỏi dự án…"
 ---
 
-## Making Requests
+## Thực hiện request
 
-Laravel automatically includes the proper CSRF token when making requests via Inertia or Axios. However, if you're using Laravel, be sure to omit the `csrf-token` meta tag from your project, as this will prevent the CSRF token from refreshing properly.
+Laravel tự động thêm CSRF token phù hợp khi thực hiện request qua Inertia hoặc Axios. Tuy nhiên, nếu dùng Laravel, hãy nhớ bỏ thẻ meta `csrf-token` khỏi dự án vì thẻ này sẽ ngăn CSRF token được làm mới đúng cách.
 
-If your server-side framework includes cross-site request forgery (CSRF) protection, you'll need to ensure that each Inertia request includes the necessary CSRF token for `POST`, `PUT`, `PATCH`, and `DELETE` requests.
+Nếu framework phía máy chủ có bảo vệ cross-site request forgery (CSRF), bạn cần đảm bảo mỗi request Inertia đều chứa CSRF token cần thiết cho `POST`, `PUT`, `PATCH` và `DELETE`.
 
-Some server-side frameworks, such as Laravel, automatically include the CSRF token when making requests. No additional configuration is required when using these frameworks.
+Một số server-side framework như Laravel tự động đưa CSRF token vào request. Khi dùng các framework này, bạn không cần cấu hình bổ sung.
 
-However, if you need to handle CSRF protection manually, one approach is to include the CSRF token as a prop on every response. You can then use the token when making Inertia requests.
+Tuy nhiên, nếu cần tự xử lý bảo vệ CSRF, một cách là gửi CSRF token dưới dạng prop trong mọi response. Sau đó bạn có thể sử dụng token này khi thực hiện request Inertia.
 
 <CodeGroup>
 
@@ -50,13 +51,13 @@ router.post("/users", {
 
 </CodeGroup>
 
-You can even use Inertia's [shared data](/v3/data-props/shared-data) functionality to automatically include the `csrf_token` with each response.
+Bạn thậm chí có thể dùng tính năng [shared data](/v3/data-props/shared-data) của Inertia để tự động đưa `csrf_token` vào mỗi response.
 
-A better approach is to use Inertia's built-in XSRF token handling. Inertia's HTTP client automatically checks for the existence of an `XSRF-TOKEN` cookie and, when present, includes the token in an `X-XSRF-TOKEN` header for every request it makes.
+Một cách tốt hơn là dùng cơ chế xử lý XSRF token tích hợp sẵn của Inertia. HTTP client của Inertia tự động kiểm tra cookie `XSRF-TOKEN` và, nếu tồn tại, đưa token vào header `X-XSRF-TOKEN` cho mọi request.
 
-The easiest way to implement this is using server-side middleware. Simply include the `XSRF-TOKEN` cookie on each response, and then verify the token using the `X-XSRF-TOKEN` header sent in the requests from Inertia.
+Cách dễ nhất để triển khai là dùng middleware phía server. Chỉ cần đưa cookie `XSRF-TOKEN` vào mỗi response, sau đó xác minh token bằng header `X-XSRF-TOKEN` được gửi trong các request từ Inertia.
 
-You may customize the cookie and header names via the `http` option in `createInertiaApp`.
+Bạn có thể tùy chỉnh tên cookie và header thông qua tùy chọn `http` trong `createInertiaApp`.
 
 ```js
 createInertiaApp({
@@ -68,9 +69,9 @@ createInertiaApp({
 })
 ```
 
-## Handling Mismatches
+## Xử lý token không khớp
 
-When a CSRF token mismatch occurs, your server-side framework will likely throw an exception that results in an error response. For example, Laravel throws a `TokenMismatchException`, which results in a `419` error page. Since that isn't a valid Inertia response, the error is shown in a modal.
+Khi CSRF token không khớp, framework phía server thường ném exception dẫn đến error response. Ví dụ, Laravel ném `TokenMismatchException`, tạo ra trang lỗi `419`. Vì đây không phải response Inertia hợp lệ, lỗi sẽ được hiển thị trong modal.
 
 <video
   controls
@@ -78,9 +79,9 @@ When a CSRF token mismatch occurs, your server-side framework will likely throw 
   src="/mp4/csrf-mismatch-modal.mp4"
 ></video>
 
-Obviously, this isn't a great user experience. A better way to handle these errors is to return a redirect back to the previous page, along with a flash message that the page expired. This will result in a valid Inertia response with the flash message available as a prop which you can then display to the user. Of course, you'll need to share your [flash messages](/shared-data#flash-messages) with Inertia for this to work.
+Rõ ràng đây không phải trải nghiệm tốt cho người dùng. Cách xử lý tốt hơn là redirect về trang trước kèm flash message cho biết trang đã hết hạn. Kết quả sẽ là một response Inertia hợp lệ, trong đó flash message có sẵn dưới dạng prop để bạn hiển thị cho người dùng. Tất nhiên, bạn cần chia sẻ [flash message](/shared-data#flash-messages) với Inertia để cách này hoạt động.
 
-When using Laravel, you may modify your application's exception handler to automatically redirect the user back to the page they were previously on while flashing a message to the session. To accomplish this, you may use the `respond` exception method in your application's `bootstrap/app.php` file.
+Khi dùng Laravel, bạn có thể chỉnh exception handler của ứng dụng để tự động redirect người dùng về trang trước và flash message vào session. Bạn có thể thực hiện việc này bằng phương thức exception `respond` trong file `bootstrap/app.php`.
 
 ```php
 use Symfony\Component\HttpFoundation\Response;
@@ -98,7 +99,7 @@ use Symfony\Component\HttpFoundation\Response;
 });
 ```
 
-The result is a much better experience: instead of seeing the error modal, users see a message that the page has expired and are asked to try again.
+Kết quả là trải nghiệm tốt hơn nhiều: thay vì thấy error modal, người dùng nhận thông báo rằng trang đã hết hạn và được yêu cầu thử lại.
 
 <video
   controls

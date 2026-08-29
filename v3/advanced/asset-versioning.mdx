@@ -1,14 +1,15 @@
 ---
-title: Asset Versioning
+title: Quản lý phiên bản asset
+description: "Một thách thức phổ biến khi xây single-page app là refresh site asset khi chúng thay đổi. Inertia giúp việc này đơn giản bằng cách tùy chọn theo dõi version…"
 ---
 
-One common challenge when building single-page apps is refreshing site assets when they've been changed. Thankfully, Inertia makes this easy by optionally tracking the current version of your site assets. When an asset changes, Inertia will automatically make a full-page visit instead of an XHR visit on the next request.
+Một thách thức phổ biến khi xây single-page app là refresh site asset khi chúng thay đổi. Inertia giúp việc này đơn giản bằng cách tùy chọn theo dõi version hiện tại của asset. Khi asset thay đổi, ở request tiếp theo Inertia tự động thực hiện full-page visit thay vì XHR visit.
 
-## Configuration
+## Cấu hình
 
-To enable automatic asset refreshing, you need to tell Inertia the current version of your assets. This can be any arbitrary string (letters, numbers, or a file hash), as long as it changes when your assets have been updated.
+Để bật cơ chế tự động làm mới asset, bạn cần cho Inertia biết phiên bản hiện tại của asset. Đây có thể là bất kỳ chuỗi tùy ý nào (chữ, số hoặc file hash), miễn là giá trị thay đổi khi asset được cập nhật.
 
-Typically, your application's asset version can be specified within the `version` method of the Inertia `HandleInertiaRequests` middleware.
+Thông thường, phiên bản asset của ứng dụng có thể được chỉ định trong phương thức `version` của middleware Inertia `HandleInertiaRequests`.
 
 ```php
 class HandleInertiaRequests extends Middleware
@@ -20,7 +21,7 @@ class HandleInertiaRequests extends Middleware
 }
 ```
 
-Alternatively, the asset version can be provided manually using the `Inertia::version()` method.
+Ngoài ra, bạn có thể cung cấp phiên bản asset thủ công bằng phương thức `Inertia::version()`.
 
 ```php
 use Inertia\Inertia;
@@ -29,23 +30,23 @@ Inertia::version($version);
 Inertia::version(fn () => $version); // Lazily...
 ```
 
-## Cache Busting
+## Cache busting
 
-Asset refreshing in Inertia works on the assumption that a full-page visit will trigger your assets to reload. However, Inertia doesn't actually do anything to force this. Typically this is done with some form of cache busting. For example, appending a version query parameter to the end of your asset URLs.
+Asset refreshing trong Inertia giả định full-page visit sẽ làm asset được tải lại. Tuy nhiên Inertia không trực tiếp ép việc này. Thông thường bạn dùng một dạng cache busting, ví dụ thêm version query parameter vào cuối asset URL.
 
-With Laravel's Vite integration, asset versioning is done automatically. If you're using Laravel Mix, you can do this automatically by enabling [versioning](https://laravel.com/docs/mix#versioning-and-cache-busting) in your `webpack.mix.js` file.
+Với tích hợp Vite của Laravel, asset versioning được thực hiện tự động. Nếu dùng Laravel Mix, bạn cũng có thể tự động hóa việc này bằng cách bật [versioning](https://laravel.com/docs/mix#versioning-and-cache-busting) trong file `webpack.mix.js`.
 
-## Background Requests
+## Background requests
 
 <Badge>v3.6.0+</Badge>
 
-A version change detected on a background request, such as polling or a `router.reload()`, does not force a full-page navigation. Reloading a request the user never initiated could wipe out unsaved state, so the current page stays untouched and the next user-initiated visit picks up the new assets. You may hook into the [`location` event](/v3/advanced/events#location) to detect an asset version change and show a notification instead of reloading.
+Version change được phát hiện trong background request như polling hoặc `router.reload()` không ép full-page navigation. Reload một request user chưa khởi tạo có thể làm mất state chưa lưu, vì vậy page hiện tại được giữ nguyên và visit do user khởi tạo tiếp theo sẽ nhận asset mới. Bạn có thể hook vào [`location` event](/v3/advanced/events#location) để phát hiện asset version change và hiển thị thông báo thay vì reload.
 
-## Manual Refreshing
+## Làm mới thủ công
 
-If you want to take control of asset refreshing, you can return a fixed value from the `version` method in the `HandleInertiaRequests` middleware. This disables Inertia's automatic asset versioning.
+Nếu muốn tự kiểm soát asset refreshing, có thể trả fixed value từ phương thức `version` trong middleware `HandleInertiaRequests`. Điều này tắt automatic asset versioning của Inertia.
 
-For example, if you want to notify users when a new version of your front end is available, you can still expose the actual asset version to the front end by including it as [shared data](/v3/data-props/shared-data).
+Ví dụ, nếu muốn thông báo khi có phiên bản frontend mới, bạn vẫn có thể expose asset version thực tế lên frontend qua [shared data](/v3/data-props/shared-data).
 
 ```php
 class HandleInertiaRequests extends Middleware
@@ -64,4 +65,4 @@ class HandleInertiaRequests extends Middleware
 }
 ```
 
-On the front end, you can watch the `version` property and show a notification when a new version is detected.
+Ở frontend, có thể theo dõi property `version` và hiển thị thông báo khi phát hiện version mới.

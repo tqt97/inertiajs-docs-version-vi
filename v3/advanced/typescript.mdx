@@ -1,28 +1,29 @@
 ---
 title: TypeScript
+description: "Inertia hỗ trợ TypeScript ở mức first-class. Bạn có thể cấu hình kiểu toàn cục bằng declaration merging và truyền generic vào hook cũng như phương thức…"
 ---
 
-Inertia provides first-class TypeScript support. You may configure global types using declaration merging, and pass generics to hooks and router methods for type-safe props, forms, and state management.
+Inertia hỗ trợ TypeScript ở mức first-class. Bạn có thể cấu hình kiểu toàn cục bằng declaration merging và truyền generic vào hook cũng như phương thức router để có props, form và quản lý state type-safe.
 
-## Using pnpm
+## Sử dụng pnpm
 
-Due to pnpm's strict dependency isolation, `@inertiajs/core` is not accessible at `node_modules/@inertiajs/core`. Instead, it's nested inside `.pnpm/`, which prevents TypeScript module augmentation from resolving the module.
+Do cơ chế cô lập dependency nghiêm ngặt của pnpm, `@inertiajs/core` không truy cập được tại `node_modules/@inertiajs/core`. Thay vào đó, package nằm lồng trong `.pnpm/`, khiến TypeScript module augmentation không thể resolve module.
 
-You may fix this by configuring pnpm to [hoist the package](https://pnpm.io/settings#publichoistpattern). Add the following to your `.npmrc` file and run `pnpm install`.
+Bạn có thể khắc phục bằng cách cấu hình pnpm để [hoist package](https://pnpm.io/settings#publichoistpattern). Thêm cấu hình sau vào file `.npmrc` rồi chạy `pnpm install`.
 
 ```ini
 public-hoist-pattern[]=@inertiajs/core
 ```
 
-Alternatively, you may add `@inertiajs/core` as a direct dependency in your project.
+Hoặc bạn có thể thêm `@inertiajs/core` làm dependency trực tiếp của project.
 
 ```bash
 pnpm add @inertiajs/core
 ```
 
-## Global Configuration
+## Cấu hình toàn cục
 
-You may configure Inertia's types globally by augmenting the `InertiaConfig` interface in the `@inertiajs/core` module. This is typically done in a `global.d.ts` file in your project's root or `types` directory.
+Bạn có thể cấu hình type của Inertia trên toàn cục bằng cách augment interface `InertiaConfig` trong module `@inertiajs/core`. Việc này thường được thực hiện trong file `global.d.ts` ở thư mục root hoặc thư mục `types` của project.
 
 ```ts
 // global.d.ts
@@ -51,12 +52,12 @@ declare module "@inertiajs/core" {
 ```
 
 <Note>
-The `import` statement (or `export {}`) is required to make this file a module. Without it, `declare module` replaces the module definition instead of augmenting it. Your `tsconfig.json` also needs to include `.d.ts` files, so make sure a pattern like `"resources/js/**/*.d.ts"` is present in the `include` array.
+Câu lệnh `import` (hoặc `export {}`) là bắt buộc để biến file này thành module. Nếu thiếu nó, `declare module` sẽ thay thế định nghĩa module thay vì augment module. `tsconfig.json` cũng phải include các file `.d.ts`, vì vậy hãy đảm bảo mảng `include` có pattern như `"resources/js/**/*.d.ts"`.
 </Note>
 
-### Shared Page Props
+### Shared page props
 
-The `sharedPageProps` option defines the type of data that is [shared](/v3/data-props/shared-data) with every page in your application. With this configuration, `page.props.auth` and `page.props.appName` will be properly typed everywhere.
+Tùy chọn `sharedPageProps` định nghĩa type dữ liệu được [share](/v3/data-props/shared-data) với mọi page. Với cấu hình này, `page.props.auth` và `page.props.appName` có type đúng ở mọi nơi.
 
 ```ts
 sharedPageProps: {
@@ -65,9 +66,9 @@ sharedPageProps: {
 }
 ```
 
-### Flash Data
+### Flash data
 
-The `flashDataType` option defines the type of [flash data](/v3/data-props/flash-data) in your application.
+Tùy chọn `flashDataType` định nghĩa type [flash data](/v3/data-props/flash-data) trong ứng dụng.
 
 ```ts
 flashDataType: {
@@ -75,9 +76,9 @@ flashDataType: {
 }
 ```
 
-### Error Values
+### Giá trị lỗi
 
-By default, validation error values are typed as `string`. You may configure TypeScript to expect arrays instead for [multiple errors per field](/v3/the-basics/validation#multiple-errors-per-field).
+Mặc định validation error value có type `string`. Bạn có thể cấu hình TypeScript để mong đợi mảng cho [nhiều lỗi trên mỗi field](/v3/the-basics/validation#multiple-errors-per-field).
 
 ```ts
 errorValueType: string[]
@@ -85,7 +86,7 @@ errorValueType: string[]
 
 ### Layout Props
 
-The `layoutProps` option types the data accepted by `setLayoutProps()`. The `namedLayoutProps` option types the data accepted by `setLayoutProps('name', props)`, keyed by layout name.
+Tùy chọn `layoutProps` khai báo type dữ liệu `setLayoutProps()` nhận. `namedLayoutProps` khai báo type dữ liệu `setLayoutProps('name', props)` nhận, key theo layout name.
 
 ```ts
 layoutProps: {
@@ -98,9 +99,9 @@ namedLayoutProps: {
 }
 ```
 
-With this configuration, `setLayoutProps({ title: 'Dashboard' })` is type-checked, and `setLayoutProps('app', { theme: 'dark' })` validates both the layout name and its props.
+Với cấu hình này, `setLayoutProps({ title: 'Dashboard' })` được type-check, còn `setLayoutProps('app', { theme: 'dark' })` validate cả layout name lẫn props.
 
-You may also pass a generic type parameter directly to `setLayoutProps` for ad-hoc typing without configuring the global `InertiaConfig` interface.
+Bạn cũng có thể truyền generic type parameter trực tiếp vào `setLayoutProps` để khai báo type ad-hoc mà không cấu hình interface `InertiaConfig` toàn cục.
 
 ```ts
 setLayoutProps<{ custom: string }>({ custom: 'value' })
@@ -108,16 +109,16 @@ setLayoutProps<{ collapsed: boolean }>('sidebar', { collapsed: true })
 ```
 
 <Note>
-  The next version of [Laravel
-  Wayfinder](https://github.com/laravel/wayfinder/tree/next) may automatically
-  generate these types for you by analyzing your Laravel application. It
-  generates TypeScript types for shared props, page props, form requests, and
-  Eloquent models. This version is currently in beta.
+  Phiên bản tiếp theo của [Laravel
+  Wayfinder](https://github.com/laravel/wayfinder/tree/next) có thể tự động
+  sinh các type này bằng cách phân tích ứng dụng Laravel. Nó
+  sinh TypeScript type cho shared props, page props, form request và
+  Eloquent model. Phiên bản này hiện ở giai đoạn beta.
 </Note>
 
-## Page Components
+## Page component
 
-You may type the `import.meta.glob` result for better type safety when resolving page components.
+Bạn có thể khai báo type cho kết quả `import.meta.glob` để tăng type safety khi resolve page component.
 
 <CodeGroup>
 
@@ -160,9 +161,9 @@ createInertiaApp({
 
 </CodeGroup>
 
-## Page Props
+## Page props
 
-You may type page-specific props by passing a generic to `usePage()`. These are merged with your global `sharedPageProps`, giving you autocomplete and type checking for both shared and page-specific data.
+Bạn có thể khai báo kiểu cho prop riêng của từng trang bằng cách truyền generic vào `usePage()`. Chúng được gộp với `sharedPageProps` toàn cục, nhờ đó bạn có autocomplete và type checking cho cả dữ liệu shared lẫn dữ liệu riêng của trang.
 
 <CodeGroup>
 
@@ -206,9 +207,9 @@ export default function Posts() {
 
 </CodeGroup>
 
-## Form Helper
+## Form helper
 
-The [form helper](/v3/the-basics/forms#form-helper) accepts a generic type parameter for type-safe form data and error handling. This provides autocomplete for form fields and errors, and prevents typos in field names.
+[Form helper](/v3/the-basics/forms#form-helper) nhận generic type parameter cho form data và error handling type-safe. Điều này cung cấp autocomplete cho form field/error và ngăn lỗi chính tả tên field.
 
 <CodeGroup>
 
@@ -264,9 +265,9 @@ export default function CreateUser() {
 
 </CodeGroup>
 
-### Nested Data and Arrays
+### Dữ liệu lồng nhau và mảng
 
-Form types fully support nested objects and arrays. You may access and update nested fields using dot notation, and error keys are automatically typed to match.
+Form type hỗ trợ đầy đủ object lồng nhau và mảng. Bạn có thể truy cập và cập nhật field lồng nhau bằng dot notation, còn error key sẽ tự động có kiểu tương ứng.
 
 ```ts
 import { useForm } from "@inertiajs/react";
@@ -280,9 +281,9 @@ const form = useForm<{
 });
 ```
 
-## Form Component
+## Component Form
 
-The `<Form>` component accepts a generic type parameter for type-safe slot props. In React, you may pass the generic directly. In Vue and Svelte, you may use the `createForm` helper to create a typed form component.
+Component `<Form>` nhận generic type parameter cho slot prop type-safe. Trong React có thể truyền generic trực tiếp. Trong Vue và Svelte, bạn có thể dùng helper `createForm` để tạo typed form component.
 
 <CodeGroup>
 
@@ -353,11 +354,11 @@ const TypedForm = createForm<UserForm>();
 
 </CodeGroup>
 
-The generic provides autocomplete and type checking for the `errors` object, `setError`, `clearErrors`, and other slot props that reference form fields.
+Generic cung cấp autocomplete và type checking cho object `errors`, `setError`, `clearErrors` và slot prop khác tham chiếu form field.
 
 ### useFormContext
 
-The `useFormContext()` function also accepts a generic type parameter, providing type-safe access to the form context from child components.
+Function `useFormContext()` cũng nhận generic type parameter, cung cấp quyền truy cập form context type-safe từ child component.
 
 <CodeGroup>
 
@@ -387,7 +388,7 @@ const form = useFormContext<UserForm>();
 
 ## HTTP Helper
 
-The [`useHttp`](/v3/the-basics/http-requests) hook accepts two generic type parameters: the form data type and an optional default response type.
+Hook [`useHttp`](/v3/the-basics/http-requests) nhận hai generic type parameter: form data type và default response type tùy chọn.
 
 ```ts
 import { useHttp } from "@inertiajs/react";
@@ -407,7 +408,7 @@ const http = useHttp<UserForm, UserResponse>({ name: "", email: "" });
 
 ## Layout Callbacks
 
-The `LayoutCallback` type provides type safety for [layout callbacks](/v3/the-basics/layouts#callback-props). The callback receives the page's props (typed via your global `sharedPageProps` configuration) and should return a valid layout definition.
+Type `LayoutCallback` cung cấp type safety cho [layout callback](/v3/the-basics/layouts#callback-props). Callback nhận props của page (được khai báo type qua cấu hình `sharedPageProps` toàn cục) và nên trả về layout definition hợp lệ.
 
 <CodeGroup>
 
@@ -454,9 +455,9 @@ export default {
 
 </CodeGroup>
 
-## Remembering State
+## Ghi nhớ state
 
-The `useRemember` hook accepts a generic type parameter for type-safe local state persistence, providing autocomplete and ensuring values match the expected types.
+Hook `useRemember` nhận generic type parameter để lưu local state an toàn kiểu, cung cấp autocomplete và đảm bảo giá trị khớp với kiểu mong đợi.
 
 <CodeGroup>
 
@@ -506,9 +507,9 @@ export default function Users() {
 
 </CodeGroup>
 
-## Restoring State
+## Khôi phục state
 
-The `router.restore()` method accepts a generic for typing state restored from [history](/v3/data-props/remembering-state#manually-saving-state).
+Phương thức `router.restore()` nhận generic để khai báo type state được khôi phục từ [history](/v3/data-props/remembering-state#manually-saving-state).
 
 ```ts
 import { router } from "@inertiajs/react";
@@ -526,9 +527,9 @@ if (restored) {
 }
 ```
 
-## Router Requests
+## Router request
 
-Router methods accept a generic for typing request data, providing type checking for the data being sent.
+Các phương thức router nhận generic để khai báo kiểu cho request data, giúp type checking dữ liệu được gửi đi.
 
 ```ts
 import { router } from "@inertiajs/react";
@@ -544,9 +545,9 @@ router.post<CreateUserData>("/users", {
 });
 ```
 
-## Scoped Flash Data
+## Flash data theo scope
 
-The `router.flash()` method accepts a generic for typing page or section-specific flash data, separate from the global `flashDataType` configuration.
+Phương thức `router.flash()` nhận generic để khai báo kiểu cho flash data riêng theo trang hoặc section, tách biệt với cấu hình `flashDataType` toàn cục.
 
 ```ts
 import { router } from "@inertiajs/react";
@@ -554,9 +555,9 @@ import { router } from "@inertiajs/react";
 router.flash<{ paymentError: string }>({ paymentError: "Card declined" });
 ```
 
-## Client-Side Visits
+## Client-side visits
 
-The `router.push()` and `router.replace()` methods accept a generic for typing [client-side visit](/v3/the-basics/manual-visits#client-side-visits) props.
+Các phương thức `router.push()` và `router.replace()` nhận generic để khai báo type props của [client-side visit](/v3/the-basics/manual-visits#client-side-visits).
 
 ```ts
 import { router } from "@inertiajs/react";

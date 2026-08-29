@@ -1,20 +1,21 @@
 ---
-title: Error Handling
+title: Xử lý lỗi
+description: "Một lợi thế khi làm việc với server-side framework mạnh là bạn được hưởng sẵn cơ chế xử lý exception. Ví dụ, Laravel đi kèm công cụ báo lỗi trực quan, hiển…"
 ---
 
-## Development
+## Môi trường phát triển
 
-One of the advantages to working with a robust server-side framework is the built-in exception handling you get for free. For example, Laravel ships with a beautiful error reporting tool which displays a nicely formatted stack trace in local development.
+Một lợi thế khi làm việc với server-side framework mạnh là bạn được hưởng sẵn cơ chế xử lý exception. Ví dụ, Laravel đi kèm công cụ báo lỗi trực quan, hiển thị stack trace được định dạng rõ ràng trong môi trường phát triển local.
 
-The challenge is, if you're making an XHR request (which Inertia does) and you hit a server-side error, you're typically left digging through the network tab in your browser's devtools to diagnose the problem.
+Khó khăn nằm ở chỗ khi bạn thực hiện request XHR (như Inertia vẫn làm) và gặp lỗi phía máy chủ, thông thường bạn phải mở tab Network trong devtools của trình duyệt để lần tìm và chẩn đoán vấn đề.
 
-Inertia solves this issue by showing all non-Inertia responses in a modal. This means you get the same beautiful error-reporting you're accustomed to, even though you've made that request over XHR.
+Inertia giải quyết vấn đề này bằng cách hiển thị mọi response không phải Inertia trong một modal. Nhờ vậy, bạn vẫn có trải nghiệm báo lỗi trực quan quen thuộc dù request được thực hiện qua XHR.
 
-For applications using a [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) that restricts inline styles, you may pass a `nonce` to `createInertiaApp()` to permit the inline styles the error modal injects. See [Content Security Policy](/v3/installation/client-side-setup#content-security-policy) for details.
+Với ứng dụng dùng [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) hạn chế inline style, bạn có thể truyền `nonce` vào `createInertiaApp()` để cho phép inline style do error modal inject. Xem [Content Security Policy](/v3/installation/client-side-setup#content-security-policy) để biết chi tiết.
 
 ## Production
 
-In production you will want to return a proper Inertia error response instead of relying on the modal-driven error reporting that is present during development. To accomplish this, you may use the `Inertia::handleExceptionsUsing()` method in your application's service provider.
+Trong production, bạn nên trả proper Inertia error response thay vì dựa vào error reporting bằng modal vốn dùng trong development. Có thể thực hiện bằng phương thức `Inertia::handleExceptionsUsing()` trong service provider của ứng dụng.
 
 ```php
 // app/Providers/AppServiceProvider.php
@@ -33,21 +34,21 @@ public function boot(): void
 }
 ```
 
-Since exceptions like 404s occur outside of the Inertia middleware (the request never reaches your routes), the error response won't have access to shared data or the root view by default. Calling `withSharedData()` explicitly resolves the Inertia middleware and includes your shared props in the error page.
+Vì exception như 404 xảy ra bên ngoài Inertia middleware (request không bao giờ tới route), error response mặc định không truy cập được shared data hoặc root view. Gọi `withSharedData()` rõ ràng sẽ resolve Inertia middleware và đưa shared props vào error page.
 
-The `ExceptionResponse` instance provides the `exception`, `request`, and `response` as public readonly properties, along with the following methods:
+Instance `ExceptionResponse` cung cấp `exception`, `request` và `response` dưới dạng public readonly property, cùng các method sau:
 
-- `render($component, $props)` - Render an Inertia page component with the given props
-- `withSharedData()` - Include shared data from the Inertia middleware
-- `usingMiddleware($class)` - Specify which Inertia middleware to use for shared data and root view resolution
-- `rootView($view)` - Set a custom root view for the error response
-- `statusCode()` - Get the HTTP status code of the original response
+- `render($component, $props)` - Render Inertia page component với props được cung cấp
+- `withSharedData()` - Bao gồm shared data từ Inertia middleware
+- `usingMiddleware($class)` - Chỉ định Inertia middleware dùng để resolve shared data và root view
+- `rootView($view)` - Đặt custom root view cho error response
+- `statusCode()` - Lấy HTTP status code của response ban đầu
 
-The Inertia middleware is auto-resolved from the matched route or the kernel's middleware groups, so `withSharedData()` typically works without specifying a middleware class. Returning `null` from the callback falls through to Laravel's default exception rendering.
+Inertia middleware được tự động resolve từ matched route hoặc middleware group của kernel, nên `withSharedData()` thường hoạt động mà không cần chỉ định middleware class. Trả `null` từ callback sẽ fallback về cách render exception mặc định của Laravel.
 
-### Error Page Example
+### Ví dụ trang lỗi
 
-You'll need to create the error page components referenced above. Here's an example you may use as a starting point.
+Bạn cần tạo các error page component được tham chiếu ở trên. Dưới đây là ví dụ có thể dùng làm điểm bắt đầu.
 
 <CodeGroup>
 
@@ -136,9 +137,9 @@ export default function ErrorPage({ status }) {
 
 </CodeGroup>
 
-### Manual Exception Handling
+### Xử lý exception thủ công
 
-Under the hood, `handleExceptionsUsing()` registers a `$exceptions->respond()` callback in your application's `bootstrap/app.php` file. You may register this callback manually if you prefer.
+Bên dưới, `handleExceptionsUsing()` đăng ký callback `$exceptions->respond()` trong file `bootstrap/app.php` của ứng dụng. Bạn có thể đăng ký callback này thủ công nếu muốn.
 
 ```php
 use Illuminate\Http\Request;

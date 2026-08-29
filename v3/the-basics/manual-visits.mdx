@@ -1,8 +1,9 @@
 ---
-title: Manual Visits
+title: Truy cập thủ công
+description: "Ngoài tạo link, bạn cũng có thể chủ động thực hiện Inertia visit hoặc request bằng JavaScript. Việc này được thực hiện qua phương thức router.visit()."
 ---
 
-In addition to [creating links](/v3/the-basics/links), it's also possible to manually make Inertia visits or requests programmatically via JavaScript. This is accomplished via the `router.visit()` method.
+Ngoài [tạo link](/v3/the-basics/links), bạn cũng có thể chủ động thực hiện Inertia visit hoặc request bằng JavaScript. Việc này được thực hiện qua phương thức `router.visit()`.
 
 <CodeGroup>
 
@@ -128,7 +129,7 @@ router.visit(url, {
 
 </CodeGroup>
 
-However, it's generally more convenient to use one of Inertia's shortcut request methods. These methods share all the same options as `router.visit()`.
+Tuy nhiên, nhìn chung sẽ thuận tiện hơn khi sử dụng một trong các phương thức request rút gọn của Inertia. Những phương thức này hỗ trợ đầy đủ các tùy chọn giống `router.visit()`.
 
 <CodeGroup>
 
@@ -167,11 +168,11 @@ router.reload(options); // Uses the current URL
 
 </CodeGroup>
 
-The `reload()` method is a convenient, shorthand method that automatically visits the current page with `preserveState` and `preserveScroll` both set to `true`, making it the perfect method to invoke when you just want to reload the current page's data.
+Phương thức `reload()` là cách viết tắt tiện lợi, tự động truy cập lại trang hiện tại với cả `preserveState` và `preserveScroll` đều được đặt thành `true`, vì vậy rất phù hợp khi bạn chỉ muốn tải lại dữ liệu của trang hiện tại.
 
-## Method
+## Phương thức
 
-When making manual visits, you may use the `method` option to set the request's HTTP method to `get`, `post`, `put`, `patch` or `delete`. The default method is `get`.
+Khi thực hiện truy cập thủ công, bạn có thể dùng tùy chọn `method` để đặt HTTP method của request thành `get`, `post`, `put`, `patch` hoặc `delete`. Method mặc định là `get`.
 
 <CodeGroup>
 
@@ -195,11 +196,11 @@ router.visit(url, { method: "post" });
 
 </CodeGroup>
 
-Uploading files via `put` or `patch` is not supported in Laravel. Instead, make the request via `post`, including a `_method` field set to `put` or `patch`. This is called [form method spoofing](https://laravel.com/docs/routing#form-method-spoofing).
+Laravel không hỗ trợ tải file qua `put` hoặc `patch`. Thay vào đó, hãy gửi request bằng `post`, kèm field `_method` đặt thành `put` hoặc `patch`. Kỹ thuật này gọi là [form method spoofing](https://laravel.com/docs/routing#form-method-spoofing).
 
 ## Wayfinder
 
-When using [Wayfinder](https://github.com/laravel/wayfinder), you can pass the resulting object directly to any router method. The router will infer the HTTP method and URL from the Wayfinder object.
+Khi sử dụng [Wayfinder](https://github.com/laravel/wayfinder), bạn có thể truyền object kết quả trực tiếp vào bất kỳ phương thức router nào. Router sẽ tự suy ra HTTP method và URL từ object Wayfinder.
 
 <CodeGroup>
 
@@ -232,7 +233,7 @@ router.delete(destroy(1));
 
 </CodeGroup>
 
-If you provide both a Wayfinder object and specify the `method` option, the `method` option will take precedence.
+Nếu bạn vừa truyền Wayfinder object vừa chỉ định tùy chọn `method`, tùy chọn `method` sẽ được ưu tiên.
 
 <CodeGroup>
 
@@ -259,9 +260,9 @@ router.visit(update(1), { method: "patch" });
 
 </CodeGroup>
 
-## Data
+## Dữ liệu
 
-You may use the `data` option to add data to the request.
+Bạn có thể dùng tùy chọn `data` để thêm dữ liệu vào request.
 
 <CodeGroup>
 
@@ -303,7 +304,7 @@ router.visit("/users", {
 
 </CodeGroup>
 
-For convenience, the `get()`, `post()`, `put()`, and `patch()` methods all accept `data` as their second argument.
+Để thuận tiện, các phương thức `get()`, `post()`, `put()` và `patch()` đều nhận `data` làm đối số thứ hai.
 
 <CodeGroup>
 
@@ -336,9 +337,9 @@ router.post("/users", {
 
 </CodeGroup>
 
-## Custom Headers
+## Header tùy chỉnh
 
-The `headers` option allows you to add custom headers to a request.
+Tùy chọn `headers` cho phép bạn thêm header tùy chỉnh vào request.
 
 <CodeGroup>
 
@@ -374,11 +375,11 @@ router.post("/users", data, {
 
 </CodeGroup>
 
-The headers Inertia uses internally to communicate its state to the server take priority and therefore cannot be overwritten.
+Các header mà Inertia sử dụng nội bộ để truyền trạng thái của nó tới máy chủ có độ ưu tiên cao hơn và vì vậy không thể bị ghi đè.
 
-## Global Visit Options
+## Tùy chọn visit toàn cục
 
-You may configure a `visitOptions` callback when [initializing your Inertia app](/v3/installation/client-side-setup#configuring-defaults) to modify visit options globally for every request. The callback receives the target URL and the current visit options, and should return an object with any options you want to override.
+Bạn có thể cấu hình callback `visitOptions` khi [khởi tạo ứng dụng Inertia](/v3/installation/client-side-setup#configuring-defaults) để thay đổi visit option trên toàn cục cho mọi request. Callback nhận target URL và các visit option hiện tại, rồi nên trả object chứa những option cần override.
 
 <CodeGroup>
 
@@ -440,9 +441,9 @@ createInertiaApp({
 
 </CodeGroup>
 
-## File Uploads
+## Tải file lên
 
-When making visits / requests that include files, Inertia will automatically convert the request data into a `FormData` object. If you would like the request to always use a `FormData` object, you may use the `forceFormData` option.
+Khi thực hiện lần truy cập / request có chứa file, Inertia sẽ tự động chuyển dữ liệu request thành object `FormData`. Nếu muốn request luôn dùng object `FormData`, bạn có thể sử dụng tùy chọn `forceFormData`.
 
 <CodeGroup>
 
@@ -472,11 +473,11 @@ router.post("/companies", data, {
 
 </CodeGroup>
 
-For more information on uploading files, check out the dedicated [file uploads](/v3/the-basics/file-uploads) documentation.
+Để biết thêm về upload file, hãy xem tài liệu riêng về [file uploads](/v3/the-basics/file-uploads).
 
-## Browser History
+## Lịch sử trình duyệt
 
-When making visits, Inertia automatically adds a new entry into the browser history. However, it's also possible to replace the current history entry by setting the `replace` option to `true`.
+Khi thực hiện các lần truy cập, Inertia tự động thêm một entry mới vào lịch sử trình duyệt. Tuy nhiên, bạn cũng có thể thay thế entry lịch sử hiện tại bằng cách đặt tùy chọn `replace` thành `true`.
 
 <CodeGroup>
 
@@ -500,11 +501,11 @@ router.get("/users", { search: "John" }, { replace: true });
 
 </CodeGroup>
 
-Visits made to the same URL automatically set `replace` to `true`.
+Các lần truy cập đến cùng một URL sẽ tự động đặt `replace` thành `true`.
 
-## Client-Side Visits
+## Client-side visits
 
-You can use the `router.push` and `router.replace` methods to make client-side visits. These methods are useful when you want to update the browser's history without making a server request.
+Bạn có thể dùng `router.push` và `router.replace` để thực hiện client-side visit. Các phương thức này hữu ích khi muốn cập nhật history của trình duyệt mà không gửi request tới server.
 
 <CodeGroup>
 
@@ -564,9 +565,9 @@ router.push({
 
 </CodeGroup>
 
-All of the parameters are optional. By default, all passed parameters (except `errorBag`) will be merged with the current page. This means you are responsible for overriding the current page's URL, component, and props.
+Tất cả tham số đều tùy chọn. Mặc định, mọi tham số được truyền vào (trừ `errorBag`) sẽ được merge với page hiện tại. Điều này có nghĩa bạn chịu trách nhiệm override URL, component và props của page hiện tại.
 
-If you need access to the current page's props, you may pass a function to the `props` option. This function receives the current props (including any [once props](/v3/data-props/once-props)) and should return the new props.
+Nếu cần truy cập props của page hiện tại, bạn có thể truyền function vào tùy chọn `props`. Function nhận props hiện tại (bao gồm mọi [once props](/v3/data-props/once-props)) và nên trả về props mới.
 
 <CodeGroup>
 
@@ -602,7 +603,7 @@ router.replace({
 
 </CodeGroup>
 
-The function also receives [once props](/v3/data-props/once-props) as a second argument. This is useful when you want to replace all regular props while still preserving once props.
+Function cũng nhận [once props](/v3/data-props/once-props) làm đối số thứ hai. Điều này hữu ích khi muốn thay toàn bộ regular props nhưng vẫn giữ once props.
 
 <CodeGroup>
 
@@ -632,21 +633,21 @@ router.replace({
 
 </CodeGroup>
 
-The `errorBag` option allows you to specify which error bag to use when handling validation errors in the `onError` callback.
+Tùy chọn `errorBag` cho phép chỉ định error bag dùng khi xử lý lỗi validation trong callback `onError`.
 
-Make sure that any route you push on the client side is also defined on the server side. If the user refreshes the page, the server will need to know how to render the page.
+Hãy đảm bảo mọi route bạn push ở phía client cũng được định nghĩa ở phía máy chủ. Nếu người dùng refresh trang, máy chủ cần biết cách render trang đó.
 
 <Warning>
-  Some browsers limit the number of `history.pushState()` and
-  `history.replaceState()` calls allowed within a short time period. Inertia
-  catches this error and logs it to the console, but the state update will be
-  lost. Avoid calling `router.push()` or `router.replace()` too frequently, and
-  consider debouncing or batching updates in high-frequency scenarios.
+  Một số trình duyệt giới hạn số lần gọi `history.pushState()` và
+  `history.replaceState()` trong khoảng thời gian ngắn. Inertia
+  bắt lỗi này và ghi ra console, nhưng state update sẽ bị
+  mất. Tránh gọi `router.push()` hoặc `router.replace()` quá thường xuyên và
+  cân nhắc debounce hoặc batch update trong các trường hợp tần suất cao.
 </Warning>
 
-### Prop Helpers
+### Prop helper
 
-Inertia provides three helper methods for updating page props without making server requests. These methods are shortcuts to `router.replace()` and automatically set `preserveScroll` and `preserveState` to `true`.
+Inertia cung cấp ba phương thức helper để cập nhật page props mà không gửi request đến máy chủ. Đây là các cách viết tắt của `router.replace()` và tự động đặt `preserveScroll` cùng `preserveState` thành `true`.
 
 <CodeGroup>
 
@@ -691,7 +692,7 @@ router.prependToProp("tags", "urgent");
 
 </CodeGroup>
 
-All three methods support dot notation for nested props and can accept a callback function that receives the current value as the first argument and the current page props as the second argument.
+Cả ba phương thức đều hỗ trợ dot notation cho prop lồng nhau và có thể nhận callback function, trong đó đối số đầu tiên là giá trị hiện tại và đối số thứ hai là props của trang hiện tại.
 
 <CodeGroup>
 
@@ -730,15 +731,15 @@ router.prependToProp('notifications', (current, props) => {
 
 </CodeGroup>
 
-## State Preservation
+## Giữ lại state
 
-By default, page visits to the same page create a fresh page component instance. This causes any local state, such as form inputs, scroll positions, and focus states to be lost.
+Mặc định, các lần truy cập lại cùng một trang sẽ tạo một instance page component mới. Điều này khiến các state cục bộ như input của form, vị trí cuộn và trạng thái focus bị mất.
 
-However, in some situations, it's necessary to preserve the page component state. For example, when submitting a form, you need to preserve your form data in the event that form validation fails on the server.
+Tuy nhiên, trong một số tình huống, cần giữ lại state của page component. Ví dụ, khi submit form, bạn cần giữ dữ liệu form nếu validation form thất bại ở phía máy chủ.
 
-For this reason, the `post`, `put`, `patch`, `delete`, and `reload` methods all set the `preserveState` option to `true` by default.
+Vì lý do này, các phương thức `post`, `put`, `patch`, `delete` và `reload` đều đặt tùy chọn `preserveState` thành `true` theo mặc định.
 
-You can instruct Inertia to preserve the component's state when using the `get` method by setting the `preserveState` option to `true`.
+Bạn có thể yêu cầu Inertia giữ state của component khi sử dụng phương thức `get` bằng cách đặt tùy chọn `preserveState` thành `true`.
 
 <CodeGroup>
 
@@ -762,7 +763,7 @@ router.get("/users", { search: "John" }, { preserveState: true });
 
 </CodeGroup>
 
-If you'd like to only preserve state if the response includes validation errors, set the `preserveState` option to "errors".
+Nếu chỉ muốn giữ state khi response có chứa lỗi validation, hãy đặt tùy chọn `preserveState` thành "errors".
 
 <CodeGroup>
 
@@ -786,7 +787,7 @@ router.get("/users", { search: "John" }, { preserveState: "errors" });
 
 </CodeGroup>
 
-You can also lazily evaluate the `preserveState` option based on the response by providing a callback.
+Bạn cũng có thể đánh giá trì hoãn tùy chọn `preserveState` dựa trên response bằng cách cung cấp một callback.
 
 <CodeGroup>
 
@@ -816,11 +817,11 @@ router.post("/users", data, {
 
 </CodeGroup>
 
-## Scroll Preservation
+## Giữ vị trí cuộn
 
-When navigating between pages, Inertia mimics default browser behavior by automatically resetting the scroll position of the document body (as well as any [scroll regions](/v3/advanced/scroll-management#scroll-regions) you've defined) back to the top of the page.
+Khi điều hướng giữa các page, Inertia mô phỏng hành vi mặc định của trình duyệt bằng cách tự động reset vị trí cuộn của document body (cũng như các [scroll region](/v3/advanced/scroll-management#scroll-regions) đã định nghĩa) về đầu trang.
 
-You can disable this behavior by setting the `preserveScroll` option to `true`.
+Bạn có thể tắt hành vi này bằng cách đặt tùy chọn `preserveScroll` thành `true`.
 
 <CodeGroup>
 
@@ -844,7 +845,7 @@ router.visit(url, { preserveScroll: true });
 
 </CodeGroup>
 
-If you'd like to only preserve the scroll position if the response includes validation errors, set the `preserveScroll` option to "errors".
+Nếu chỉ muốn giữ vị trí cuộn khi response có lỗi validation, hãy đặt tùy chọn `preserveScroll` thành "errors".
 
 <CodeGroup>
 
@@ -868,7 +869,7 @@ router.visit(url, { preserveScroll: "errors" });
 
 </CodeGroup>
 
-You can also lazily evaluate the `preserveScroll` option based on the response by providing a callback.
+Bạn cũng có thể đánh giá trì hoãn tùy chọn `preserveScroll` dựa trên response bằng cách cung cấp một callback.
 
 <CodeGroup>
 
@@ -898,11 +899,11 @@ router.post("/users", data, {
 
 </CodeGroup>
 
-For more information regarding this feature, please consult the [scroll management](/v3/advanced/scroll-management) documentation.
+Để biết thêm về tính năng này, xem tài liệu [scroll management](/v3/advanced/scroll-management).
 
-## Partial Reloads
+## Tải lại một phần
 
-The `only` option allows you to request a subset of the props (data) from the server on subsequent visits to the same page, thus making your application more efficient since it does not need to retrieve data that the page is not interested in refreshing.
+Tùy chọn `only` cho phép bạn chỉ yêu cầu một tập con props (dữ liệu) từ máy chủ trong các lần truy cập tiếp theo đến cùng một trang, qua đó giúp ứng dụng hiệu quả hơn vì không cần truy xuất dữ liệu mà trang không có nhu cầu làm mới.
 
 <CodeGroup>
 
@@ -926,11 +927,11 @@ router.get("/users", { search: "John" }, { only: ["users"] });
 
 </CodeGroup>
 
-For more information on this feature, please consult the [partial reloads](/v3/data-props/partial-reloads) documentation.
+Để biết thêm về tính năng này, xem tài liệu [partial reloads](/v3/data-props/partial-reloads).
 
-## View Transitions
+## View Transition
 
-You may enable [View transitions](/v3/the-basics/view-transitions) for a visit by setting the `viewTransition` option to `true`. This will use the browser's View Transitions API to animate the page transition.
+Bạn có thể bật [View transitions](/v3/the-basics/view-transitions) cho một visit bằng cách đặt tùy chọn `viewTransition` thành `true`. Cơ chế này dùng View Transitions API của trình duyệt để animate quá trình chuyển trang.
 
 <CodeGroup>
 
@@ -954,9 +955,9 @@ router.visit("/another-page", { viewTransition: true });
 
 </CodeGroup>
 
-## Visit Cancellation
+## Hủy lần truy cập
 
-You may cancel all in-flight visits using the `router.cancelAll()` method. By default, this cancels all synchronous, asynchronous, and prefetch requests.
+Bạn có thể hủy toàn bộ visit đang chạy bằng phương thức `router.cancelAll()`. Mặc định, thao tác này hủy mọi request đồng bộ, bất đồng bộ và prefetch.
 
 <CodeGroup>
 
@@ -983,7 +984,7 @@ router.cancelAll();
 
 </CodeGroup>
 
-You may selectively cancel specific request types by passing an options object.
+Bạn có thể hủy chọn lọc từng loại request bằng cách truyền options object.
 
 ```js
 // Cancel only async requests (leaving sync and prefetch active)...
@@ -996,9 +997,9 @@ router.cancelAll({ async: false, prefetch: false });
 router.cancelAll({ prefetch: false });
 ```
 
-### Cancel Tokens
+### Cancel token
 
-For more granular control, you may cancel individual visits using a cancel token. Inertia automatically generates a cancel token and provides it via the `onCancelToken()` callback prior to making the visit.
+Để kiểm soát chi tiết hơn, bạn có thể hủy từng visit bằng cancel token. Inertia tự động tạo cancel token và cung cấp nó qua callback `onCancelToken()` trước khi thực hiện visit.
 
 <CodeGroup>
 
@@ -1037,11 +1038,11 @@ this.cancelToken.cancel();
 
 </CodeGroup>
 
-The `onCancel()` and `onFinish()` event callbacks will be executed when a visit is canceled.
+Các event callback `onCancel()` và `onFinish()` sẽ được thực thi khi visit bị hủy.
 
-## Event Callbacks
+## Callback sự kiện
 
-In addition to Inertia's [global events](/v3/advanced/events), Inertia also provides a number of per-visit event callbacks.
+Ngoài [global events](/v3/advanced/events) của Inertia, Inertia còn cung cấp nhiều event callback theo từng visit.
 
 <CodeGroup>
 
@@ -1101,7 +1102,7 @@ router.post("/users", data, {
 
 </CodeGroup>
 
-Returning `false` from the `onBefore()` callback will cause the visit to be canceled. Returning `false` from `onHttpException()` or `onNetworkError()` will prevent the corresponding [global event](/v3/advanced/events) from being fired and its default behavior.
+Trả `false` từ callback `onBefore()` sẽ hủy visit. Trả `false` từ `onHttpException()` hoặc `onNetworkError()` sẽ ngăn [global event](/v3/advanced/events) tương ứng được phát và ngăn hành vi mặc định của nó.
 
 <CodeGroup>
 
@@ -1131,7 +1132,7 @@ router.delete(`/users/${user.id}`, {
 
 </CodeGroup>
 
-It's also possible to return a promise from the `onSuccess()` and `onError()` callbacks. When doing so, the "finish" event will be delayed until the promise has resolved.
+Bạn cũng có thể trả về promise từ các callback `onSuccess()` và `onError()`. Khi làm vậy, sự kiện "finish" sẽ được trì hoãn cho đến khi promise được resolve.
 
 <CodeGroup>
 

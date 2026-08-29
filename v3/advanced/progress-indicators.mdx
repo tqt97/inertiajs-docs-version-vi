@@ -1,14 +1,15 @@
 ---
-title: Progress Indicators
+title: Chỉ báo tiến trình
+description: "Vì request Inertia được thực hiện qua XHR, trình duyệt thường không hiển thị chỉ báo tải khi điều hướng từ trang này sang trang khác. Để giải quyết, Inertia…"
 ---
 
-Since Inertia requests are made via XHR, there would typically not be a browser loading indicator when navigating from one page to another. To solve this, Inertia displays a progress indicator at the top of the page whenever you make an Inertia visit. However, [asynchronous requests](#visit-options) do not show the progress indicator unless explicitly configured.
+Vì request Inertia được thực hiện qua XHR, trình duyệt thường không hiển thị chỉ báo tải khi điều hướng từ trang này sang trang khác. Để giải quyết, Inertia hiển thị progress indicator ở đầu trang mỗi khi bạn thực hiện một Inertia visit. Tuy nhiên, [asynchronous request](#visit-options) không hiển thị progress indicator trừ khi được cấu hình rõ ràng.
 
-Of course, if you prefer, you can disable Inertia's default loading indicator and provide your own custom implementation. We'll discuss both approaches below.
+Tất nhiên, nếu muốn, bạn có thể tắt loading indicator mặc định của Inertia và tự triển khai. Chúng ta sẽ trình bày cả hai cách bên dưới.
 
-## Default
+## Mặc định
 
-Inertia's default progress indicator is a light-weight wrapper around the [NProgress](https://ricostacruz.com/nprogress/) library. You can customize it via the `progress` property of the `createInertiaApp()` function.
+Progress indicator mặc định của Inertia là một lớp bọc nhẹ quanh thư viện [NProgress](https://ricostacruz.com/nprogress/). Bạn có thể tùy chỉnh thông qua property `progress` của hàm `createInertiaApp()`.
 
 ```js
 createInertiaApp({
@@ -26,9 +27,9 @@ createInertiaApp({
 });
 ```
 
-For applications using a [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) that restricts inline styles, you may pass a `nonce` to `createInertiaApp()` to permit the styles Inertia injects for the progress bar. See [Content Security Policy](/v3/installation/client-side-setup#content-security-policy) for details.
+Với ứng dụng dùng [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) hạn chế inline style, bạn có thể truyền `nonce` vào `createInertiaApp()` để cho phép style Inertia inject cho progress bar. Xem [Content Security Policy](/v3/installation/client-side-setup#content-security-policy) để biết chi tiết.
 
-You may disable Inertia's default loading indicator by setting the `progress` property to `false`.
+Bạn có thể tắt loading indicator mặc định của Inertia bằng cách đặt property `progress` thành `false`.
 
 ```js
 createInertiaApp({
@@ -37,9 +38,9 @@ createInertiaApp({
 });
 ```
 
-## Programmatic Access
+## Truy cập bằng code
 
-When you need to control the progress indicator outside of Inertia requests, for example, when making requests with Axios or other libraries, you can use Inertia's progress methods directly.
+Khi cần kiểm soát progress indicator bên ngoài request Inertia, ví dụ khi gửi request bằng Axios hoặc thư viện khác, bạn có thể dùng trực tiếp các phương thức progress của Inertia.
 
 <CodeGroup>
 
@@ -90,9 +91,9 @@ progress.getStatus(); // Returns current percentage or null
 
 </CodeGroup>
 
-The `hide()` and `reveal()` methods work together to prevent conflicts when separate parts of your code need to control progress visibility. Each `hide()` call increments an internal counter, while `reveal()` decrements it. The progress bar only appears when this counter reaches zero.
+Các phương thức `hide()` và `reveal()` phối hợp để tránh xung đột khi nhiều phần code cùng cần kiểm soát khả năng hiển thị progress. Mỗi lần gọi `hide()` sẽ tăng một bộ đếm nội bộ, còn `reveal()` giảm bộ đếm đó. Progress bar chỉ xuất hiện khi bộ đếm trở về 0.
 
-However, `reveal()` accepts an optional `force` parameter that bypasses this counter. Inertia uses this pattern internally to hide progress during prefetching while ensuring it appears for actual navigation.
+Tuy nhiên, `reveal()` nhận tham số tùy chọn `force` để bỏ qua bộ đếm này. Inertia dùng chính cơ chế đó ở bên trong để ẩn progress khi prefetch nhưng vẫn đảm bảo progress xuất hiện khi điều hướng thực tế.
 
 ```js
 progress.hide(); // Counter = 1, bar hidden
@@ -104,13 +105,13 @@ progress.reveal(); // Counter = 0, bar now visible
 progress.reveal(true);
 ```
 
-If you've disabled the progress indicator with `progress: false` in `createInertiaApp()`, these programmatic methods will not work.
+Nếu bạn đã tắt progress indicator bằng `progress: false` trong `createInertiaApp()`, các phương thức lập trình này sẽ không hoạt động.
 
-## Custom
+## Tùy chỉnh
 
-It's also possible to set up your own custom page loading indicators using Inertia [events](/v3/advanced/events). Let's explore how to do this using the [NProgress](https://ricostacruz.com/nprogress/) library as an example.
+Bạn cũng có thể tự tạo page loading indicator tùy chỉnh bằng [events](/v3/advanced/events) của Inertia. Hãy xem cách làm với thư viện [NProgress](https://ricostacruz.com/nprogress/) làm ví dụ.
 
-First, disable Inertia's default loading indicator.
+Trước tiên, hãy tắt loading indicator mặc định của Inertia.
 
 ```js
 createInertiaApp({
@@ -119,13 +120,13 @@ createInertiaApp({
 });
 ```
 
-Next, install the NProgress library.
+Tiếp theo, cài thư viện NProgress.
 
 ```bash
 npm install nprogress
 ```
 
-After installation, you'll need to add the NProgress [styles](https://github.com/rstacruz/nprogress/blob/master/nprogress.css) to your project. You can do this using a CDN hosted copy of the styles.
+Sau khi cài đặt, bạn cần thêm [style](https://github.com/rstacruz/nprogress/blob/master/nprogress.css) của NProgress vào dự án. Bạn có thể dùng bản style được host trên CDN.
 
 ```html
 <link
@@ -134,7 +135,7 @@ After installation, you'll need to add the NProgress [styles](https://github.com
 />
 ```
 
-Then, import both `NProgress` and the Inertia `router` into your application.
+Sau đó, import cả `NProgress` và `router` của Inertia vào ứng dụng.
 
 <CodeGroup>
 
@@ -155,25 +156,25 @@ import { router } from "@inertiajs/svelte";
 
 </CodeGroup>
 
-Next, add a `start` event listener. We'll use this listener to show the progress bar when a new Inertia visit begins.
+Tiếp theo, thêm event listener `start`. Listener này sẽ hiển thị progress bar khi một Inertia visit mới bắt đầu.
 
 ```js
 router.on("start", () => NProgress.start());
 ```
 
-Finally, add a `finish` event listener to hide the progress bar when the page visit finishes.
+Cuối cùng, thêm event listener `finish` để ẩn progress bar khi page visit kết thúc.
 
 ```js
 router.on("finish", () => NProgress.done());
 ```
 
-That's it! Now, as you navigate from one page to another, the progress bar will be added and removed from the page.
+Vậy là xong. Giờ khi điều hướng giữa các trang, progress bar sẽ tự động được thêm vào và loại bỏ khỏi trang.
 
-### Handling Canceled Visits
+### Xử lý visit bị hủy
 
-While this custom progress implementation works great for page visits that finish properly, it would be nice to handle canceled visits as well. First, for interrupted visits (those that get canceled as a result of a new visit), the progress bar should simply be reset back to the start position. Second, for manually canceled visits, the progress bar should be immediately removed from the page.
+Custom progress này hoạt động tốt với page visit hoàn tất bình thường, nhưng cũng nên xử lý visit bị hủy. Với interrupted visit do visit mới hủy visit cũ, progress bar nên reset về vị trí bắt đầu. Với visit bị hủy thủ công, progress bar nên bị loại khỏi page ngay.
 
-We can accomplish this by inspecting the `event.detail.visit` object that's provided to the finish event.
+Chúng ta có thể thực hiện bằng cách kiểm tra object `event.detail.visit` được cung cấp cho sự kiện finish.
 
 ```js
 router.on("finish", (event) => {
@@ -188,9 +189,9 @@ router.on("finish", (event) => {
 });
 ```
 
-### File Upload Progress
+### Tiến trình tải file
 
-Let's take this a step further. When files are being uploaded, it would be great to update the loading indicator to reflect the upload progress. This can be done using the `progress` event.
+Hãy tiến thêm một bước. Khi file đang được tải lên, sẽ rất hữu ích nếu loading indicator phản ánh đúng tiến trình upload. Bạn có thể làm việc này bằng sự kiện `progress`.
 
 ```js
 router.on("progress", (event) => {
@@ -200,19 +201,19 @@ router.on("progress", (event) => {
 });
 ```
 
-Now, instead of the progress bar "trickling" while the files are being uploaded, it will actually update its position based on the progress of the request. We limit the progress here to 90%, since we still need to wait for a response from the server.
+Giờ đây thay vì progress bar chỉ "trickling" trong lúc upload file, vị trí thực tế sẽ cập nhật theo tiến trình request. Ở đây giới hạn progress ở 90% vì vẫn phải chờ response từ server.
 
-### Loading Indicator Delay
+### Trì hoãn loading indicator
 
-The last thing we're going to implement is a loading indicator delay. It's often preferable to delay showing the loading indicator until a request has taken longer than 250-500 milliseconds. This prevents the loading indicator from appearing constantly on quick page visits, which can be visually distracting.
+Phần cuối cùng chúng ta sẽ triển khai là độ trễ trước khi hiển thị loading indicator. Thông thường nên trì hoãn việc hiển thị cho đến khi request kéo dài hơn 250–500 mili giây. Điều này tránh loading indicator xuất hiện liên tục ở các page visit rất nhanh, vốn có thể gây rối mắt.
 
-To implement the delay behavior, we'll use the `setTimeout` and `clearTimeout` functions. Let's start by defining a variable to keep track of the timeout.
+Để triển khai độ trễ, chúng ta sẽ dùng các hàm `setTimeout` và `clearTimeout`. Trước tiên, hãy định nghĩa một biến để theo dõi timeout.
 
 ```js
 let timeout = null;
 ```
 
-Next, let's update the `start` event listener to start a new timeout that will show the progress bar after 250 milliseconds.
+Tiếp theo, cập nhật listener `start` để tạo timeout mới, hiển thị progress bar sau 250 mili giây.
 
 ```js
 router.on("start", () => {
@@ -220,7 +221,7 @@ router.on("start", () => {
 });
 ```
 
-Next, we'll update the `finish` event listener to clear any existing timeouts in the event that the page visit finishes before the timeout does.
+Sau đó, cập nhật listener `finish` để xóa mọi timeout còn tồn tại nếu page visit hoàn tất trước khi timeout kết thúc.
 
 ```js
 router.on("finish", (event) => {
@@ -229,7 +230,7 @@ router.on("finish", (event) => {
 });
 ```
 
-In the `finish` event listener, we need to determine if the progress bar has actually started displaying progress, otherwise we'll inadvertently cause it to show before the timeout has finished.
+Trong listener `finish`, chúng ta cần xác định progress bar đã thực sự bắt đầu hiển thị tiến trình hay chưa; nếu không, vô tình chúng ta sẽ khiến nó xuất hiện trước khi timeout kết thúc.
 
 ```js
 router.on("finish", (event) => {
@@ -242,7 +243,7 @@ router.on("finish", (event) => {
 });
 ```
 
-And, finally, we need to do the same check in the `progress` event listener.
+Cuối cùng, chúng ta cũng cần thực hiện cùng phép kiểm tra đó trong listener `progress`.
 
 ```js
 router.on("progress", (event) => {
@@ -253,11 +254,11 @@ router.on("progress", (event) => {
 });
 ```
 
-That's it, you now have a beautiful custom page loading indicator!
+Vậy là bạn đã có một loading indicator tùy chỉnh đẹp mắt cho trang.
 
-### Complete Example
+### Ví dụ hoàn chỉnh
 
-For convenience, here is the full source code of the final version of our custom loading indicator.
+Để tiện tham khảo, dưới đây là toàn bộ source code của phiên bản cuối cùng cho loading indicator tùy chỉnh.
 
 <CodeGroup>
 
@@ -365,13 +366,13 @@ router.on("finish", (event) => {
 
 </CodeGroup>
 
-## Visit Options
+## Tùy chọn visit
 
-In addition to these configurations, Inertia provides two visit options to control the loading indicator on a per-request basis: `showProgress` and `async`. These options offer greater control over how Inertia handles asynchronous requests and manages progress indicators.
+Ngoài các cấu hình này, Inertia cung cấp hai visit option để kiểm soát loading indicator theo từng request: `showProgress` và `async`. Chúng cho phép kiểm soát tốt hơn cách Inertia xử lý asynchronous request và progress indicator.
 
 ### Show Progress
 
-The `showProgress` option provides fine-grained control over the visibility of the loading indicator during requests.
+Tùy chọn `showProgress` cho phép kiểm soát chi tiết khả năng hiển thị loading indicator trong khi request đang chạy.
 
 ```js
 router.get("/settings", {}, { showProgress: false });
@@ -379,7 +380,7 @@ router.get("/settings", {}, { showProgress: false });
 
 ### Async
 
-The `async` option allows you to perform asynchronous requests without displaying the default progress indicator. It can be used in combination with the `showProgress` option.
+Tùy chọn `async` cho phép thực hiện asynchronous request mà không hiển thị progress indicator mặc định. Có thể dùng kết hợp với tùy chọn `showProgress`.
 
 ```js
 // Disable the progress indicator

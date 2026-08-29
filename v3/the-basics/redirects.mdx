@@ -1,10 +1,11 @@
 ---
-title: Redirects
+title: Redirect
+description: "Khi thực hiện request Inertia không phải GET theo cách thủ công hoặc thông qua phần tử , bạn cần đảm bảo luôn phản hồi bằng một response redirect Inertia hợp…"
 ---
 
-When making a non-GET Inertia request manually or via a `<Link>` element, you should ensure that you always respond with a proper Inertia redirect response.
+Khi thực hiện request Inertia không phải `GET` theo cách thủ công hoặc thông qua phần tử `<Link>`, bạn cần đảm bảo luôn phản hồi bằng một response redirect Inertia hợp lệ.
 
-For example, if your controller is creating a new user, your "store" endpoint should return a redirect back to a standard `GET` endpoint, such as your user "index" page. Inertia will automatically follow this redirect and update the page accordingly.
+Ví dụ, nếu controller đang tạo người dùng mới, endpoint "store" nên trả về redirect về một endpoint `GET` thông thường, chẳng hạn trang "index" người dùng. Inertia sẽ tự động đi theo redirect này và cập nhật trang tương ứng.
 
 ```php
 class UsersController extends Controller
@@ -30,15 +31,15 @@ class UsersController extends Controller
 }
 ```
 
-## 303 Response Code
+## Mã response 303
 
-When redirecting after a `PUT`, `PATCH`, or `DELETE` request, you must use a `303` response code, otherwise the subsequent request will not be treated as a `GET` request. A `303` redirect is very similar to a `302` redirect; however, the follow-up request is explicitly changed to a `GET` request.
+Khi redirect sau request `PUT`, `PATCH` hoặc `DELETE`, bạn phải dùng response code `303`, nếu không request tiếp theo sẽ không được xử lý như `GET`. Redirect `303` rất giống `302`; tuy nhiên follow-up request được chuyển rõ ràng thành `GET`.
 
-If you're using one of our official server-side adapters, all redirects will automatically be converted to `303` redirects.
+Nếu đang dùng một trong các adapter phía máy chủ chính thức của Inertia, mọi redirect sẽ tự động được chuyển thành redirect `303`.
 
-## Preserving Fragments
+## Giữ fragment
 
-Sometimes a user may visit a URL with a fragment, such as `/article/old-slug#section`, and the server needs to redirect to a different URL. The fragment from the original request is normally lost during the redirect.
+Đôi khi người dùng truy cập URL có fragment, chẳng hạn `/article/old-slug#section`, và server cần redirect sang URL khác. Fragment của request ban đầu thường bị mất trong redirect.
 
 <CodeGroup>
 
@@ -62,18 +63,18 @@ import { Link } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-You may preserve the fragment by chaining the `preserveFragment` method on the redirect response. The client will carry over the `#section` fragment to the redirect target, resulting in `/article/new-slug#section`.
+Bạn có thể giữ fragment bằng cách nối phương thức `preserveFragment` trên redirect response. Client sẽ mang fragment `#section` sang redirect target, tạo thành `/article/new-slug#section`.
 
 ```php
 return redirect('/article/new-slug')->preserveFragment();
 ```
 
-## External Redirects
+## Redirect ra bên ngoài
 
-Sometimes it's necessary to redirect to an external website, or even another non-Inertia endpoint in your app while handling an Inertia request. This can be accomplished using a server-side initiated `window.location` visit via the `Inertia::location()` method.
+Đôi khi, trong lúc xử lý request Inertia, bạn cần redirect đến một website bên ngoài hoặc thậm chí một endpoint không dùng Inertia khác trong ứng dụng. Bạn có thể thực hiện việc này bằng một lần truy cập `window.location` được khởi tạo từ phía máy chủ thông qua phương thức `Inertia::location()`.
 
 ```php
 return Inertia::location($url);
 ```
 
-The `Inertia::location()` method will generate a `409 Conflict` response and include the destination URL in the `X-Inertia-Location` header. When this response is received client-side, Inertia will automatically perform a `window.location = url` visit.
+Phương thức `Inertia::location()` sẽ tạo response `409 Conflict` và đặt URL đích trong header `X-Inertia-Location`. Khi phía client nhận được response này, Inertia sẽ tự động thực hiện truy cập bằng `window.location = url`.

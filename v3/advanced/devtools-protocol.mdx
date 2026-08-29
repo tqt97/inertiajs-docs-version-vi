@@ -1,18 +1,19 @@
 ---
 title: DevTools Protocol
+description: "Trang này chứa đặc tả chi tiết Inertia DevTools protocol. Hãy đọc trang DevTools trước để có tổng quan cấp cao về tính năng."
 ---
 
-This page contains a detailed specification of the Inertia DevTools protocol. Be sure to read the [DevTools](/v3/advanced/devtools) page first for a high-level overview of the feature.
+Trang này chứa đặc tả chi tiết Inertia DevTools protocol. Hãy đọc trang [DevTools](/v3/advanced/devtools) trước để có tổng quan cấp cao về tính năng.
 
-The DevTools extension is backend-agnostic. Any server-side Inertia adapter may integrate with it by implementing this protocol. The reference implementation is the Laravel adapter, and nothing in this specification is Laravel-specific.
+DevTools extension không phụ thuộc backend. Bất kỳ server-side Inertia adapter nào cũng có thể tích hợp bằng cách triển khai protocol này. Implementation tham chiếu là Laravel adapter và không có nội dung nào trong đặc tả phụ thuộc Laravel.
 
-The protocol has three layers:
+Protocol có ba lớp:
 
-1. **Discovery**, how the extension learns an entry was recorded.
-2. **Correlation headers**, request and response headers that correlate and group entries.
-3. **Read API**, the endpoints the extension calls to fetch recorded entries, along with the entry format they return.
+1. **Discovery** - cách extension biết một entry đã được ghi nhận.
+2. **Correlation headers** - request/response header dùng để correlate và group entry.
+3. **Read API** - endpoint extension gọi để lấy recorded entry cùng định dạng entry trả về.
 
-A conforming adapter records one entry per HTTP request it handles, stores it keyed by a generated id and scoped per browser tab, and exposes it through the read API. The extension fetches each entry out of band rather than reading it from the app's response, so recording never alters the payload your application actually returns.
+Adapter tuân thủ protocol ghi một entry cho mỗi HTTP request nó xử lý, lưu theo generated id và scope theo browser tab, rồi expose qua read API. Extension fetch từng entry out-of-band thay vì đọc từ response của app, vì vậy recording không bao giờ thay đổi payload thực tế ứng dụng trả về.
 
 ```mermaid
 sequenceDiagram
@@ -29,75 +30,75 @@ sequenceDiagram
 
 ## Discovery
 
-For every response, the adapter generates a unique entry id (any collision-resistant string, such as a ULID) and sets it on a response header.
+Với mỗi response, adapter tạo entry id duy nhất (bất kỳ chuỗi chống collision như ULID) và đặt nó vào response header.
 
 <ParamField header="X-Inertia-Devtools-Id" type="string">
-  The generated id for this entry, set on every response. The extension learns the id from this header, then fetches the entry from the [read API](#the-read-api).
+  Generated id của entry này được đặt trên mọi response. Extension lấy id từ header rồi fetch entry từ [read API](#the-read-api).
 </ParamField>
 
-The header alone is not enough for the first document load, which the extension observes through the DOM rather than `fetch`. On the initial full-page HTML response, also inject a script tag so the extension may read the id before any XHR occurs.
+Chỉ header là chưa đủ cho lần document load đầu tiên, vốn được extension quan sát qua DOM thay vì `fetch`. Trên initial full-page HTML response, hãy inject thêm script tag để extension đọc id trước khi XHR xảy ra.
 
 ```html
 <script data-inertia-devtools-id type="application/json">"<id>"</script>
 ```
 
-The tag content is the JSON-encoded id string.
+Nội dung tag là chuỗi id được JSON encode.
 
-## Correlation Headers
+## Correlation headers
 
-These headers correlate entries with client-side page state and group related requests. The extension stamps the request headers, and the adapter reads them and stores their values on the entry. The adapter emits the response header.
+Các header này correlate entry với client-side page state và group request liên quan. Extension đóng dấu request header; adapter đọc và lưu giá trị vào entry. Adapter phát response header.
 
-The following request headers are sent by the extension, all optional per request.
+Các request header sau do extension gửi, tất cả đều tùy chọn theo từng request.
 
 <ParamField header="X-Inertia-Devtools-Tab" type="string">
-  Per-tab UUID, stored as `__meta.tabUuid`. Used to scope stored entries so one tab's history does not evict another's.
+  UUID theo tab, lưu dưới `__meta.tabUuid`. Dùng để scope stored entry để history của tab này không evict tab khác.
 </ParamField>
 
 <ParamField header="X-Inertia-Devtools-Visit" type="string">
-  Client visit id, stored as `__meta.visitId`. Lets the extension pair the entry with the browser-side page snapshot.
+  Client visit id, lưu dưới `__meta.visitId`. Cho phép extension ghép entry với browser-side page snapshot.
 </ParamField>
 
 <ParamField header="X-Inertia-Devtools-Parent" type="string">
-  Id of the entry that started this batch, stored as `__meta.batchId`. Stored verbatim, grouping is a client concern.
+  Id của entry bắt đầu batch này, lưu dưới `__meta.batchId`. Được lưu nguyên trạng; grouping là trách nhiệm của client.
 </ParamField>
 
 <ParamField header="X-Inertia-Devtools-Deferred" type="string">
-  Present (`1`) when this is a [deferred-prop](/v3/data-props/deferred-props) follow-up. Wire-indistinguishable from a [partial reload](/v3/data-props/partial-reloads), so the client declares the intent.
+  Có mặt (`1`) khi đây là follow-up của [deferred prop](/v3/data-props/deferred-props). Trên wire không phân biệt được với [partial reload](/v3/data-props/partial-reloads), nên client khai báo intent.
 </ParamField>
 
 <ParamField header="X-Inertia-Devtools-Poll" type="string">
-  Present (`1`) when this is a [polling](/v3/data-props/polling) tick, also wire-indistinguishable from a partial reload.
+  Có mặt (`1`) khi đây là tick [polling](/v3/data-props/polling), cũng không phân biệt được với partial reload trên wire.
 </ParamField>
 
-The following response header is emitted by the adapter.
+Response header sau do adapter phát ra.
 
 <ParamField header="X-Inertia-Devtools-Parent-Out" type="string">
-  The batch root id (the `batchId` of this request, or this entry's own `id` when it starts a batch). The client forwards this value as `X-Inertia-Devtools-Parent` on the next same-batch request. Pointing every follow-up at the root keeps a batch flat, and hands the true root down across a redirect so the post-redirect request attaches to the batch root rather than the throwaway redirect hop. A [prefetch](/v3/data-props/prefetching) response returns its own `id` instead, since a prefetch is speculative and must not advance the batch cursor for unrelated traffic.
+  Batch root id (`batchId` của request này, hoặc `id` của chính entry khi nó bắt đầu batch). Client forward giá trị này thành `X-Inertia-Devtools-Parent` trong request cùng batch tiếp theo. Việc mọi follow-up đều trỏ tới root giúp batch phẳng, đồng thời truyền root thực sự qua redirect để post-redirect request gắn vào batch root thay vì hop redirect tạm. Response [prefetch](/v3/data-props/prefetching) trả `id` riêng vì prefetch là speculative và không được tiến batch cursor cho traffic không liên quan.
 </ParamField>
 
-An adapter should set this header on every response. Omitting it degrades batching, since the client then falls back to the response's own `X-Inertia-Devtools-Id`, so each request chains to the previous response rather than the batch root and redirects may group less precisely.
+Adapter nên đặt header này trên mọi response. Bỏ nó làm giảm chất lượng batching vì client fallback về `X-Inertia-Devtools-Id` của chính response, khiến mỗi request chain tới response trước thay vì batch root và redirect có thể group kém chính xác.
 
-## The Read API
+## Read API
 
-Two authenticated endpoints, gated so they are reachable only in development or by an authorized developer. The paths are fixed.
+Hai endpoint có authentication, được gate để chỉ truy cập trong development hoặc bởi developer đã được authorize. Path là cố định.
 
-**`GET /_inertia/devtools/entries/{id}`** returns a single [entry](#the-entry-format) as JSON, or `404` if the id is unknown. This is the only endpoint the extension currently calls. It learns an id from discovery or the response header, then fetches that one entry.
+**`GET /_inertia/devtools/entries/{id}`** trả một [entry](#the-entry-format) dưới dạng JSON hoặc `404` nếu id không tồn tại. Đây là endpoint duy nhất extension hiện gọi. Nó lấy id từ discovery hoặc response header rồi fetch entry đó.
 
-**`GET /_inertia/devtools/entries`** returns a JSON array of entries, newest first. The extension does not call it yet, so it is optional. It exists for tooling that lists a tab's history. An adapter may implement these optional query filters: `component` (exact component name to keep), `type` and `exclude` (comma-separated `requestType` lists to keep or drop), `offset`, and `limit`. A minimal adapter may ignore them and return the full buffer.
+**`GET /_inertia/devtools/entries`** trả mảng JSON entry theo thứ tự mới nhất trước. Extension hiện chưa gọi nên endpoint này là tùy chọn. Nó tồn tại cho tooling liệt kê history của tab. Adapter có thể hỗ trợ các query filter tùy chọn: `component` (giữ exact component name), `type` và `exclude` (danh sách `requestType` phân tách dấu phẩy để giữ hoặc loại), `offset`, `limit`. Adapter tối thiểu có thể bỏ qua filter và trả toàn bộ buffer.
 
-Requests are made with credentials (same-origin cookies) so the adapter may authorize them.
+Request được gửi kèm credential (same-origin cookie) để adapter có thể authorize.
 
-## The Entry Format
+## Định dạng Entry
 
-An entry is a JSON object. Fields are split into two tiers.
+Entry là JSON object. Các field được chia thành hai tầng.
 
-Required fields must be emitted for the panel to function. Where a value is genuinely absent, the adapter emits the documented empty or null form rather than omitting the key.
+Các field bắt buộc phải được phát để panel hoạt động. Khi giá trị thực sự không tồn tại, adapter phát dạng rỗng hoặc null theo tài liệu thay vì bỏ key.
 
-Optional fields are enhancement data. An adapter may emit `null`, `{}`, or omit them, and the panel degrades gracefully, for example hiding "open in editor" links when source locations are absent.
+Field tùy chọn là dữ liệu bổ sung. Adapter có thể phát `null`, `{}` hoặc bỏ qua; panel vẫn degrade gracefully, ví dụ ẩn link "open in editor" khi không có source location.
 
-Adding fields beyond this specification is safe. The extension ignores unknown fields rather than rejecting the entry.
+Có thể thêm field ngoài đặc tả này một cách an toàn. Extension bỏ qua field không nhận biết thay vì từ chối entry.
 
-A fully-populated entry for a standard navigation looks like this.
+Một entry đầy đủ cho navigation tiêu chuẩn có dạng sau.
 
 ```json
 {
@@ -145,14 +146,14 @@ A fully-populated entry for a standard navigation looks like this.
 }
 ```
 
-The fields are detailed below.
+Chi tiết các field được mô tả bên dưới.
 
 ### Meta
 
-The `__meta` object carries the entry's identity and summary.
+Object `__meta` chứa identity và summary của entry.
 
 <ParamField body="id" type="string" required>
-  Matches the `X-Inertia-Devtools-Id` for this response.
+  Khớp với `X-Inertia-Devtools-Id` của response này.
 </ParamField>
 
 <ParamField body="method" type="string" required>
@@ -160,7 +161,7 @@ The `__meta` object carries the entry's identity and summary.
 </ParamField>
 
 <ParamField body="url" type="string" required>
-  Absolute request URL.
+  Request URL tuyệt đối.
 </ParamField>
 
 <ParamField body="status" type="number" required>
@@ -168,48 +169,48 @@ The `__meta` object carries the entry's identity and summary.
 </ParamField>
 
 <ParamField body="requestType" type="string" required>
-  One of the [request types](#request-type-derivation).
+  Một trong các [request type](#request-type-derivation).
 </ParamField>
 
 <ParamField body="component" type="string | null" required>
-  Inertia page component, `null` for non-Inertia (raw HTTP) responses.
+  Inertia page component, `null` với response không phải Inertia (raw HTTP).
 </ParamField>
 
 <ParamField body="timestamp" type="string" required>
-  ISO 8601, used for display.
+  ISO 8601, dùng để hiển thị.
 </ParamField>
 
 <ParamField body="utime" type="number" required>
-  Float seconds since epoch, used for stable ordering.
+  Số giây dạng float từ epoch, dùng để sắp xếp ổn định.
 </ParamField>
 
 <ParamField body="tabUuid" type="string | null" required>
-  From `X-Inertia-Devtools-Tab`, `null` on the initial full-page load, which carries no tab header yet.
+  Từ `X-Inertia-Devtools-Tab`, `null` ở lần full-page load đầu tiên vì lúc đó chưa có tab header.
 </ParamField>
 
 <ParamField body="batchId" type="string | null" required>
-  From `X-Inertia-Devtools-Parent`, `null` starts a new batch.
+  Từ `X-Inertia-Devtools-Parent`; `null` bắt đầu batch mới.
 </ParamField>
 
 <ParamField body="serverTimingMs" type="number | null" required>
-  Server processing time in milliseconds, `null` when unavailable.
+  Thời gian xử lý phía server tính bằng millisecond, `null` nếu không có.
 </ParamField>
 
 <ParamField body="redirectLocation" type="string | null">
-  Redirect target for `3xx` and Inertia location responses.
+  Redirect target cho response `3xx` và Inertia location.
 </ParamField>
 
 <ParamField body="visitId" type="string | null">
-  From `X-Inertia-Devtools-Visit`.
+  Từ `X-Inertia-Devtools-Visit`.
 </ParamField>
 
 <Note>
-`timestamp` and `utime` describe the same instant in two forms: `timestamp` keeps a stored entry readable on its own, while `utime` carries sub-millisecond precision and is the key the panel orders and groups by. Adapters emit both, derived from the same instant.
+`timestamp` và `utime` mô tả cùng một thời điểm dưới hai dạng: `timestamp` giúp stored entry tự đọc được, còn `utime` mang độ chính xác dưới millisecond và là key panel dùng để sắp xếp, group. Adapter phát cả hai từ cùng một thời điểm.
 </Note>
 
 ### HTTP
 
-The `http` object is required, and each sub-key is required (use the empty forms when there is nothing to show).
+Object `http` là bắt buộc và mỗi sub-key cũng bắt buộc; dùng dạng rỗng khi không có gì để hiển thị.
 
 ```ts
 http: {
@@ -220,7 +221,7 @@ http: {
 }
 ```
 
-`BodyCapture` is a tagged union.
+`BodyCapture` là tagged union.
 
 ```ts
 | { status: 'empty' }
@@ -228,33 +229,33 @@ http: {
 | { status: 'omitted', reason: string }
 ```
 
-`value` is a string for raw textual bodies, otherwise a decoded JSON value. Recognized `omitted` reasons are `non-inertia-response`, `non-inertia-request`, `non-textual`, `streamed`, `too-large`, `unserializable`, and `binary`. The panel maps these to friendly notices, and an unknown reason falls back to a generic message, so new reasons are safe. Adapters redact sensitive keys and summarize file uploads rather than serializing binary content.
+`value` là chuỗi với raw textual body, còn trường hợp khác là JSON value đã decode. Các reason `omitted` được nhận biết gồm `non-inertia-response`, `non-inertia-request`, `non-textual`, `streamed`, `too-large`, `unserializable` và `binary`. Panel ánh xạ chúng thành thông báo thân thiện; reason không biết fallback về message chung nên có thể thêm reason mới an toàn. Adapter redact key nhạy cảm và tóm tắt file upload thay vì serialize nội dung binary.
 
 ### Props
 
 <ParamField body="props" type="Record<string, PropMeta>" required>
-  Per-prop metadata, keyed by dotted path. May be `{}` when the adapter cannot classify props; the panel then renders values only.
+  Metadata theo từng prop, key là dotted path. Có thể là `{}` nếu adapter không phân loại được prop; khi đó panel chỉ render value.
 
   <Expandable title="PropMeta">
-    Every field is optional. Source locations are `{ file: string, line: number }`.
+    Mọi field đều tùy chọn. Source location có dạng `{ file: string, line: number }`.
 
     <ParamField body="inertiaType" type="'always' | 'defer' | 'optional' | 'merge' | 'scroll' | 'once'" />
     <ParamField body="shared" type="boolean">
-      Whether the prop was [shared](/v3/data-props/shared-data) rather than returned from the controller.
+      Cho biết prop được [share](/v3/data-props/shared-data) thay vì trả từ controller.
     </ParamField>
     <ParamField body="deferGroup" type="string" />
     <ParamField body="reset" type="boolean" />
     <ParamField body="once" type="boolean">
-      Set for a [once prop](/v3/data-props/once-props), loaded a single time and reused on later visits.
+      Được đặt cho [once prop](/v3/data-props/once-props), chỉ tải một lần và tái sử dụng ở visit sau.
     </ParamField>
     <ParamField body="mergeDirection" type="'append' | 'prepend'">
-      How a [merge](/v3/data-props/merging-props) or [scroll](/v3/data-props/infinite-scroll) prop combines with existing client data.
+      Cách [merge](/v3/data-props/merging-props) hoặc [scroll](/v3/data-props/infinite-scroll) prop kết hợp với dữ liệu hiện có phía client.
     </ParamField>
     <ParamField body="deepMerge" type="boolean">
-      Set alongside `mergeDirection` for a deep merge.
+      Được đặt cùng `mergeDirection` cho deep merge.
     </ParamField>
     <ParamField body="rescued" type="boolean">
-      A deferred prop whose resolver threw but was rescued, so the prop carries no value on this response.
+      Deferred prop có resolver ném exception nhưng được rescue, nên prop không mang value trong response này.
     </ParamField>
     <ParamField body="renderSource" type="{ file, line }" />
     <ParamField body="shareSource" type="{ file, line }" />
@@ -262,56 +263,56 @@ http: {
 </ParamField>
 
 <ParamField body="propValues" type="Record<string, unknown>">
-  Resolved prop values, keyed by dotted path. Sensitive values are replaced with `"[REDACTED]"`. May be omitted or `{}`. The panel guards against absence.
+  Giá trị prop đã resolve, key theo dotted path. Giá trị nhạy cảm được thay bằng `"[REDACTED]"`. Có thể bị bỏ hoặc là `{}`; panel tự xử lý khi vắng mặt.
 </ParamField>
 
 ### Route
 
 <ParamField body="route.uri" type="string" required>
-  Matched route path, `""` if none.
+  Matched route path, `""` nếu không có.
 </ParamField>
 
 <ParamField body="route.name" type="string | null" required>
-  Route name, `null` when the route is unnamed.
+  Route name, `null` khi route không có tên.
 </ParamField>
 
 <ParamField body="route.action" type="string | null" required>
-  Controller or handler identifier, `null` when none applies.
+  Định danh controller hoặc handler, `null` khi không áp dụng.
 </ParamField>
 
 <ParamField body="route.actionSource" type="{ file, line }">
-  Handler source location.
+  Source location của handler.
 </ParamField>
 
 <ParamField body="renderSource" type="{ file, line } | null" required>
-  Where the page render was invoked, `null` when it cannot be resolved.
+  Nơi page render được gọi, `null` khi không resolve được.
 </ParamField>
 
 <ParamField body="componentPath" type="string | null" required>
-  Resolved path of the component file, `null` when it cannot be resolved.
+  Path đã resolve của component file, `null` khi không resolve được.
 </ParamField>
 
-Source-location fields power the "open in editor" links. Adapters that cannot cheaply resolve them emit `null` and lose only those links.
+Các field source-location cung cấp link "open in editor". Adapter không thể resolve chúng với chi phí hợp lý có thể phát `null` và chỉ mất các link này.
 
-## Request Type Derivation
+## Xác định Request Type
 
-The type is derived from headers the adapter already sees, plus the two DevTools hint headers. Evaluate in this order and take the first match.
+Type được suy ra từ các header adapter vốn đã thấy, cộng hai DevTools hint header. Đánh giá theo thứ tự này và lấy match đầu tiên.
 
-| Order | Condition | Request type |
+| Thứ tự | Điều kiện | Request type |
 | --- | --- | --- |
-| 1 | [Precognition](/v3/the-basics/forms#precognition) header present | `precognition` |
-| 2 | Not an Inertia request, and an Inertia page was rendered (component present) | `initial` |
-| 3 | Not an Inertia request, and no Inertia page was rendered | `http` |
-| 4 | `X-Inertia-Devtools-Deferred` present | `deferred` |
-| 5 | `X-Inertia-Devtools-Poll` present | `poll` |
-| 6 | Partial-reload header present (`X-Inertia-Partial-Component`) | `partial` |
+| 1 | Có header [Precognition](/v3/the-basics/forms#precognition) | `precognition` |
+| 2 | Không phải Inertia request và có render Inertia page (có component) | `initial` |
+| 3 | Không phải Inertia request và không render Inertia page | `http` |
+| 4 | Có `X-Inertia-Devtools-Deferred` | `deferred` |
+| 5 | Có `X-Inertia-Devtools-Poll` | `poll` |
+| 6 | Có partial-reload header (`X-Inertia-Partial-Component`) | `partial` |
 | 7 | Prefetch (`Purpose: prefetch`) | `prefetch` |
-| 8 | Otherwise | `navigate` |
+| 8 | Trường hợp khác | `navigate` |
 
-`initial` and `http` are both non-Inertia requests, and the adapter distinguishes them by whether it rendered an Inertia page. The app's initial full-page load renders a page (so `component` is set) and is `initial`, while a plain JSON or text endpoint the app serves alongside Inertia renders no page (so `component` is `null`) and is `http`. The adapter already knows which it produced, so it classifies once on the wire rather than leaving the panel to re-derive it.
+`initial` và `http` đều là request không phải Inertia; adapter phân biệt bằng việc nó có render Inertia page hay không. Initial full-page load của app render page nên `component` được đặt và type là `initial`; endpoint JSON/text thông thường chạy cạnh Inertia không render page nên `component` là `null` và type là `http`. Adapter đã biết mình tạo loại nào nên phân loại ngay trên wire thay vì để panel suy luận lại.
 
-The `client-visit` and `cache-hit` types are client-only and never come from an adapter.
+Type `client-visit` và `cache-hit` chỉ tồn tại phía client và không bao giờ đến từ adapter.
 
-## Storage Semantics
+## Ngữ nghĩa lưu trữ
 
-An adapter buffers recent entries and evicts old ones, typically capping entries per `tabUuid` so a busy tab cannot evict another tab's history, and pruning entries past a TTL. These are adapter-internal concerns; the protocol only requires that the read API return what is currently stored, newest first.
+Adapter buffer các entry gần đây và evict entry cũ, thường giới hạn số entry theo `tabUuid` để tab bận không đẩy mất history của tab khác, đồng thời prune entry quá TTL. Đây là chi tiết nội bộ adapter; protocol chỉ yêu cầu read API trả những gì hiện đang lưu, mới nhất trước.

@@ -1,12 +1,13 @@
 ---
 title: Once Props
+description: "Một số dữ liệu hiếm khi thay đổi, tốn chi phí tính toán hoặc đơn giản là rất lớn. Thay vì đưa dữ liệu đó vào mọi response, bạn có thể dùng once props. Các…"
 ---
 
-Some data rarely changes, is expensive to compute, or is simply large. Rather than including this data in every response, you may use once props. These props are remembered by the client and reused on subsequent pages that include the same prop. This makes them ideal for [shared data](/v3/data-props/shared-data).
+Một số dữ liệu hiếm khi thay đổi, tốn chi phí tính toán hoặc đơn giản là rất lớn. Thay vì đưa dữ liệu đó vào mọi response, bạn có thể dùng once props. Các prop này được client ghi nhớ và tái sử dụng ở những page sau có cùng prop. Điều này đặc biệt phù hợp cho [shared data](/v3/data-props/shared-data).
 
-## Creating Once Props
+## Tạo once props
 
-To create a once prop, use the `Inertia::once()` method when returning your response. This method receives a callback that returns the prop data.
+Để tạo once prop, dùng method `Inertia::once()` khi trả response. Method nhận callback trả về dữ liệu prop.
 
 ```php
 return Inertia::render('Billing', [
@@ -14,13 +15,13 @@ return Inertia::render('Billing', [
 ]);
 ```
 
-After the client has received this prop, subsequent requests will skip resolving the callback and exclude the prop from the response. The client only remembers once props while navigating between pages that include them.
+Sau khi client nhận prop này, các request tiếp theo sẽ bỏ qua việc resolve callback và loại prop khỏi response. Client chỉ ghi nhớ once props khi điều hướng giữa các trang có chứa chúng.
 
-Navigating to a page without the once prop will forget the remembered value, and it will be resolved again on the next page that has it. In practice, this is rarely an issue since once props are typically used as shared data or within a specific section of your application.
+Điều hướng đến trang không có once prop sẽ làm quên giá trị đã nhớ; prop sẽ được resolve lại ở trang kế tiếp có nó. Trong thực tế, đây hiếm khi là vấn đề vì once props thường được dùng làm dữ liệu dùng chung hoặc trong một khu vực cụ thể của ứng dụng.
 
-## Forcing a Refresh
+## Buộc refresh
 
-You may force a once prop to be refreshed using the `fresh()` method.
+Bạn có thể buộc once prop refresh bằng method `fresh()`.
 
 ```php
 return Inertia::render('Billing', [
@@ -28,7 +29,7 @@ return Inertia::render('Billing', [
 ]);
 ```
 
-This method also accepts a boolean, allowing you to conditionally refresh the prop.
+Method này cũng nhận boolean, cho phép refresh prop có điều kiện.
 
 ```php
 return Inertia::render('Billing', [
@@ -36,9 +37,9 @@ return Inertia::render('Billing', [
 ]);
 ```
 
-## Refreshing from the Client
+## Refresh từ client
 
-You may refresh a once prop from the client-side using a [partial reload](/v3/data-props/partial-reloads). The server will always resolve a once prop when explicitly requested.
+Bạn có thể refresh once prop từ phía client bằng [partial reload](/v3/data-props/partial-reloads). Server luôn resolve once prop khi nó được yêu cầu rõ ràng.
 
 <CodeGroup>
 
@@ -62,9 +63,9 @@ router.reload({ only: ["plans"] });
 
 </CodeGroup>
 
-## Expiration
+## Thời gian hết hạn
 
-You may set an expiration time using the `until()` method. This method accepts a `DateTimeInterface`, `DateInterval`, or an integer (seconds). The prop will be refreshed on a subsequent visit after the expiration time has passed.
+Bạn có thể đặt thời gian hết hạn bằng method `until()`. Method nhận `DateTimeInterface`, `DateInterval` hoặc integer (giây). Prop sẽ được refresh trong một visit tiếp theo sau khi thời gian hết hạn đã qua.
 
 ```php
 return Inertia::render('Dashboard', [
@@ -72,9 +73,9 @@ return Inertia::render('Dashboard', [
 ]);
 ```
 
-## Custom Keys
+## Custom key
 
-You may assign a custom key to the prop using the `as()` method. This is useful when you want to share data across multiple pages while using different prop names.
+Bạn có thể gán custom key cho prop bằng method `as()`. Điều này hữu ích khi muốn chia sẻ dữ liệu qua nhiều trang nhưng dùng tên prop khác nhau.
 
 ```php
 // Team member list...
@@ -88,29 +89,29 @@ return Inertia::render('Team/Invite', [
 ]);
 ```
 
-Both pages share the same underlying data because they use the same custom key, so the prop is only resolved for whichever page you visit first.
+Cả hai trang chia sẻ cùng dữ liệu bên dưới vì dùng chung custom key, vì vậy prop chỉ được resolve cho trang bạn truy cập đầu tiên.
 
-## Sharing Once Props
+## Chia sẻ once props
 
-You may share once props globally using the `Inertia::share()` method.
+Bạn có thể chia sẻ once props toàn cục bằng method `Inertia::share()`.
 
 ```php
 Inertia::share('countries', Inertia::once(fn () => Country::all()));
 ```
 
-Or, for convenience, you may use the `shareOnce()` method.
+Hoặc để thuận tiện, dùng method `shareOnce()`.
 
 ```php
 Inertia::shareOnce('countries', fn () => Country::all());
 ```
 
-You may also chain `as()`, `fresh()`, and `until()` onto the `shareOnce` method.
+Bạn cũng có thể chain `as()`, `fresh()` và `until()` vào method `shareOnce`.
 
 ```php
 Inertia::shareOnce('countries', fn () => Country::all())->until(now()->addDay());
 ```
 
-Additionally, you may define a dedicated `shareOnce()` method in your middleware. The middleware will evaluate both `share()` and `shareOnce()`, merging the results.
+Ngoài ra, bạn có thể định nghĩa method `shareOnce()` chuyên biệt trong middleware. Middleware sẽ evaluate cả `share()` và `shareOnce()`, sau đó merge kết quả.
 
 ```php
 class HandleInertiaRequests extends Middleware
@@ -124,11 +125,11 @@ class HandleInertiaRequests extends Middleware
 }
 ```
 
-## Conditional Once Props
+## Once props có điều kiện
 
-Some shared data is mostly stable but changes at specific moments, like the authenticated user. You may return a once prop while a user is authenticated, and `null` otherwise. Sign in and sign out usually end with a redirect to a page that does not explicitly request the `auth` prop, so a remembered once value would go stale.
+Một số shared data hầu như ổn định nhưng thay đổi ở thời điểm cụ thể, chẳng hạn authenticated user. Bạn có thể trả once prop khi user đã đăng nhập và `null` nếu chưa. Đăng nhập và đăng xuất thường kết thúc bằng redirect tới page không yêu cầu rõ prop `auth`, nên once value đã nhớ có thể bị stale.
 
-Returning `null` on signed-out requests overwrites the remembered user on every response, while returning a once prop when authenticated lets the client remember the user across visits.
+Trả `null` ở request khi đã đăng xuất sẽ ghi đè user đã nhớ trong mọi response, còn trả once prop khi đã xác thực cho phép client ghi nhớ user qua các visit.
 
 ```php
 class HandleInertiaRequests extends Middleware
@@ -145,15 +146,15 @@ class HandleInertiaRequests extends Middleware
 }
 ```
 
-## Prefetching
+## Prefetch
 
-Once props are compatible with [prefetching](/v3/data-props/prefetching). The client automatically includes any remembered once props in prefetched responses, so navigating to a prefetched page will already have the once props available.
+Once props tương thích với [prefetching](/v3/data-props/prefetching). Client tự động đưa once props đã nhớ vào prefetched response, nên khi điều hướng tới page đã prefetch, once props đã sẵn sàng.
 
-Prefetched pages containing an expired once prop will be invalidated from the cache.
+Trang prefetch chứa once prop đã hết hạn sẽ bị invalid khỏi cache.
 
-## Combining with Other Prop Types
+## Kết hợp với loại prop khác
 
-The `once()` modifier may be chained onto [deferred](/v3/data-props/deferred-props), [merge](/v3/data-props/merging-props), and [optional](/v3/data-props/partial-reloads#lazy-data-evaluation) props.
+Modifier `once()` có thể nối vào [deferred](/v3/data-props/deferred-props), [merge](/v3/data-props/merging-props) và [optional](/v3/data-props/partial-reloads#lazy-data-evaluation) props.
 
 ```php
 return Inertia::render('Dashboard', [

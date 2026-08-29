@@ -1,24 +1,25 @@
 ---
 title: Routing
+description: "Khi dùng Inertia, toàn bộ route của ứng dụng được định nghĩa phía server. Điều này có nghĩa bạn không cần Vue Router hay React Router. Thay vào đó, chỉ cần…"
 ---
 
-## Defining Routes
+## Định nghĩa route
 
-When using Inertia, all of your application's routes are defined server-side. This means that you don't need Vue Router or React Router. Instead, you can simply define Laravel routes and return [Inertia responses](/v3/the-basics/responses) from those routes.
+Khi dùng Inertia, toàn bộ route của ứng dụng được định nghĩa phía server. Điều này có nghĩa bạn không cần Vue Router hay React Router. Thay vào đó, chỉ cần định nghĩa Laravel route và trả [Inertia response](/v3/the-basics/responses) từ các route đó.
 
-## Shorthand Routes
+## Route rút gọn
 
-If you have a [page](/v3/the-basics/pages) that doesn't need a corresponding controller method, like an "FAQ" or "about" page, you can route directly to a component via the `Route::inertia()` method.
+Nếu có [page](/v3/the-basics/pages) không cần controller method tương ứng, như trang "FAQ" hoặc "giới thiệu", bạn có thể route trực tiếp tới component bằng phương thức `Route::inertia()`.
 
 ```php
 Route::inertia('/about', 'About');
 ```
 
-## Generating URLs
+## Tạo URL
 
-Some server-side frameworks allow you to generate URLs from named routes. However, you will not have access to those helpers client-side. Here are a couple ways to still use named routes with Inertia.
+Một số framework phía máy chủ cho phép tạo URL từ named route. Tuy nhiên, bạn sẽ không truy cập được các helper đó ở phía client. Sau đây là một vài cách để vẫn sử dụng named route với Inertia.
 
-The first option is to generate URLs server-side and include them as props. Notice in this example how we're passing the `edit_url` and `create_url` to the `Users/Index` component.
+Lựa chọn đầu tiên là tạo URL ở phía máy chủ và truyền chúng dưới dạng props. Hãy chú ý trong ví dụ này, chúng ta truyền `edit_url` và `create_url` vào component `Users/Index`.
 
 ```php
 class UsersController extends Controller
@@ -38,21 +39,21 @@ class UsersController extends Controller
 }
 ```
 
-When using Laravel, you have several options to make your server-side routes available to your client-side code:
+Khi dùng Laravel, bạn có một số lựa chọn để cung cấp route phía máy chủ cho code phía client:
 
 ### Wayfinder
 
-When using [Wayfinder](https://github.com/laravel/wayfinder), you can pass the generated TypeScript method directly to the [Link component](/v3/the-basics/links#wayfinder), [form helpers](/v3/the-basics/forms#wayfinder), or [router methods](/v3/the-basics/manual-visits#wayfinder) and Inertia understands how to handle it. In fact, if you are developing an application using one of Laravel's [starter kits](https://laravel.com/docs/starter-kits), Wayfinder is already configured for you.
+Khi dùng [Wayfinder](https://github.com/laravel/wayfinder), bạn có thể truyền trực tiếp TypeScript method được sinh vào [Link component](/v3/the-basics/links#wayfinder), [form helper](/v3/the-basics/forms#wayfinder) hoặc [router method](/v3/the-basics/manual-visits#wayfinder), và Inertia biết cách xử lý. Nếu phát triển ứng dụng bằng một trong các [starter kit](https://laravel.com/docs/starter-kits) của Laravel thì Wayfinder đã được cấu hình sẵn.
 
 ### Ziggy
 
-The [Ziggy](https://github.com/tighten/ziggy) library can make your named, server-side routes available to you via a global `route()` function. If you're using the Vue plugin included with Ziggy, you may use the `route()` function directly in your templates.
+Thư viện [Ziggy](https://github.com/tighten/ziggy) có thể cung cấp các named route phía máy chủ cho phía client qua hàm `route()` toàn cục. Nếu dùng Vue plugin đi kèm Ziggy, bạn có thể gọi `route()` trực tiếp trong template.
 
 ```vue
 <Link :href="route('users.create')">Create User</Link>
 ```
 
-When [server-side rendering](/v3/advanced/server-side-rendering) is enabled, you may pass an options object to the Ziggy plugin in your `ssr.js` file. This should include the route definitions and current location.
+Khi bật [server-side rendering](/v3/advanced/server-side-rendering), bạn có thể truyền options object vào Ziggy plugin trong file `ssr.js`. Object này nên chứa route definition và location hiện tại.
 
 ```js
 .use(ZiggyVue, {
@@ -61,11 +62,11 @@ When [server-side rendering](/v3/advanced/server-side-rendering) is enabled, you
 });
 ```
 
-## Customizing the Page URL
+## Tùy chỉnh URL của trang
 
-The [page object](/v3/core-concepts/the-protocol#the-page-object) includes a `url` that represents the current page's URL. By default, the Laravel adapter resolves this using the `fullUrl()` method on the `Request` instance, but strips the scheme and host so the result is a relative URL.
+[Page object](/v3/core-concepts/the-protocol#the-page-object) chứa `url` đại diện cho URL của page hiện tại. Mặc định Laravel adapter resolve giá trị này bằng phương thức `fullUrl()` trên instance `Request`, nhưng loại bỏ scheme và host để kết quả là relative URL.
 
-If you need to customize how the URL is resolved, you may provide a resolver within the `urlResolver` method of the Inertia `HandleInertiaRequests` middleware.
+Nếu cần tùy chỉnh cách URL được resolve, bạn có thể cung cấp resolver trong phương thức `urlResolver` của middleware Inertia `HandleInertiaRequests`.
 
 ```php
 class HandleInertiaRequests extends Middleware
@@ -79,7 +80,7 @@ class HandleInertiaRequests extends Middleware
 }
 ```
 
-Alternatively, you may define the resolver using the `Inertia::resolveUrlUsing()` method.
+Ngoài ra, bạn có thể định nghĩa resolver bằng phương thức `Inertia::resolveUrlUsing()`.
 
 ```php
 Inertia::resolveUrlUsing(function (Request $request) {

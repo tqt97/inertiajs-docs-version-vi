@@ -1,10 +1,11 @@
 ---
-title: Load When Visible
+title: Tải khi hiển thị
+description: "Inertia hỗ trợ lazy-load dữ liệu khi cuộn bằng Intersection Observer API. Framework cung cấp component WhenVisible như một cách thuận tiện để tải dữ liệu khi…"
 ---
 
-Inertia supports lazy loading data on scroll using the Intersection Observer API. It provides the `WhenVisible` component as a convenient way to load data when an element becomes visible in the viewport.
+Inertia hỗ trợ lazy-load dữ liệu khi cuộn bằng Intersection Observer API. Framework cung cấp component `WhenVisible` như một cách thuận tiện để tải dữ liệu khi một phần tử xuất hiện trong viewport.
 
-The `WhenVisible` component accepts a `data` prop that specifies the key of the prop to load. It also accepts a `fallback` prop that specifies a component to render while the data is loading. The `WhenVisible` component should wrap the component that depends on the data.
+Component `WhenVisible` nhận prop `data` để chỉ định key của prop cần tải. Component cũng nhận prop `fallback` để chỉ định component được render trong lúc dữ liệu đang tải. `WhenVisible` nên bao bọc component phụ thuộc vào dữ liệu đó.
 
 <CodeGroup>
 
@@ -56,7 +57,7 @@ export default () => (
 
 </CodeGroup>
 
-If you'd like to load multiple props when an element becomes visible, you can provide an array to the `data` prop.
+Nếu muốn tải nhiều prop khi một phần tử trở nên hiển thị, bạn có thể truyền một mảng vào prop `data`.
 
 <CodeGroup>
 
@@ -104,9 +105,9 @@ export default () => (
 
 </CodeGroup>
 
-## Loading Before Visible
+## Tải trước khi phần tử hiển thị
 
-If you'd like to start loading data before the element is visible, you can provide a value to the `buffer` prop. The buffer value is a number that represents the number of pixels before the element is visible.
+Nếu muốn bắt đầu tải dữ liệu trước khi phần tử thực sự hiển thị, bạn có thể truyền giá trị cho prop `buffer`. Giá trị buffer là số pixel tính từ thời điểm trước khi phần tử đi vào viewport.
 
 <CodeGroup>
 
@@ -162,9 +163,9 @@ export default () => (
 
 </CodeGroup>
 
-In the above example, the data will start loading 500 pixels before the element is visible.
+Trong ví dụ trên, dữ liệu sẽ bắt đầu được tải khi phần tử còn cách thời điểm hiển thị 500 pixel.
 
-By default, the `WhenVisible` component wraps the fallback template in a `div` element so it can ensure the element is visible in the viewport. If you want to customize the wrapper element, you can provide the `as` prop.
+Mặc định, component `WhenVisible` bao bọc fallback template bằng phần tử `div` để có thể xác định phần tử có hiển thị trong viewport hay không. Nếu muốn tùy chỉnh phần tử bao bọc, hãy truyền prop `as`.
 
 <CodeGroup>
 
@@ -204,13 +205,13 @@ export default () => (
 
 </CodeGroup>
 
-## Always Trigger
+## Luôn kích hoạt
 
-By default, the `WhenVisible` component will only trigger once when the element becomes visible. If you want to always trigger the data loading when the element is visible, you can provide the `always` prop.
+Mặc định, component `WhenVisible` chỉ kích hoạt một lần khi element trở nên hiển thị. Nếu muốn luôn kích hoạt tải dữ liệu khi element hiển thị, bạn có thể truyền prop `always`.
 
-This is useful when you want to load data every time the element becomes visible, such as when the element is at the end of an infinite scroll list and you want to load more data. Alternatively, you can use the [Infinite scroll](/v3/data-props/infinite-scroll) component which handles this use case for you.
+Điều này hữu ích khi muốn tải dữ liệu mỗi lần element hiển thị, chẳng hạn element ở cuối infinite scroll list và bạn muốn tải thêm. Ngoài ra có thể dùng component [Infinite scroll](/v3/data-props/infinite-scroll), vốn xử lý sẵn trường hợp này.
 
-Note that if the data loading request is already in flight, the component will wait until it is finished to start the next request if the element is still visible in the viewport.
+Lưu ý rằng nếu request tải dữ liệu vẫn đang được xử lý, component sẽ đợi request đó hoàn tất rồi mới bắt đầu request tiếp theo nếu phần tử vẫn còn hiển thị trong viewport.
 
 <CodeGroup>
 
@@ -250,9 +251,9 @@ export default () => (
 
 </CodeGroup>
 
-### Fetching State
+### Trạng thái fetching
 
-The `WhenVisible` component exposes a `fetching` slot prop that you may use to display a loading indicator during subsequent requests. This is useful because the `fallback` is only shown on the initial load, while `fetching` allows you to indicate that data is being refreshed on subsequent loads.
+Component `WhenVisible` cung cấp slot prop `fetching` để bạn hiển thị chỉ báo đang tải trong các request tiếp theo. Điều này hữu ích vì `fallback` chỉ được hiển thị ở lần tải đầu tiên, còn `fetching` cho phép cho biết dữ liệu đang được làm mới ở những lần tải sau.
 
 <CodeGroup>
 
@@ -313,9 +314,9 @@ export default () => (
 
 </CodeGroup>
 
-## Preserving Errors
+## Giữ lỗi
 
-The `WhenVisible` component sets `preserveErrors: true` by default, ensuring that validation errors are not cleared when it triggers a reload. You may override this via the `params` prop.
+Component `WhenVisible` mặc định đặt `preserveErrors: true`, đảm bảo validation error không bị xóa khi nó kích hoạt reload. Bạn có thể override qua prop `params`.
 
 <CodeGroup>
 
@@ -339,9 +340,9 @@ The `WhenVisible` component sets `preserveErrors: true` by default, ensuring tha
 
 </CodeGroup>
 
-## Form Submissions
+## Gửi form
 
-When submitting forms, you may want to use the `except` option to exclude the props that are being used by the `WhenVisible` component. This prevents the props from being reloaded when you get redirected back to the current page because of validation errors.
+Khi gửi form, bạn có thể muốn dùng tùy chọn `except` để loại trừ các prop đang được component `WhenVisible` sử dụng. Cách này tránh việc các prop bị tải lại khi bạn được redirect trở về trang hiện tại do lỗi validation.
 
 <CodeGroup>
 

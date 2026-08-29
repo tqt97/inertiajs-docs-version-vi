@@ -1,16 +1,17 @@
 ---
-title: Scroll Management
+title: Quản lý cuộn
+description: "Khi điều hướng giữa các trang, Inertia mô phỏng hành vi mặc định của trình duyệt bằng cách tự động đưa vị trí cuộn của document body (cũng như mọi vùng cuộn…"
 ---
 
-## Scroll Resetting
+## Đặt lại vị trí cuộn
 
-When navigating between pages, Inertia mimics default browser behavior by automatically resetting the scroll position of the document body (as well as any [scroll regions](#scroll-regions) you've defined) back to the top.
+Khi điều hướng giữa các trang, Inertia mô phỏng hành vi mặc định của trình duyệt bằng cách tự động đưa vị trí cuộn của document body (cũng như mọi [vùng cuộn](#scroll-regions) bạn đã định nghĩa) trở lại đầu trang.
 
-In addition, Inertia keeps track of the scroll position of each page and automatically restores that scroll position as you navigate forward and back in history.
+Ngoài ra, Inertia theo dõi vị trí cuộn của từng trang và tự động khôi phục vị trí đó khi bạn điều hướng tiến hoặc lùi trong lịch sử trình duyệt.
 
-## Scroll Preservation
+## Giữ vị trí cuộn
 
-Sometimes it's desirable to prevent the default scroll resetting when making visits. You can disable this behavior by setting the `preserveScroll` option to `true`.
+Đôi khi bạn muốn ngăn hành vi reset vị trí cuộn mặc định khi thực hiện visit. Có thể tắt hành vi này bằng cách đặt tùy chọn `preserveScroll` thành `true`.
 
 <CodeGroup>
 
@@ -34,7 +35,7 @@ router.visit(url, { preserveScroll: true });
 
 </CodeGroup>
 
-If you'd like to only preserve the scroll position if the response includes validation errors, set the `preserveScroll` option to "errors".
+Nếu chỉ muốn giữ vị trí cuộn khi response có lỗi validation, hãy đặt tùy chọn `preserveScroll` thành "errors".
 
 <CodeGroup>
 
@@ -58,7 +59,7 @@ router.visit(url, { preserveScroll: "errors" });
 
 </CodeGroup>
 
-You can also lazily evaluate the `preserveScroll` option based on the response by providing a callback.
+Bạn cũng có thể đánh giá trì hoãn tùy chọn `preserveScroll` dựa trên response bằng cách cung cấp một callback.
 
 <CodeGroup>
 
@@ -88,7 +89,7 @@ router.post("/users", data, {
 
 </CodeGroup>
 
-When using an [Inertia link](/v3/the-basics/links), you can preserve the scroll position using the `preserveScroll` prop.
+Khi dùng [Inertia link](/v3/the-basics/links), bạn có thể giữ vị trí cuộn bằng prop `preserveScroll`.
 
 <CodeGroup>
 
@@ -116,11 +117,11 @@ import { inertia, Link } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-## Scroll Regions
+## Vùng cuộn
 
-If your app doesn't use document body scrolling, but instead has scrollable elements (using the `overflow` CSS property), scroll resetting will not work.
+Nếu ứng dụng không cuộn bằng document body mà dùng các phần tử có thể cuộn (thông qua thuộc tính CSS `overflow`), cơ chế đặt lại vị trí cuộn sẽ không hoạt động.
 
-In these situations, you must tell Inertia which scrollable elements to manage by adding the `scroll-region` attribute to the element.
+Trong những trường hợp này, bạn phải cho Inertia biết phần tử cuộn nào cần được quản lý bằng cách thêm thuộc tính `scroll-region` vào phần tử đó.
 
 ```html
 <div class="overflow-y-auto" scroll-region="">
@@ -128,8 +129,8 @@ In these situations, you must tell Inertia which scrollable elements to manage b
 </div>
 ```
 
-## Text Fragments
+## Text fragments
 
-[Text fragments](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment/Text_fragments) allow you to link directly to specific text on a page using a special URL syntax like `#:~:text=term`. However, the browser removes the fragment directive before any JavaScript runs, so text fragments only work if the targeted text is present in the initial HTML response.
+[Text fragments](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment/Text_fragments) cho phép liên kết trực tiếp đến một đoạn văn bản cụ thể trên trang bằng cú pháp URL đặc biệt như `#:~:text=term`. Tuy nhiên, trình duyệt loại bỏ fragment directive trước khi JavaScript chạy, vì vậy text fragment chỉ hoạt động nếu đoạn văn bản đích đã có trong HTML response ban đầu.
 
-To use text fragments with your Inertia pages, enable [server-side rendering](/v3/advanced/server-side-rendering).
+Để dùng text fragment với Inertia page, hãy bật [server-side rendering](/v3/advanced/server-side-rendering).

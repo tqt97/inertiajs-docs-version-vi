@@ -1,12 +1,13 @@
 ---
 title: Infinite Scroll
+description: "Tính năng infinite scroll của Inertia tải thêm các trang nội dung khi người dùng cuộn, thay thế control phân trang truyền thống. Tính năng này phù hợp cho…"
 ---
 
-Inertia's infinite scroll feature loads additional pages of content as users scroll, replacing traditional pagination controls. This is great for applications like chat interfaces, social feeds, photo grids, and product listings.
+Tính năng infinite scroll của Inertia tải thêm các trang nội dung khi người dùng cuộn, thay thế control phân trang truyền thống. Tính năng này phù hợp cho giao diện chat, social feed, lưới ảnh và danh sách sản phẩm.
 
-## Server-Side
+## Phía máy chủ
 
-To configure your paginated data for infinite scrolling, you should use the `Inertia::scroll()` method when returning your response. This method automatically configures the proper merge behavior and normalizes pagination metadata for the front-end component.
+Để cấu hình dữ liệu phân trang cho infinite scrolling, bạn nên dùng phương thức `Inertia::scroll()` khi trả response. Phương thức tự động cấu hình hành vi merge phù hợp và chuẩn hóa pagination metadata cho frontend component.
 
 ```php
 Route::get('/users', function () {
@@ -16,11 +17,11 @@ Route::get('/users', function () {
 });
 ```
 
-The `Inertia::scroll()` method works with Laravel's `paginate()`, `simplePaginate()`, and `cursorPaginate()` methods, as well as pagination data wrapped in [Eloquent API resources](https://laravel.com/docs/eloquent-resources). For more details, check out the [Inertia::scroll() method](#inertia-scroll-method) documentation.
+Method `Inertia::scroll()` hoạt động với các method `paginate()`, `simplePaginate()` và `cursorPaginate()` của Laravel, cũng như dữ liệu phân trang được bọc trong [Eloquent API resource](https://laravel.com/docs/eloquent-resources). Xem tài liệu [method Inertia::scroll()](#inertia-scroll-method) để biết thêm.
 
-## Client-Side
+## Phía client
 
-On the client side, Inertia provides the `<InfiniteScroll>` component to automatically load additional pages of content. The component accepts a `data` prop that specifies the key of the prop containing your paginated data. The `<InfiniteScroll>` component should wrap the content that depends on the paginated data.
+Ở phía client, Inertia cung cấp component `<InfiniteScroll>` để tự động tải thêm các trang nội dung. Component nhận prop `data` chỉ định key của prop chứa dữ liệu phân trang. Component `<InfiniteScroll>` cần bọc nội dung phụ thuộc vào dữ liệu này.
 
 <CodeGroup>
 
@@ -69,11 +70,11 @@ export default function Users({ users }) {
 
 </CodeGroup>
 
-The component uses [intersection observers](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) to detect when users scroll near the end of the content and automatically triggers requests to load the next page. New data is merged with existing content rather than replacing it.
+Component dùng [Intersection Observer](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) để phát hiện khi người dùng cuộn gần cuối nội dung và tự động kích hoạt request tải page tiếp theo. Dữ liệu mới được merge với nội dung hiện có thay vì thay thế.
 
-## Loading Buffer
+## Loading buffer
 
-You can control how early content begins loading by setting a buffer distance. The buffer specifies how many pixels before the end of the content loading should begin.
+Bạn có thể kiểm soát việc tải nội dung bắt đầu sớm đến mức nào bằng khoảng buffer. Buffer chỉ định số pixel trước cuối nội dung mà quá trình tải cần bắt đầu.
 
 <CodeGroup>
 
@@ -97,11 +98,11 @@ You can control how early content begins loading by setting a buffer distance. T
 
 </CodeGroup>
 
-In the example above, content will start loading 500 pixels before reaching the end of the current content. A larger buffer loads content earlier but potentially loads content that users may never see.
+Trong ví dụ trên, nội dung bắt đầu tải khi còn cách cuối phần hiện tại 500 pixel. Buffer lớn hơn tải nội dung sớm hơn nhưng có thể tải cả nội dung người dùng không bao giờ xem.
 
-## URL Synchronization
+## Đồng bộ URL
 
-The infinite scroll component updates the browser URL's query string (`?page=...`) as users scroll through content. The URL reflects which page has the most visible items on screen, updating in both directions as users scroll up or down. This allows users to bookmark or share links to specific pages. You can disable this behavior to maintain the original page URL.
+Component infinite scroll cập nhật query string URL của trình duyệt (`?page=...`) khi người dùng cuộn qua nội dung. URL phản ánh trang có nhiều item hiển thị nhất trên màn hình và cập nhật theo cả hai hướng khi cuộn lên hoặc xuống. Nhờ đó người dùng có thể bookmark hoặc chia sẻ liên kết đến trang cụ thể. Bạn có thể tắt hành vi này để giữ nguyên URL ban đầu.
 
 <CodeGroup>
 
@@ -125,13 +126,13 @@ The infinite scroll component updates the browser URL's query string (`?page=...
 
 </CodeGroup>
 
-This is useful when infinite scroll is used for secondary content that shouldn't affect the main page URL, such as comments on a blog post or related products on a product page.
+Điều này hữu ích khi infinite scroll được dùng cho nội dung phụ không nên ảnh hưởng URL chính của trang, chẳng hạn comment của bài blog hoặc sản phẩm liên quan.
 
-## Resetting
+## Reset
 
-When filters or other parameters change, you may need to reset the infinite scroll data to start from the beginning. Without resetting, new results will merge with existing content instead of replacing it.
+Khi filter hoặc tham số khác thay đổi, bạn có thể cần reset dữ liệu infinite scroll để bắt đầu lại từ đầu. Nếu không reset, kết quả mới sẽ merge với nội dung hiện tại thay vì thay thế.
 
-You can reset data using the `reset` visit option.
+Bạn có thể reset dữ liệu bằng visit option `reset`.
 
 <CodeGroup>
 
@@ -215,11 +216,11 @@ export default function Users({ users }) {
 
 </CodeGroup>
 
-For more information about the reset option, see the [Resetting props](/v3/data-props/merging-props#resetting-props) documentation.
+Để biết thêm về tùy chọn reset, xem tài liệu [Resetting props](/v3/data-props/merging-props#resetting-props).
 
-## Loading Direction
+## Hướng tải dữ liệu
 
-The infinite scroll component loads content in both directions when you scroll near the start or end. You can control this behavior using the `only-next` and `only-previous` props.
+Component infinite scroll tải nội dung theo cả hai hướng khi bạn cuộn gần đầu hoặc cuối. Bạn có thể kiểm soát bằng các prop `only-next` và `only-previous`.
 
 <CodeGroup>
 
@@ -280,11 +281,11 @@ The infinite scroll component loads content in both directions when you scroll n
 
 </CodeGroup>
 
-The default option is particularly useful when users start on a middle page and need to scroll in both directions to access all content.
+Option mặc định đặc biệt hữu ích khi người dùng bắt đầu ở một trang giữa và cần cuộn theo cả hai hướng để truy cập toàn bộ nội dung.
 
-## Reverse Mode
+## Reverse mode
 
-For chat applications, timelines, or interfaces where content is sorted descendingly (newest items at the bottom), you can enable reverse mode. This configures the component to load older content when scrolling upward.
+Với ứng dụng chat, timeline hoặc giao diện có nội dung sắp xếp giảm dần (item mới nhất ở dưới cùng), bạn có thể bật reverse mode. Chế độ này cấu hình component tải nội dung cũ hơn khi cuộn lên.
 
 <CodeGroup>
 
@@ -308,9 +309,9 @@ For chat applications, timelines, or interfaces where content is sorted descendi
 
 </CodeGroup>
 
-In reverse mode, the component flips the loading directions so that scrolling up loads the next page (older content) and scrolling down loads the previous page (newer content). The component handles the loading positioning, but you are responsible for reversing your content to display in the correct order.
+Trong reverse mode, component đảo hướng tải: cuộn lên tải trang kế tiếp (nội dung cũ hơn), cuộn xuống tải trang trước (nội dung mới hơn). Component xử lý vị trí khi loading, nhưng bạn chịu trách nhiệm đảo thứ tự nội dung để hiển thị đúng.
 
-Reverse mode also enables automatic scrolling to the bottom on initial load, which you can disable with `:auto-scroll="false"`.
+Reverse mode cũng tự động cuộn xuống cuối ở lần tải đầu tiên; bạn có thể tắt bằng `:auto-scroll="false"`.
 
 <CodeGroup>
 
@@ -334,9 +335,9 @@ Reverse mode also enables automatic scrolling to the bottom on initial load, whi
 
 </CodeGroup>
 
-## Manual Mode
+## Manual mode
 
-Manual mode disables automatic loading when scrolling and allows you to control when content loads through the `next` and `previous` slots. For more details about available slot properties and customization options, see the [Slots](#slots) documentation.
+Manual mode tắt tự động tải khi cuộn và cho phép bạn kiểm soát thời điểm tải nội dung qua slot `next` và `previous`. Để biết chi tiết property slot và option tùy chỉnh, xem [Slots](#slots).
 
 <CodeGroup>
 
@@ -420,7 +421,7 @@ export default ({ users }) => (
 
 </CodeGroup>
 
-You can also configure the component to automatically switch to manual mode after a certain number of pages using the `manualAfter` prop.
+Bạn cũng có thể cấu hình component tự chuyển sang manual mode sau một số lượng trang nhất định bằng prop `manualAfter`.
 
 <CodeGroup>
 
@@ -446,11 +447,11 @@ You can also configure the component to automatically switch to manual mode afte
 
 ## Slots
 
-The infinite scroll component provides several slots to customize the loading experience. These slots allow you to display custom loading indicators and create manual load controls. Each slot receives properties that provide loading state information and functions to trigger content loading.
+Component infinite scroll cung cấp nhiều slot để tùy chỉnh trải nghiệm loading. Các slot cho phép hiển thị loading indicator tùy chỉnh và tạo control tải thủ công. Mỗi slot nhận property cung cấp thông tin trạng thái loading và function kích hoạt tải nội dung.
 
-### Default Slot
+### Default slot
 
-The main content area where you render your data items. This slot receives loading state information.
+Khu vực nội dung chính nơi bạn render item dữ liệu. Slot này nhận thông tin trạng thái loading.
 
 <CodeGroup>
 
@@ -481,9 +482,9 @@ The main content area where you render your data items. This slot receives loadi
 
 </CodeGroup>
 
-### Loading Slot
+### Loading slot
 
-The loading slot is used as a fallback when loading content and no custom `before` or `after` slots are provided. This creates a default loading indicator.
+Loading slot được dùng làm fallback khi đang tải nội dung và không có custom slot `before` hoặc `after`. Nó tạo loading indicator mặc định.
 
 <CodeGroup>
 
@@ -515,9 +516,9 @@ The loading slot is used as a fallback when loading content and no custom `befor
 
 </CodeGroup>
 
-### Previous and Next Slots
+### Slot Previous và Next
 
-The `previous` and `next` slots are rendered above and below the main content, typically used for manual load controls. These slots receive several properties including loading states, fetch functions, and mode indicators.
+Slot `previous` và `next` được render phía trên và dưới nội dung chính, thường dùng làm control tải thủ công. Các slot nhận nhiều property gồm trạng thái loading, function fetch và chỉ báo mode.
 
 ```vue
 <template>
@@ -539,23 +540,23 @@ The `previous` and `next` slots are rendered above and below the main content, t
 </template>
 ```
 
-The `loading`, `previous`, and `next` slots receive the following properties:
+Các slot `loading`, `previous` và `next` nhận những property sau:
 
-| Property          | Description                                    |
+| Thuộc tính         | Mô tả                                           |
 | :---------------- | :--------------------------------------------- |
-| `loading`         | Whether the slot is currently loading content  |
-| `loadingPrevious` | Whether previous content is loading            |
-| `loadingNext`     | Whether next content is loading                |
-| `fetch`           | Function to trigger loading for the slot       |
-| `hasMore`         | Whether more content is available for the slot |
-| `hasPrevious`     | Whether more previous content is available     |
-| `hasNext`         | Whether more next content is available         |
-| `manualMode`      | Whether manual mode is active                  |
-| `autoMode`        | Whether automatic loading is active            |
+| `loading`         | Slot hiện có đang tải nội dung hay không       |
+| `loadingPrevious` | Nội dung trước đó có đang được tải hay không   |
+| `loadingNext`     | Nội dung tiếp theo có đang được tải hay không  |
+| `fetch`           | Function kích hoạt tải cho slot                |
+| `hasMore`         | Slot còn nội dung để tải hay không             |
+| `hasPrevious`     | Còn nội dung trước đó hay không                |
+| `hasNext`         | Còn nội dung tiếp theo hay không               |
+| `manualMode`      | Manual mode có đang active hay không           |
+| `autoMode`        | Automatic loading có đang active hay không     |
 
-## Custom Element
+## Custom element
 
-The `InfiniteScroll` component renders as a `<div>` element. You may customize this to use any HTML element using the `as` prop.
+Component `InfiniteScroll` render dưới dạng phần tử `<div>`. Bạn có thể tùy chỉnh thành bất kỳ element HTML nào bằng prop `as`.
 
 <CodeGroup>
 
@@ -587,9 +588,9 @@ The `InfiniteScroll` component renders as a `<div>` element. You may customize t
 
 </CodeGroup>
 
-## Element Targeting
+## Target element
 
-The infinite scroll component automatically tracks content and assigns page numbers to elements for [URL synchronization](#url-synchronization). When your data items are not direct children of the component's root element, you need to specify which element contains the actual data items using the `itemsElement` prop.
+Component infinite scroll tự động theo dõi nội dung và gán số trang cho element để [đồng bộ URL](#url-synchronization). Khi item dữ liệu không phải child trực tiếp của root element của component, bạn cần chỉ định element thực sự chứa item bằng prop `itemsElement`.
 
 <CodeGroup>
 
@@ -650,9 +651,9 @@ The infinite scroll component automatically tracks content and assigns page numb
 
 </CodeGroup>
 
-In this example, the component monitors the `#table-body` element and automatically tags each `<tr>` with a page number as new content loads. This enables proper URL updates based on which page's content is most visible in the viewport.
+Trong ví dụ này, component theo dõi element `#table-body` và tự động gắn số trang cho từng `<tr>` khi nội dung mới được tải. Điều này cho phép URL cập nhật chính xác dựa trên nội dung của trang nào đang hiển thị nhiều nhất trong viewport.
 
-You can also specify custom trigger elements for loading more content using CSS selectors. This prevents the default trigger elements from being rendered and uses intersection observers on your custom elements instead.
+Bạn cũng có thể chỉ định custom trigger element để tải thêm nội dung bằng CSS selector. Khi đó các trigger element mặc định sẽ không được render và Intersection Observer sẽ theo dõi custom element thay thế.
 
 <CodeGroup>
 
@@ -741,7 +742,7 @@ You can also specify custom trigger elements for loading more content using CSS 
 
 </CodeGroup>
 
-Alternatively, you can use template refs instead of CSS selectors. This avoids adding HTML attributes and provides direct element references.
+Ngoài ra, bạn có thể dùng template ref thay cho CSS selector. Cách này tránh phải thêm HTML attribute và cung cấp tham chiếu element trực tiếp.
 
 <CodeGroup>
 
@@ -856,9 +857,9 @@ export default ({ users }) => {
 
 </CodeGroup>
 
-## Scroll Containers
+## Scroll container
 
-The infinite scroll component works within any scrollable container, not just the main document. The component automatically adapts to use the custom scroll container for trigger detection and calculations instead of the main document scroll.
+Component infinite scroll hoạt động trong bất kỳ container có thể cuộn nào, không chỉ document chính. Component tự động thích nghi để dùng custom scroll container cho việc phát hiện trigger và tính toán thay cho scroll của document chính.
 
 <CodeGroup>
 
@@ -896,9 +897,9 @@ The infinite scroll component works within any scrollable container, not just th
 
 </CodeGroup>
 
-### Multiple Scroll Containers
+### Nhiều scroll container
 
-Sometimes you may need to render multiple infinite scroll components on a single page. However, if both components use the default `page` query parameter for [URL synchronization](#url-synchronization), they will conflict with each other. To resolve this, instruct each paginator to use a custom `pageName`.
+Đôi khi bạn cần render nhiều component infinite scroll trên cùng một trang. Tuy nhiên, nếu cả hai đều dùng query parameter `page` mặc định để [đồng bộ URL](#url-synchronization), chúng sẽ xung đột. Để giải quyết, hãy yêu cầu mỗi paginator dùng `pageName` riêng.
 
 ```php
 Route::get('/dashboard', function () {
@@ -913,13 +914,13 @@ Route::get('/dashboard', function () {
 });
 ```
 
-The `Inertia::scroll()` method automatically detects the `pageName` from each paginator, allowing both scroll containers to maintain independent pagination state. This results in URLs like `?users=2&orders=3` instead of conflicting `?page=` parameters.
+Method `Inertia::scroll()` tự động phát hiện `pageName` từ từng paginator, cho phép các scroll container duy trì pagination state độc lập. Kết quả URL sẽ có dạng `?users=2&orders=3` thay vì xung đột ở parameter `?page=`.
 
-For more information about pagination page names, see [Laravel's documentation](https://laravel.com/docs/pagination#multiple-paginator-instances-per-page).
+Để biết thêm về page name của pagination, xem [tài liệu Laravel](https://laravel.com/docs/pagination#multiple-paginator-instances-per-page).
 
-## Programmatic Access
+## Truy cập bằng code
 
-When you need to trigger loading actions programmatically, you may use a template ref.
+Khi cần kích hoạt action tải dữ liệu bằng code, bạn có thể dùng template ref.
 
 <CodeGroup>
 
@@ -990,16 +991,16 @@ export default ({ users }) => {
 
 </CodeGroup>
 
-The component exposes the following methods:
+Component expose các method sau:
 
-- `fetchNext()` - Manually fetch the next page
-- `fetchPrevious()` - Manually fetch the previous page
-- `hasNext()` - Whether there is a next page
-- `hasPrevious()` - Whether there is a previous page
+- `fetchNext()` - Chủ động lấy trang tiếp theo
+- `fetchPrevious()` - Chủ động lấy trang trước
+- `hasNext()` - Có trang tiếp theo hay không
+- `hasPrevious()` - Có trang trước hay không
 
-## Inertia::scroll() Method
+## Method Inertia::scroll()
 
-The `Inertia::scroll()` method provides server-side configuration for infinite scrolling. It automatically configures the proper merge behavior so that new data is appended or prepended to existing content instead of replacing it, and normalizes pagination metadata for the front-end component.
+Phương thức `Inertia::scroll()` cung cấp cấu hình phía server cho infinite scrolling. Nó tự động cấu hình merge để dữ liệu mới được append hoặc prepend vào nội dung hiện có thay vì thay thế, đồng thời chuẩn hóa pagination metadata cho frontend component.
 
 ```php
 // Works with all Laravel pagination methods...
@@ -1011,7 +1012,7 @@ Inertia::scroll(User::cursorPaginate(20));
 Inertia::scroll(UserResource::collection(User::paginate(20)));
 ```
 
-If you don't use Laravel's paginator or use a different transformation layer, you may use the additional arguments that `scroll()` accepts.
+Nếu không dùng paginator của Laravel hoặc dùng transformation layer khác, bạn có thể sử dụng các đối số bổ sung mà `scroll()` hỗ trợ.
 
 ```php
 // Customize the data wrapper key (defaults to 'data')...
@@ -1021,7 +1022,7 @@ Inertia::scroll($customPaginatedData, wrapper: 'items');
 Inertia::scroll($data, metadata: $metadataProvider);
 ```
 
-The metadata parameter accepts an instance of `ProvidesScrollMetadata` or a callback that returns such an instance. The callback receives the `$data` parameter. This is useful when integrating with third-party pagination libraries like Fractal.
+Tham số metadata nhận instance `ProvidesScrollMetadata` hoặc callback trả về instance đó. Callback nhận tham số `$data`. Điều này hữu ích khi tích hợp thư viện pagination bên thứ ba như Fractal.
 
 ```php
 use League\Fractal\Resource\Collection;
@@ -1036,7 +1037,7 @@ class FractalScrollMetadata implements ProvidesScrollMetadata
 }
 ```
 
-You may then use this custom metadata provider in your scroll function.
+Sau đó bạn có thể dùng custom metadata provider này trong scroll function.
 
 ```php
 // Using an instance directly
@@ -1049,7 +1050,7 @@ Inertia::scroll(
 );
 ```
 
-To avoid repeating this setup in multiple controllers, you may define a macro.
+Để tránh lặp setup này trong nhiều controller, bạn có thể định nghĩa macro.
 
 ```php
 // In your AppServiceProvider's boot method

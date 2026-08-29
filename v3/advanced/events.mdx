@@ -1,12 +1,13 @@
 ---
-title: Events
+title: Sự kiện
+description: "Inertia cung cấp một hệ thống sự kiện cho phép bạn \"hook\" vào nhiều sự kiện khác nhau trong lifecycle của thư viện."
 ---
 
-Inertia provides an event system that allows you to "hook into" the various lifecycle events of the library.
+Inertia cung cấp một hệ thống sự kiện cho phép bạn "hook" vào nhiều sự kiện khác nhau trong lifecycle của thư viện.
 
-## Registering Listeners
+## Đăng ký listener
 
-To register an event listener, use the `router.on()` method.
+Để đăng ký event listener, dùng phương thức `router.on()`.
 
 <CodeGroup>
 
@@ -36,7 +37,7 @@ router.on("start", (event) => {
 
 </CodeGroup>
 
-Under the hood, Inertia uses native browser events, so you can also interact with Inertia events using the typical event methods you may already be familiar with. Just be sure to prepend `inertia:` to the event name.
+Bên dưới, Inertia dùng native browser event, nên bạn cũng có thể tương tác với Inertia event bằng các event method quen thuộc. Chỉ cần nhớ thêm tiền tố `inertia:` vào event name.
 
 <CodeGroup>
 
@@ -66,9 +67,9 @@ document.addEventListener("inertia:start", (event) => {
 
 </CodeGroup>
 
-## Removing Listeners
+## Gỡ listener
 
-When you register an event listener, Inertia automatically returns a callback that can be invoked to remove the event listener.
+Khi bạn đăng ký event listener, Inertia tự động trả về một callback có thể gọi để gỡ listener đó.
 
 <CodeGroup>
 
@@ -107,7 +108,7 @@ removeStartEventListener();
 
 </CodeGroup>
 
-Combined with hooks, you can automatically remove the event listener when components unmount.
+Kết hợp với hook, bạn có thể tự động gỡ event listener khi component unmount.
 
 <CodeGroup>
 
@@ -147,7 +148,7 @@ $effect(() => {
 
 </CodeGroup>
 
-Alternatively, if you're using native browser events, you can remove the event listener using `removeEventListener()`.
+Ngoài ra, nếu đang dùng event nguyên bản của trình duyệt, bạn có thể gỡ listener bằng `removeEventListener()`.
 
 <CodeGroup>
 
@@ -192,9 +193,9 @@ document.removeEventListener("inertia:start", startEventListener);
 
 </CodeGroup>
 
-## One-time Listeners
+## Listener chỉ chạy một lần
 
-You may register a listener that fires only once using the `router.once()` method. The listener is automatically removed after the first invocation.
+Bạn có thể đăng ký listener chỉ chạy một lần bằng phương thức `router.once()`. Listener tự động bị xóa sau lần gọi đầu tiên.
 
 <CodeGroup>
 
@@ -224,7 +225,7 @@ router.once("start", (event) => {
 
 </CodeGroup>
 
-Like `router.on()`, this method returns a callback you may invoke to remove the listener before it fires.
+Giống `router.on()`, phương thức này trả callback mà bạn có thể gọi để xóa listener trước khi nó chạy.
 
 <CodeGroup>
 
@@ -263,9 +264,9 @@ removeStartEventListener();
 
 </CodeGroup>
 
-## Canceling Events
+## Hủy event
 
-Some events, such as `before`, `networkError`, `httpException`, and `location`, support cancellation, allowing you to prevent Inertia's default behavior. Just like native events, the event will be canceled if only one event listener calls `event.preventDefault()`.
+Một số event như `before`, `networkError`, `httpException` và `location` hỗ trợ hủy, cho phép ngăn hành vi mặc định của Inertia. Giống native event, event sẽ bị hủy nếu chỉ cần một listener gọi `event.preventDefault()`.
 
 <CodeGroup>
 
@@ -301,7 +302,7 @@ router.on("before", (event) => {
 
 </CodeGroup>
 
-For convenience, if you register your event listener using `router.on()`, you can cancel the event by returning `false` from the listener.
+Để thuận tiện, nếu đăng ký event listener bằng `router.on()`, bạn có thể hủy event bằng cách trả về `false` từ listener.
 
 <CodeGroup>
 
@@ -331,11 +332,11 @@ router.on("before", (event) => {
 
 </CodeGroup>
 
-Note that browsers do not allow canceling the native `popstate` event, so preventing forward and back history visits with Inertia is not possible.
+Lưu ý browser không cho phép hủy native event `popstate`, vì vậy không thể ngăn history visit forward/back bằng Inertia.
 
 ## Before
 
-The `before` event fires when a request is about to be made to the server. This is useful for intercepting visits.
+Sự kiện `before` được phát ngay trước khi một request chuẩn bị được gửi đến máy chủ. Điều này hữu ích để chặn visit.
 
 <CodeGroup>
 
@@ -365,7 +366,7 @@ router.on("before", (event) => {
 
 </CodeGroup>
 
-The primary purpose of this event is to allow you to prevent a visit from happening.
+Mục đích chính của sự kiện này là cho phép bạn ngăn một visit diễn ra.
 
 <CodeGroup>
 
@@ -397,7 +398,7 @@ router.on("before", (event) => {
 
 ## Start
 
-The `start` event fires when a request to the server has started. This is useful for displaying loading indicators.
+Sự kiện `start` được phát khi request đến máy chủ đã bắt đầu. Sự kiện này hữu ích để hiển thị loading indicator.
 
 <CodeGroup>
 
@@ -427,11 +428,11 @@ router.on("start", (event) => {
 
 </CodeGroup>
 
-The `start` event is not cancelable.
+Sự kiện `start` không thể bị hủy.
 
 ## Progress
 
-The `progress` event fires as progress increments during file uploads.
+Sự kiện `progress` được phát khi tiến trình tăng lên trong quá trình tải file.
 
 <CodeGroup>
 
@@ -461,11 +462,11 @@ router.on("progress", (event) => {
 
 </CodeGroup>
 
-The `progress` event is not cancelable.
+Sự kiện `progress` không thể bị hủy.
 
 ## Success
 
-The `success` event fires on successful page visits, unless validation errors are present. However, this does _not_ include history visits.
+Event `success` chạy khi page visit thành công, trừ khi có validation error. Tuy nhiên, điều này _không_ bao gồm history visit.
 
 <CodeGroup>
 
@@ -495,11 +496,11 @@ router.on("success", (event) => {
 
 </CodeGroup>
 
-The `success` event is not cancelable.
+Sự kiện `success` không thể bị hủy.
 
 ## Flash
 
-The `flash` event fires when [flash data](/v3/data-props/flash-data) is received from the server. This is useful for displaying toast notifications or handling temporary data in a central location.
+Event `flash` chạy khi nhận [flash data](/v3/data-props/flash-data) từ server. Điều này hữu ích để hiển thị toast hoặc xử lý dữ liệu tạm thời tại một vị trí tập trung.
 
 <CodeGroup>
 
@@ -535,11 +536,11 @@ router.on("flash", (event) => {
 
 </CodeGroup>
 
-The `flash` event is not cancelable and fires on every response that carries flash data.
+Event `flash` không thể bị hủy và được phát trên mọi response có chứa flash data.
 
 ## Error
 
-The `error` event fires when validation errors are present on "successful" page visits.
+Sự kiện `error` được phát khi có lỗi validation trong các page visit "thành công".
 
 <CodeGroup>
 
@@ -569,13 +570,13 @@ router.on("error", (event) => {
 
 </CodeGroup>
 
-The `error` event is not cancelable.
+Sự kiện `error` không thể bị hủy.
 
 ## HTTP Exception
 
-The `httpException` event fires when a non-Inertia response is received from the server, such as an HTML or JSON response. A valid Inertia response has the `X-Inertia` header set to `true` and a JSON payload containing [the page object](/v3/core-concepts/the-protocol#the-page-object).
+Event `httpException` chạy khi nhận response không phải Inertia từ server, chẳng hạn HTML hoặc JSON response. Inertia response hợp lệ có header `X-Inertia` đặt thành `true` và JSON payload chứa [page object](/v3/core-concepts/the-protocol#the-page-object).
 
-This event is fired for all response types, including `200`, `400`, and `500` response codes.
+Event này chạy cho mọi loại response, bao gồm code `200`, `400` và `500`.
 
 <CodeGroup>
 
@@ -608,7 +609,7 @@ router.on("httpException", (event) => {
 
 </CodeGroup>
 
-You may cancel the `httpException` event to prevent Inertia from showing the non-Inertia response modal.
+Bạn có thể hủy event `httpException` để ngăn Inertia hiển thị modal response không phải Inertia.
 
 <CodeGroup>
 
@@ -646,7 +647,7 @@ router.on("httpException", (event) => {
 
 ## Network Error
 
-The `networkError` event fires on unexpected XHR errors such as network interruptions. In addition, this event fires for errors generated when resolving page components.
+Event `networkError` chạy khi xảy ra XHR error ngoài dự kiến như mất kết nối mạng. Ngoài ra event cũng chạy với error phát sinh khi resolve page component.
 
 <CodeGroup>
 
@@ -679,7 +680,7 @@ router.on("networkError", (event) => {
 
 </CodeGroup>
 
-You may cancel the `networkError` event to prevent the error from being thrown.
+Bạn có thể hủy event `networkError` để ngăn exception bị ném.
 
 <CodeGroup>
 
@@ -712,11 +713,11 @@ router.on("networkError", (event) => {
 
 </CodeGroup>
 
-This event will _not_ fire for XHR requests that receive `400`- and `500`-level responses or for non-Inertia responses, as these situations are handled in other ways by Inertia. Please consult the [error handling documentation](/v3/advanced/error-handling) for more information.
+Event này _không_ chạy với XHR request nhận response mức `400` và `500` hoặc response không phải Inertia, vì các tình huống đó được Inertia xử lý theo cách khác. Xem [tài liệu xử lý lỗi](/v3/advanced/error-handling) để biết thêm.
 
 ## Finish
 
-The `finish` event fires after an XHR request has completed for both "successful" and "unsuccessful" responses. This event is useful for hiding loading indicators.
+Sự kiện `finish` được phát sau khi một request XHR hoàn tất, áp dụng cho cả response "thành công" lẫn "không thành công". Sự kiện này hữu ích để ẩn loading indicator.
 
 <CodeGroup>
 
@@ -746,11 +747,11 @@ router.on("finish", (event) => {
 
 </CodeGroup>
 
-The `finish` event is not cancelable.
+Sự kiện `finish` không thể bị hủy.
 
 ## Navigate
 
-The `navigate` event fires on successful page visits, as well as when navigating through history.
+Sự kiện `navigate` được phát khi page visit thành công, cũng như khi điều hướng qua lịch sử trình duyệt.
 
 <CodeGroup>
 
@@ -780,13 +781,13 @@ router.on("navigate", (event) => {
 
 </CodeGroup>
 
-The `navigate` event is not cancelable.
+Sự kiện `navigate` không thể bị hủy.
 
 ## Location
 
 <Badge>v3.6.0+</Badge>
 
-The `location` event fires whenever Inertia is about to force a full-page navigation, either because the [asset version](/v3/advanced/asset-versioning) changed or because the server returned an `Inertia::location()` redirect. The event detail includes a `versionChange` boolean so you may tell an automatic asset version change apart from a manual redirect.
+Event `location` chạy mỗi khi Inertia chuẩn bị ép full-page navigation, do [asset version](/v3/advanced/asset-versioning) thay đổi hoặc server trả redirect `Inertia::location()`. Event detail chứa boolean `versionChange` để phân biệt automatic asset version change với manual redirect.
 
 <CodeGroup>
 
@@ -819,7 +820,7 @@ router.on("location", (event) => {
 
 </CodeGroup>
 
-You may cancel the `location` event to take over the navigation yourself, for example to show a "new version available" banner instead of reloading.
+Bạn có thể hủy event `location` để tự tiếp quản navigation, ví dụ hiển thị banner "có phiên bản mới" thay vì reload.
 
 <CodeGroup>
 
@@ -858,9 +859,9 @@ router.on("location", (event) => {
 
 </CodeGroup>
 
-## Prefetching
+## Prefetch
 
-The `prefetching` event fires when the router starts prefetching a page.
+Event `prefetching` được kích hoạt khi router bắt đầu prefetch một trang.
 
 <CodeGroup>
 
@@ -890,11 +891,11 @@ router.on("prefetching", (event) => {
 
 </CodeGroup>
 
-The `prefetching` event is not cancelable.
+Event `prefetching` không thể hủy.
 
 ## Prefetched
 
-The `prefetched` event fires when the router has successfully prefetched a page.
+Event `prefetched` được kích hoạt khi router đã prefetch một trang thành công.
 
 <CodeGroup>
 
@@ -924,8 +925,8 @@ router.on("prefetched", (event) => {
 
 </CodeGroup>
 
-The `prefetched` event is not cancelable.
+Event `prefetched` không thể hủy.
 
-## Event Callbacks
+## Callback sự kiện
 
-In addition to the global events described throughout this page, Inertia also provides a number of [event callbacks](/v3/the-basics/manual-visits#event-callbacks) that fire when you manually make Inertia visits.
+Ngoài các global event được mô tả trong trang này, Inertia còn cung cấp nhiều [event callback](/v3/the-basics/manual-visits#event-callbacks) chạy khi bạn thực hiện Inertia visit thủ công.

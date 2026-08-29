@@ -1,5 +1,6 @@
 ---
-title: Pages
+title: Trang
+description: "Khi xây ứng dụng với Inertia, mỗi page thường có controller hoặc route riêng và JavaScript component tương ứng. Điều này cho phép chỉ lấy dữ liệu cần thiết…"
 ---
 
 import { ClientSpecific } from "/snippets/client-specific.jsx";
@@ -7,13 +8,13 @@ import { ReactSpecific } from "/snippets/react-specific.jsx";
 import { SvelteSpecific } from "/snippets/svelte-specific.jsx";
 import { VueSpecific } from "/snippets/vue-specific.jsx";
 
-When building applications using Inertia, each page in your application typically has its own controller or route and a corresponding JavaScript component. This allows you to retrieve just the data necessary for that page - no API required.
+Khi xây ứng dụng với Inertia, mỗi page thường có controller hoặc route riêng và JavaScript component tương ứng. Điều này cho phép chỉ lấy dữ liệu cần thiết cho page đó - không cần API.
 
-In addition, all of the data needed for the page can be retrieved before the page is ever rendered by the browser, eliminating the need for displaying "loading" states when users visit your application.
+Ngoài ra, toàn bộ dữ liệu mà trang cần có thể được truy xuất trước khi trình duyệt render trang, qua đó loại bỏ nhu cầu hiển thị trạng thái "đang tải" khi người dùng truy cập ứng dụng.
 
-## Creating Pages
+## Tạo trang
 
-Inertia pages are simply JavaScript components. If you have ever written a Vue, React, or Svelte component, you will feel right at home. As you can see in the example below, pages receive data from your application's controllers as props.
+Trang Inertia đơn giản chỉ là các component JavaScript. Nếu từng viết component Vue, React hoặc Svelte, bạn sẽ thấy rất quen thuộc. Như ví dụ bên dưới, các trang nhận dữ liệu từ controller của ứng dụng thông qua props.
 
 <CodeGroup>
 
@@ -69,13 +70,13 @@ export default function Welcome({ user }) {
 </CodeGroup>
 
 <ClientSpecific>
-  Given the page above, you can render the page by returning an [Inertia
-  response](/v3/the-basics/responses) from a controller or route. In this
-  example, let's assume this page is stored at{" "}
+  Với page ở trên, bạn có thể render page bằng cách trả [Inertia
+  response](/v3/the-basics/responses) từ controller hoặc route. Trong
+  ví dụ này, giả sử page được lưu tại{" "}
   <VueSpecific>`resources/js/Pages/User/Show.vue`</VueSpecific>
   <ReactSpecific>`resources/js/Pages/User/Show.jsx`</ReactSpecific>
-  <SvelteSpecific>`resources/js/Pages/User/Show.svelte`</SvelteSpecific>within a
-  Laravel application.
+  <SvelteSpecific>`resources/js/Pages/User/Show.svelte`</SvelteSpecific>trong một
+  ứng dụng Laravel.
 </ClientSpecific>
 
 ```php
@@ -92,11 +93,11 @@ class UserController extends Controller
 }
 ```
 
-If you attempt to render a page that does not exist, the response will typically be a blank screen. To prevent this, you may set the `inertia.ensure_pages_exist` configuration option to `true`. The Laravel adapter will then throw an `Inertia\ComponentNotFoundException` when a page cannot be found.
+Nếu cố render một trang không tồn tại, response thường là màn hình trống. Để ngăn điều này, bạn có thể đặt config `inertia.ensure_pages_exist` thành `true`. Adapter Laravel khi đó sẽ ném `Inertia\ComponentNotFoundException` nếu không tìm thấy trang.
 
-## Transforming Component Names
+## Biến đổi tên component
 
-Sometimes you may wish to transform component names. This may be done on the client side using the [`pages.transform`](/v3/installation/client-side-setup#pages-shorthand) option, or on the server using the `Inertia::transformComponentUsing()` method. The transformed name is sent to the browser and used for `ensure_pages_exist` checks.
+Đôi khi bạn muốn biến đổi tên component. Có thể làm phía client bằng tùy chọn [`pages.transform`](/v3/installation/client-side-setup#pages-shorthand), hoặc phía server bằng phương thức `Inertia::transformComponentUsing()`. Tên sau biến đổi được gửi tới trình duyệt và dùng cho kiểm tra `ensure_pages_exist`.
 
 ```php
 use Inertia\Inertia;
@@ -108,4 +109,4 @@ Inertia::transformComponentUsing(function (string $name): string {
 
 ## Layouts
 
-Most applications share common UI elements across pages. Inertia provides persistent layouts that survive page navigations, along with layout props for passing dynamic data between pages and their layouts. Visit the [layouts documentation](/v3/the-basics/layouts) to learn more.
+Hầu hết ứng dụng chia sẻ các phần tử UI chung giữa các page. Inertia cung cấp persistent layout tồn tại qua page navigation, cùng layout prop để truyền dữ liệu động giữa page và layout. Xem [tài liệu layouts](/v3/the-basics/layouts) để biết thêm.

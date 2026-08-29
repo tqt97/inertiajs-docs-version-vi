@@ -1,14 +1,15 @@
 ---
-title: Instant Visits
+title: Instant visits
+description: "Đôi khi bạn muốn điều hướng sang page mới mà không chờ server phản hồi. Instant visit cho phép Inertia ngay lập tức chuyển sang target page component trong…"
 ---
 
-Sometimes you may wish to navigate to a new page without waiting for the server to respond. Instant visits allow Inertia to immediately swap to the target page component while the server request happens in the background. Once the server responds, the real props are merged in.
+Đôi khi bạn muốn điều hướng sang page mới mà không chờ server phản hồi. Instant visit cho phép Inertia ngay lập tức chuyển sang target page component trong khi server request chạy nền. Khi server phản hồi, prop thực tế sẽ được merge vào.
 
-Unlike [client-side visits](/v3/the-basics/manual-visits#client-side-visits), which update the page entirely on the client without making a server request, instant visits still make a full server request. The difference is that the user sees the target page right away instead of waiting for the response.
+Khác với [client-side visits](/v3/the-basics/manual-visits#client-side-visits), vốn cập nhật page hoàn toàn ở client mà không gửi server request, instant visit vẫn thực hiện full server request. Khác biệt là người dùng thấy target page ngay thay vì chờ response.
 
-## Basic Usage
+## Cách dùng cơ bản
 
-To make an instant visit, provide the target `component` name to a `Link` or to `router.visit()`.
+Để tạo instant visit, hãy cung cấp tên `component` đích cho `Link` hoặc `router.visit()`.
 
 <CodeGroup>
 
@@ -36,11 +37,11 @@ import { inertia, Link } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-When clicked, Inertia immediately renders the `Dashboard` component while the server request fires in the background. The full props are merged in when the response arrives.
+Khi được click, Inertia ngay lập tức render component `Dashboard` trong khi server request chạy nền. Toàn bộ prop được merge vào khi response đến.
 
-The target component must be able to render without its page-specific props, as only [shared props](/v3/data-props/shared-data) are available on the intermediate page. You may use optional chaining or conditional rendering to handle missing props.
+Target component phải có thể render mà không cần prop riêng của page, vì intermediate page chỉ có [shared props](/v3/data-props/shared-data). Bạn có thể dùng optional chaining hoặc conditional rendering để xử lý prop bị thiếu.
 
-Programmatic instant visits work the same way via the `component` option on `router.visit()`.
+Instant visit bằng lập trình hoạt động tương tự thông qua tùy chọn `component` trên `router.visit()`.
 
 ```js
 router.visit("/dashboard", {
@@ -48,9 +49,9 @@ router.visit("/dashboard", {
 });
 ```
 
-## Shared Props
+## Shared props
 
-The Laravel adapter includes a `sharedProps` metadata key in the page response, listing the top-level prop keys registered via `Inertia::share()`.
+Laravel adapter đưa key metadata `sharedProps` vào page response, liệt kê các key prop cấp cao nhất được đăng ký qua `Inertia::share()`.
 
 ```json
 {
@@ -60,11 +61,11 @@ The Laravel adapter includes a `sharedProps` metadata key in the page response, 
 }
 ```
 
-Inertia reads this list and carries those props over from the current page to the intermediate page. Props like `auth` are available immediately, while page-specific props like `stats` will be `undefined` until the server responds.
+Inertia đọc danh sách này và mang các prop đó từ page hiện tại sang intermediate page. Các prop như `auth` có sẵn ngay, trong khi prop riêng của page như `stats` sẽ là `undefined` cho tới khi server phản hồi.
 
-## Page Props
+## Page props
 
-You may provide props for the intermediate page using the `pageProps` option. This is useful for passing data you already have on the current page, or for setting placeholder values to display loading states while the server responds.
+Bạn có thể cung cấp prop cho intermediate page bằng tùy chọn `pageProps`. Điều này hữu ích khi truyền dữ liệu đã có ở page hiện tại hoặc đặt placeholder để hiển thị loading state trong lúc chờ server.
 
 <CodeGroup>
 
@@ -106,9 +107,9 @@ import { Link } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-When `pageProps` is provided as an object, shared props are not automatically carried over. You are in full control of the intermediate page's props.
+Khi `pageProps` được truyền dưới dạng object, shared props không tự động được mang theo. Bạn toàn quyền kiểm soát prop của intermediate page.
 
-A callback may also be passed to `pageProps`. The callback receives the current page's props and the shared props as arguments, so you may selectively spread them.
+Bạn cũng có thể truyền callback vào `pageProps`. Callback nhận props của page hiện tại và shared props làm đối số, nhờ đó bạn có thể spread chọn lọc chúng.
 
 ```js
 router.visit("/posts/1", {
@@ -120,9 +121,9 @@ router.visit("/posts/1", {
 });
 ```
 
-## Wayfinder Integration
+## Tích hợp Wayfinder
 
-When using [Wayfinder](https://github.com/laravel/wayfinder), you may use the `instant` prop on the `Link` component. Inertia will extract the target component from the Wayfinder route definition, removing the need to manually specify the `component` prop.
+Khi dùng [Wayfinder](https://github.com/laravel/wayfinder), bạn có thể dùng prop `instant` trên component `Link`. Inertia sẽ lấy target component từ định nghĩa route Wayfinder, không cần chỉ định thủ công prop `component`.
 
 <CodeGroup>
 
@@ -151,7 +152,7 @@ import { show } from 'App/Http/Controllers/PostController'
 
 </CodeGroup>
 
-The `instant` prop is also available on the `Form` component.
+Prop `instant` cũng có trên component `Form`.
 
 <CodeGroup>
 
@@ -184,11 +185,11 @@ import { store } from 'App/Http/Controllers/PostController'
 
 </CodeGroup>
 
-An explicit `component` prop always takes priority over `instant`.
+Prop `component` được chỉ định rõ luôn ưu tiên hơn `instant`.
 
-### Wayfinder Configuration
+### Cấu hình Wayfinder
 
-To include component information in your Wayfinder route definitions, enable the `generate.inertia.component` option in your `config/wayfinder.php` configuration file.
+Để đưa thông tin component vào định nghĩa route Wayfinder, hãy bật tùy chọn `generate.inertia.component` trong file cấu hình `config/wayfinder.php`.
 
 ```php config/wayfinder.php
 return [
@@ -200,11 +201,11 @@ return [
 ];
 ```
 
-After enabling this option and regenerating your Wayfinder routes, each route definition will include the component name that Inertia renders for that route.
+Sau khi bật tùy chọn và sinh lại route Wayfinder, mỗi route definition sẽ chứa tên component mà Inertia render cho route đó.
 
-### Conditional Components
+### Component có điều kiện
 
-A controller action may conditionally render different components, preventing the `instant` prop from determining which component to use. You may call the `withComponent()` method on the Wayfinder route function to specify the target component.
+Controller action có thể render các component khác nhau theo điều kiện, khiến prop `instant` không thể tự xác định component cần dùng. Bạn có thể gọi phương thức `withComponent()` trên route function của Wayfinder để chỉ định target component.
 
 ```js
 import { show } from "App/Http/Controllers/DashboardController";
@@ -212,9 +213,9 @@ import { show } from "App/Http/Controllers/DashboardController";
 router.visit(show.withComponent("Dashboard/Admin"));
 ```
 
-## Disabling Shared Prop Keys
+## Tắt shared prop keys
 
-You may disable the `sharedProps` metadata key in your `config/inertia.php` configuration file. The server will still resolve and include shared prop values in the response, but the metadata listing which keys are shared will be omitted. Without this list, the client cannot identify which props to carry over during instant visits.
+Bạn có thể tắt key metadata `sharedProps` trong file cấu hình `config/inertia.php`. Server vẫn resolve và đưa giá trị shared prop vào response nhưng metadata liệt kê key nào là shared sẽ bị bỏ. Không có danh sách này, client không thể xác định prop nào cần mang sang trong instant visit.
 
 ```php config/inertia.php
 return [

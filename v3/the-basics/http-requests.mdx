@@ -1,5 +1,6 @@
 ---
 title: HTTP Requests
+description: "Không phải request nào cũng cần kích hoạt Inertia page visit. Với request tới API bên ngoài hoặc lấy dữ liệu từ endpoint không phải Inertia, hook useHttp…"
 ---
 
 import { ClientSpecific } from "/snippets/client-specific.jsx"
@@ -7,11 +8,11 @@ import { ReactSpecific } from "/snippets/react-specific.jsx"
 import { SvelteSpecific } from "/snippets/svelte-specific.jsx"
 import { VueSpecific } from "/snippets/vue-specific.jsx"
 
-Not every request needs to trigger an Inertia page visit. For calls to an external API or fetching data from a non-Inertia endpoint, the `useHttp` hook provides the same developer experience as `useForm`, but for standalone HTTP requests.
+Không phải request nào cũng cần kích hoạt Inertia page visit. Với request tới API bên ngoài hoặc lấy dữ liệu từ endpoint không phải Inertia, hook `useHttp` cung cấp trải nghiệm phát triển tương tự `useForm` nhưng dành cho HTTP request độc lập.
 
-## Basic Usage
+## Cách dùng cơ bản
 
-The `useHttp` hook accepts initial data and returns reactive state along with methods for making HTTP requests.
+Hook `useHttp` nhận dữ liệu ban đầu và trả về reactive state cùng các phương thức gửi HTTP request.
 
 <CodeGroup>
 
@@ -89,11 +90,11 @@ function search() {
 
 </CodeGroup>
 
-Unlike router visits, `useHttp` requests do not trigger page navigation or interact with Inertia's page lifecycle. They are plain HTTP requests that return JSON responses.
+Khác router visit, request `useHttp` không kích hoạt page navigation hay tương tác với page lifecycle của Inertia. Đây là HTTP request thông thường trả JSON response.
 
-## Submitting Data
+## Gửi dữ liệu
 
-The hook provides `get`, `post`, `put`, `patch`, and `delete` convenience methods. A generic `submit` method is also available for dynamic HTTP methods.
+Hook cung cấp các phương thức tiện ích `get`, `post`, `put`, `patch` và `delete`. Ngoài ra còn có phương thức `submit` tổng quát cho HTTP method động.
 
 <CodeGroup>
 
@@ -128,11 +129,11 @@ http.submit(method, url, options)
 
 </CodeGroup>
 
-Each method returns a `Promise` that resolves with the parsed JSON response data. TypeScript users may [type the request data and response](/v3/advanced/typescript#http-helper).
+Mỗi phương thức trả một `Promise` resolve với dữ liệu JSON response đã parse. Người dùng TypeScript có thể [khai báo type cho request data và response](/v3/advanced/typescript#http-helper).
 
-### Pre-binding the Endpoint
+### Bind endpoint trước
 
-You may pass the HTTP method and URL as the first two arguments to `useHttp()`, then call `submit()` without arguments to dispatch the request. This also unlocks real-time validation. See [Precognition](#precognition) for details.
+Bạn có thể truyền HTTP method và URL làm hai đối số đầu của `useHttp()`, sau đó gọi `submit()` không cần đối số để gửi request. Cách này cũng mở khóa validation thời gian thực. Xem [Precognition](#precognition) để biết chi tiết.
 
 <CodeGroup>
 
@@ -162,9 +163,9 @@ const response = await http.post('/api/comments', {
 
 </CodeGroup>
 
-## Multiple Requests
+## Nhiều request
 
-Each `useHttp` instance tracks its own `processing`, `errors`, and other reactive state. When making independent requests, you may create a separate instance for each one so their states don't collide.
+Mỗi instance `useHttp` theo dõi `processing`, `errors` và reactive state riêng. Khi gửi các request độc lập, bạn có thể tạo instance riêng cho từng request để state không xung đột.
 
 <CodeGroup>
 
@@ -185,23 +186,23 @@ const upload = useHttp({ file: null })
 
 </CodeGroup>
 
-## Reactive State
+## Reactive state
 
-The `useHttp` hook exposes the same reactive properties as `useForm`:
+Hook `useHttp` cung cấp các reactive property tương tự `useForm`:
 
-| Property | Type | Description |
+| Thuộc tính | Kiểu | Mô tả |
 |---|---|---|
-| `errors` | `object` | Validation errors keyed by field name |
-| `hasErrors` | `boolean` | Whether validation errors exist |
-| `processing` | `boolean` | Whether a request is in progress |
-| `progress` | `object \| null` | Upload progress with `percentage` and `total` |
-| `wasSuccessful` | `boolean` | Whether the last request was successful |
-| `recentlySuccessful` | `boolean` | `true` for two seconds after a successful request |
-| `isDirty` | `boolean` | Whether the data differs from its defaults |
+| `errors` | `object` | Validation error theo key là tên field |
+| `hasErrors` | `boolean` | Có tồn tại validation error hay không |
+| `processing` | `boolean` | Có request đang được xử lý hay không |
+| `progress` | `object \| null` | Tiến trình upload với `percentage` và `total` |
+| `wasSuccessful` | `boolean` | Request gần nhất có thành công hay không |
+| `recentlySuccessful` | `boolean` | `true` trong hai giây sau một request thành công |
+| `isDirty` | `boolean` | Dữ liệu có khác giá trị mặc định hay không |
 
-## Validation Errors
+## Lỗi validation
 
-When a request returns a `422` status code, the hook automatically parses validation errors and makes them available through the `errors` property.
+Khi request trả status code `422`, hook tự động parse validation error và cung cấp chúng qua thuộc tính `errors`.
 
 <CodeGroup>
 
@@ -287,9 +288,9 @@ function save() {
 
 </CodeGroup>
 
-## Displaying All Errors
+## Hiển thị tất cả lỗi
 
-By default, validation errors are simplified to the first error message for each field. You may chain `withAllErrors()` to receive all error messages as arrays, which is useful for fields with multiple validation rules.
+Mặc định, validation error được rút gọn còn message đầu tiên cho mỗi field. Bạn có thể nối `withAllErrors()` để nhận toàn bộ error message dưới dạng mảng, hữu ích với field có nhiều validation rule.
 
 <CodeGroup>
 
@@ -322,11 +323,11 @@ const http = useHttp({
 
 </CodeGroup>
 
-The same method is available on the [`useForm`](/v3/the-basics/forms#options-2) helper and the [`<Form>`](/v3/the-basics/forms#options) component.
+Phương thức tương tự cũng có trên helper [`useForm`](/v3/the-basics/forms#options-2) và component [`<Form>`](/v3/the-basics/forms#options).
 
-## File Uploads
+## Tải file lên
 
-When the data includes files, the hook automatically sends the request as `multipart/form-data`. Upload progress is available through the `progress` property.
+Khi dữ liệu có file, hook tự động gửi request dưới dạng `multipart/form-data`. Tiến trình upload có sẵn qua thuộc tính `progress`.
 
 <CodeGroup>
 
@@ -390,9 +391,9 @@ function upload() {
 
 </CodeGroup>
 
-## Canceling Requests
+## Hủy request
 
-You may cancel an in-progress request using the `cancel()` method.
+Bạn có thể hủy request đang chạy bằng phương thức `cancel()`.
 
 <CodeGroup>
 
@@ -412,9 +413,9 @@ http.cancel()
 
 </CodeGroup>
 
-## Optimistic Updates
+## Optimistic updates
 
-The `useHttp` hook supports [optimistic updates](/v3/the-basics/optimistic-updates) via the `optimistic()` method. The callback receives the current data and should return a partial update to apply immediately.
+Hook `useHttp` hỗ trợ [optimistic update](/v3/the-basics/optimistic-updates) qua phương thức `optimistic()`. Callback nhận dữ liệu hiện tại và nên trả về partial update để áp dụng ngay.
 
 <CodeGroup>
 
@@ -441,11 +442,11 @@ http.optimistic((data) => ({
 
 </CodeGroup>
 
-The update is applied synchronously. If the request fails, the data is rolled back to its previous state.
+Update được áp dụng đồng bộ. Nếu request thất bại, dữ liệu được rollback về state trước đó.
 
-## Event Callbacks
+## Callback sự kiện
 
-Each submit method accepts an options object with lifecycle callbacks:
+Mỗi phương thức submit nhận options object với các lifecycle callback:
 
 ```js
 http.post('/api/users', {
@@ -461,11 +462,11 @@ http.post('/api/users', {
 })
 ```
 
-You may return `false` from `onBefore` to cancel the request.
+Bạn có thể trả `false` từ `onBefore` để hủy request.
 
-### Accessing the HTTP response
+### Truy cập HTTP response
 
-The `onSuccess` callback receives the parsed response data as its first argument and the HTTP response object as its second argument. The response object contains `status`, `data`, and `headers` properties, which is useful when you need to inspect the status code or response headers.
+Callback `onSuccess` nhận dữ liệu response đã parse làm đối số đầu và HTTP response object làm đối số thứ hai. Response object chứa `status`, `data` và `headers`, hữu ích khi cần kiểm tra status code hoặc response header.
 
 ```js
 http.post('/api/users', {
@@ -475,9 +476,9 @@ http.post('/api/users', {
 })
 ```
 
-### HTTP exceptions
+### HTTP exception
 
-The `onHttpException` callback fires when the server returns a non-422 HTTP error, such as a `500` or `403`. The callback receives the HTTP response object, giving you access to the status code, response body, and headers.
+Callback `onHttpException` chạy khi server trả HTTP error không phải 422, chẳng hạn `500` hoặc `403`. Callback nhận HTTP response object, cho phép truy cập status code, response body và header.
 
 ```js
 http.post('/api/users', {
@@ -488,9 +489,9 @@ http.post('/api/users', {
 })
 ```
 
-### Network errors
+### Network error
 
-The `onNetworkError` callback fires when the request fails due to a network issue, such as when the user loses their internet connection. The callback receives the `Error` object.
+Callback `onNetworkError` chạy khi request thất bại do vấn đề mạng, chẳng hạn người dùng mất kết nối Internet. Callback nhận object `Error`.
 
 ```js
 http.post('/api/users', {
@@ -502,7 +503,7 @@ http.post('/api/users', {
 
 ## Precognition
 
-The `useHttp` hook supports [Laravel Precognition](https://laravel.com/docs/precognition) for real-time validation. Enable it by chaining `withPrecognition()` with the HTTP method and validation endpoint.
+Hook `useHttp` hỗ trợ [Laravel Precognition](https://laravel.com/docs/precognition) cho validation thời gian thực. Bật tính năng bằng cách nối `withPrecognition()` với HTTP method và validation endpoint.
 
 <CodeGroup>
 
@@ -535,11 +536,11 @@ const http = useHttp({
 
 </CodeGroup>
 
-Once enabled, the `validate()`, `touch()`, `touched()`, `valid()`, and `invalid()` methods become available, working identically to [form precognition](/v3/the-basics/forms#precognition-1).
+Sau khi bật, các phương thức `validate()`, `touch()`, `touched()`, `valid()` và `invalid()` trở nên khả dụng và hoạt động giống [form precognition](/v3/the-basics/forms#precognition-1).
 
-## History State
+## History state
 
-You may persist data and errors in browser history state by providing a remember key as the first argument.
+Bạn có thể lưu dữ liệu và lỗi vào browser history state bằng cách truyền remember key làm đối số đầu tiên.
 
 <CodeGroup>
 
@@ -563,7 +564,7 @@ const http = useHttp('SearchData', {
 
 </CodeGroup>
 
-You may exclude sensitive fields from being stored in history state using the `dontRemember()` method.
+Bạn có thể loại các field nhạy cảm khỏi history state bằng phương thức `dontRemember()`.
 
 ```js
 const http = useHttp('Login', {

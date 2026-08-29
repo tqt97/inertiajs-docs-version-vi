@@ -1,12 +1,13 @@
 ---
-title: File Uploads
+title: Tải file lên
+description: "Khi thực hiện request Inertia có chứa file (kể cả file lồng nhau), Inertia sẽ tự động chuyển đổi dữ liệu request thành object FormData. Việc chuyển đổi này…"
 ---
 
-## `FormData` Conversion
+## Chuyển đổi `FormData`
 
-When making Inertia requests that include files (even nested files), Inertia will automatically convert the request data into a `FormData` object. This conversion is necessary in order to submit a `multipart/form-data` request via XHR.
+Khi thực hiện request Inertia có chứa file (kể cả file lồng nhau), Inertia sẽ tự động chuyển đổi dữ liệu request thành object `FormData`. Việc chuyển đổi này là cần thiết để gửi request `multipart/form-data` qua XHR.
 
-If you would like the request to always use a `FormData` object regardless of whether a file is present in the data, you may provide the `forceFormData` option when making the request.
+Nếu muốn request luôn sử dụng object `FormData` bất kể dữ liệu có chứa file hay không, bạn có thể truyền tùy chọn `forceFormData` khi thực hiện request.
 
 <CodeGroup>
 
@@ -36,11 +37,11 @@ router.post("/users", data, {
 
 </CodeGroup>
 
-You can learn more about the `FormData` interface via its [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/API/FormData).
+Bạn có thể tìm hiểu thêm về interface `FormData` trong [tài liệu MDN](https://developer.mozilla.org/en-US/docs/Web/API/FormData).
 
-## File Upload Example
+## Ví dụ tải file lên
 
-Let's examine a complete file upload example using Inertia. This example includes both a `name` text input and an `avatar` file input.
+Hãy xem một ví dụ hoàn chỉnh về tải file lên bằng Inertia. Ví dụ này bao gồm cả input văn bản `name` và input file `avatar`.
 
 <CodeGroup>
 
@@ -130,13 +131,13 @@ return (
 
 </CodeGroup>
 
-This example uses the [Inertia form helper](/v3/the-basics/forms#form-helper) for convenience, since the form helper provides easy access to the current upload progress. However, you are free to submit your forms using [manual Inertia visits](/v3/the-basics/manual-visits) as well.
+Ví dụ này dùng [Inertia form helper](/v3/the-basics/forms#form-helper) để thuận tiện vì form helper cho phép truy cập dễ dàng tiến trình upload hiện tại. Tuy nhiên, bạn vẫn có thể gửi form bằng [manual Inertia visits](/v3/the-basics/manual-visits).
 
-## Multipart Limitations
+## Giới hạn của multipart
 
-Uploading files using a `multipart/form-data` request is not natively supported in some server-side frameworks when using the `PUT`, `PATCH`, or `DELETE` HTTP methods. The simplest workaround for this limitation is to simply upload files using a `POST` request instead.
+Upload file bằng request `multipart/form-data` không được một số server-side framework hỗ trợ nguyên bản khi dùng HTTP method `PUT`, `PATCH` hoặc `DELETE`. Cách khắc phục đơn giản nhất là upload file bằng request `POST`.
 
-However, some frameworks, such as [Laravel](https://laravel.com/docs/routing#form-method-spoofing) and [Rails](https://guides.rubyonrails.org/form_helpers.html#how-do-forms-with-patch-put-or-delete-methods-work-questionmark), support form method spoofing, which allows you to upload the files using `POST`, but have the framework handle the request as a `PUT` or `PATCH` request. This is done by including a `_method` attribute in the data of your request.
+Tuy nhiên, một số framework như [Laravel](https://laravel.com/docs/routing#form-method-spoofing) và [Rails](https://guides.rubyonrails.org/form_helpers.html#how-do-forms-with-patch-put-or-delete-methods-work-questionmark) hỗ trợ form method spoofing, cho phép upload file bằng `POST` nhưng để framework xử lý request như `PUT` hoặc `PATCH`. Cách này được thực hiện bằng cách thêm thuộc tính `_method` vào dữ liệu request.
 
 <CodeGroup>
 

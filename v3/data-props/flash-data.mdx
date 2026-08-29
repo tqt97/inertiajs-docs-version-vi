@@ -1,12 +1,13 @@
 ---
 title: Flash Data
+description: "Flash data cho phép gửi dữ liệu dùng một lần tới frontend và không xuất hiện lại khi người dùng điều hướng qua browser history. Khác regular prop, flash data…"
 ---
 
-Flash data lets you send one-time data to your front end that won't reappear when users navigate through browser history. Unlike regular props, flash data isn't persisted in history state, making it ideal for success messages, newly created IDs, or other temporary values.
+Flash data cho phép gửi dữ liệu dùng một lần tới frontend và không xuất hiện lại khi người dùng điều hướng qua browser history. Khác regular prop, flash data không được lưu trong history state, vì vậy phù hợp cho success message, ID vừa tạo hoặc các giá trị tạm thời khác.
 
-## Flashing Data
+## Flash dữ liệu
 
-You may flash data using the `Inertia::flash()` method, passing a key and value or an array of key-value pairs.
+Bạn có thể flash dữ liệu bằng method `Inertia::flash()`, truyền key và value hoặc một array các cặp key-value.
 
 ```php
 public function store(Request $request)
@@ -25,13 +26,13 @@ public function store(Request $request)
 }
 ```
 
-Chaining with `back()` is also supported.
+Cũng hỗ trợ chain với `back()`.
 
 ```php
 return Inertia::flash('newUserId', $user->id)->back();
 ```
 
-You may also chain `flash()` onto `render()`, or vice versa.
+Bạn cũng có thể chain `flash()` vào `render()`, hoặc ngược lại.
 
 ```php
 return Inertia::render('Projects/Index', [
@@ -44,11 +45,11 @@ return Inertia::flash('highlight', $project->id)
     ->render('Projects/Index', ['projects' => $projects]);
 ```
 
-Flash data is scoped to the current request. The middleware automatically persists it to the session when redirecting. After the flash data is sent to the client, it is cleared and will not appear in subsequent requests.
+Flash data chỉ có phạm vi trong request hiện tại. Middleware tự động lưu nó vào session khi redirect. Sau khi flash data được gửi đến client, nó sẽ bị xóa và không xuất hiện trong các request tiếp theo.
 
-## Accessing Flash Data
+## Truy cập flash data
 
-Flash data is available on `page.flash`. You may also listen for the global `flash` event or use the `onFlash` callback.
+Flash data có sẵn trong `page.flash`. Bạn cũng có thể lắng nghe event toàn cục `flash` hoặc dùng callback `onFlash`.
 
 <CodeGroup>
 
@@ -93,9 +94,9 @@ export default function Layout({ children }) {
 
 </CodeGroup>
 
-## The onFlash Callback
+## Callback onFlash
 
-You may use the `onFlash` callback to handle flash data when making requests.
+Bạn có thể dùng callback `onFlash` để xử lý flash data khi thực hiện request.
 
 <CodeGroup>
 
@@ -131,9 +132,9 @@ router.post("/users", data, {
 
 </CodeGroup>
 
-## Global Flash Event
+## Event flash toàn cục
 
-You may use the global `flash` event to handle flash data in a central location, such as a layout component. For more information on events, see the [events documentation](/v3/advanced/events).
+Bạn có thể dùng global event `flash` để xử lý flash data tại vị trí tập trung như layout component. Để biết thêm về event, xem [tài liệu events](/v3/advanced/events).
 
 <CodeGroup>
 
@@ -170,13 +171,13 @@ router.on("flash", (event) => {
 </CodeGroup>
 
 <Warning>
-  Event listeners registered inside components should be cleaned up when the
-  component unmounts to prevent them from accumulating and firing multiple
-  times. This is especially important in non-persistent layouts. See [removing
-  event listeners](/v3/advanced/events#removing-listeners) for more information.
+  Event listener đăng ký bên trong component nên được cleanup khi
+  component unmount để tránh tích lũy và bị kích hoạt nhiều
+  lần. Điều này đặc biệt quan trọng với layout không persistent. Xem phần [xóa
+  event listener](/v3/advanced/events#removing-listeners) để biết thêm.
 </Warning>
 
-Native browser events are also supported.
+Event nguyên bản của trình duyệt cũng được hỗ trợ.
 
 <CodeGroup>
 
@@ -200,11 +201,11 @@ document.addEventListener("inertia:flash", (event) => {
 
 </CodeGroup>
 
-The `flash` event is not cancelable and fires on every response that carries flash data.
+Event `flash` không thể bị hủy và được phát trên mọi response có chứa flash data.
 
-## Client-Side Flash
+## Flash phía client
 
-You may set flash data on the client without a server request using the `router.flash()` method. Values are merged with existing flash data.
+Bạn có thể đặt flash data ở client mà không gửi request lên máy chủ bằng method `router.flash()`. Các value được merge với flash data hiện có.
 
 <CodeGroup>
 
@@ -231,7 +232,7 @@ router.flash({ foo: "bar" });
 
 </CodeGroup>
 
-A callback may also be passed to access the current flash data or replace it entirely.
+Bạn cũng có thể truyền callback để truy cập flash data hiện tại hoặc thay thế hoàn toàn.
 
 <CodeGroup>
 
@@ -260,8 +261,8 @@ router.flash(() => ({}));
 
 ## TypeScript
 
-You may configure the flash data type globally using [TypeScript's declaration merging](/v3/advanced/typescript#flash-data).
+Bạn có thể cấu hình type flash data trên toàn cục bằng [declaration merging của TypeScript](/v3/advanced/typescript#flash-data).
 
-## Testing
+## Kiểm thử
 
-For information on testing flash data, see the [testing documentation](/v3/advanced/testing#testing-flash-data).
+Để biết cách kiểm thử flash data, xem [tài liệu testing](/v3/advanced/testing#testing-flash-data).

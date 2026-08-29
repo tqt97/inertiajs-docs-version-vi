@@ -1,16 +1,17 @@
 ---
-title: The Protocol
+title: Giao thức
+description: "Trang này đặc tả Inertia protocol: wire contract chính xác giữa Inertia client và server của bạn. Hãy đọc trang cách hoạt động trước để có cái nhìn tổng quan."
 ---
 
-This page specifies the Inertia protocol: the exact wire contract between an Inertia client and your server. Read the [how it works](/v3/core-concepts/how-it-works) page first for a high-level overview.
+Trang này đặc tả Inertia protocol: wire contract chính xác giữa Inertia client và server của bạn. Hãy đọc trang [cách hoạt động](/v3/core-concepts/how-it-works) trước để có cái nhìn tổng quan.
 
-The protocol is framework-agnostic. Any backend that speaks HTTP may implement it, so you may build a new server-side adapter against it in any language. The official Laravel adapter serves as the reference implementation throughout this page, and every request and response below is real and copy-pasteable.
+Protocol không phụ thuộc framework. Bất kỳ backend nào giao tiếp qua HTTP đều có thể triển khai protocol này, vì vậy bạn có thể xây dựng server-side adapter mới bằng bất kỳ ngôn ngữ nào. Laravel adapter chính thức được dùng làm implementation tham chiếu xuyên suốt trang này, và mọi request/response bên dưới đều là ví dụ thực tế có thể copy-paste.
 
-## HTML Responses
+## Response HTML
 
-The very first request to an Inertia app is just a regular, full-page browser request, with no special Inertia headers or data. For these requests, the server returns a full HTML document.
+Request đầu tiên đến một ứng dụng Inertia chỉ là request trình duyệt tải toàn bộ trang thông thường, không có header hoặc dữ liệu đặc biệt nào của Inertia. Với các request này, máy chủ trả về một tài liệu HTML đầy đủ.
 
-This HTML response includes the site assets (CSS, JavaScript) as well as a root `<div>` in the page's body. The root `<div>` serves as a mounting point for the client-side app. A `<script type="application/json">` element contains the JSON-encoded [page object](#the-page-object) for the initial page. Inertia uses this information to boot your client-side framework and display the initial page component.
+HTML response này bao gồm asset của site (CSS, JavaScript) cùng một `<div>` root trong phần body. `<div>` root đóng vai trò mounting point cho ứng dụng phía client. Một phần tử `<script type="application/json">` chứa [page object](#the-page-object) được mã hóa JSON cho trang ban đầu. Inertia dùng thông tin này để khởi động client-side framework và hiển thị page component đầu tiên.
 
 ```http
 REQUEST
@@ -35,14 +36,14 @@ Content-Type: text/html; charset=utf-8
 ```
 
 <Warning>
-  The embedded page object is printed inside a `<script>` tag, so its serialized JSON MUST escape every forward slash (`/` becomes `\/`), which is why the example above contains `"\/events\/80"`. This prevents a `</script>` sequence inside your prop data from closing the script element early and breaking the page. HTML-entity encoding MUST NOT be used here, since the browser does not decode entities inside a script body and JSON parsing would then fail.
+  Page object nhúng được in bên trong thẻ `<script>`, vì vậy JSON đã serialize BẮT BUỘC phải escape mọi dấu gạch chéo (`/` thành `\/`), đó là lý do ví dụ trên chứa `"\/events\/80"`. Điều này ngăn chuỗi `</script>` nằm trong dữ liệu prop đóng thẻ script quá sớm và làm hỏng trang. KHÔNG ĐƯỢC dùng HTML entity encoding ở đây vì trình duyệt không decode entity bên trong script body, khiến việc parse JSON thất bại.
 </Warning>
 
-## Inertia Responses
+## Response Inertia
 
-Once the Inertia app has been booted, all subsequent requests to the site are made via XHR with a `X-Inertia` header set to `true`. This header indicates that the request is being made by Inertia and isn't a standard full-page visit.
+Sau khi ứng dụng Inertia được khởi động, mọi request tiếp theo đến website đều được thực hiện qua XHR với header `X-Inertia` đặt thành `true`. Header này cho biết request được thực hiện bởi Inertia và không phải một lần tải toàn bộ trang thông thường.
 
-The server detects the `X-Inertia` header and returns a JSON response with an encoded [page object](#the-page-object) instead of a full HTML document.
+Server phát hiện header `X-Inertia` và trả JSON response chứa [page object](#the-page-object) đã mã hóa thay vì trả toàn bộ tài liệu HTML.
 
 ```http
 REQUEST
@@ -75,9 +76,9 @@ X-Inertia: true
 }
 ```
 
-## Request Lifecycle Diagram
+## Sơ đồ lifecycle của request
 
-The diagram below illustrates the request lifecycle within an Inertia application. The initial visit generates a standard request to the server, which returns an HTML application skeleton containing a root element with hydrated data. For subsequent user interactions and navigation, Inertia sends XHR requests that return JSON data. Inertia uses this response to dynamically hydrate and swap the page component without a full-page reload.
+Sơ đồ dưới đây minh họa vòng đời request trong một ứng dụng Inertia. Lần truy cập đầu tạo request thông thường tới server, server trả về khung HTML của ứng dụng chứa root element cùng dữ liệu đã hydrate. Với các tương tác và điều hướng tiếp theo, Inertia gửi XHR request nhận về JSON. Inertia dùng response này để hydrate động và thay page component mà không cần full-page reload.
 
 ```mermaid
 sequenceDiagram
@@ -95,238 +96,238 @@ sequenceDiagram
     Note over Client: Inertia.js swaps components
 ```
 
-## How the Client Handles Responses
+## Cách client xử lý response
 
-After each request, the client inspects the response before touching the page. Dispatch follows a small set of rules:
+Sau mỗi request, client kiểm tra response trước khi thay đổi trang. Luồng xử lý tuân theo một số quy tắc nhỏ:
 
-- **An Inertia response (`X-Inertia: true`)** is rendered directly: the client applies the page object and swaps the component.
-- **A `409 Conflict` carrying `X-Inertia-Location`** triggers a full `window.location` visit to that URL, loading fresh assets. Background requests are exempt when the version changed, since reloading a visit the user never initiated would discard unsaved state.
-- **A `409 Conflict` carrying `X-Inertia-Redirect`** triggers a fresh Inertia `GET` visit to that URL.
-- **Any other response**, such as an HTML document, plain JSON, or an error page, is treated as an exception. The client fires a cancelable HTTP exception event and, unless you cancel it, shows an error modal rather than silently navigating.
+- **Inertia response (`X-Inertia: true`)** được render trực tiếp: client áp dụng page object và thay component.
+- **`409 Conflict` có `X-Inertia-Location`** kích hoạt full visit bằng `window.location` tới URL đó để tải asset mới. Background request được miễn khi version thay đổi, vì reload một visit mà người dùng chưa từng khởi tạo sẽ làm mất state chưa lưu.
+- **`409 Conflict` có `X-Inertia-Redirect`** kích hoạt một Inertia `GET` visit mới tới URL đó.
+- **Mọi response khác**, chẳng hạn tài liệu HTML, JSON thông thường hoặc trang lỗi, được xem là exception. Client phát một HTTP exception event có thể hủy và, trừ khi bạn hủy event, hiển thị error modal thay vì âm thầm điều hướng.
 
-Standard `3xx` redirects never reach these rules. The browser follows them transparently, replaying the request headers against the new location, so `X-Inertia` reaches the redirect target and the client only ever inspects the final response in the chain. See [redirects](#redirects) for the statuses a server returns to steer this.
+Các redirect `3xx` tiêu chuẩn không đi qua những quy tắc này. Trình duyệt tự động theo redirect và gửi lại request header đến location mới, vì vậy `X-Inertia` đến được redirect target và client chỉ kiểm tra response cuối cùng trong chuỗi. Xem [redirects](#redirects) để biết các status server dùng để điều khiển luồng này.
 
-A valid Inertia response with a status of `400` or greater fires that same cancelable HTTP exception event before rendering. Canceling it there suppresses the render, letting you handle the failure yourself.
+Một Inertia response hợp lệ có status `400` trở lên cũng phát cùng HTTP exception event có thể hủy trước khi render. Nếu hủy event ở đây, việc render bị chặn để bạn tự xử lý lỗi.
 
-## Request Headers
+## Request header
 
-The following headers are automatically sent by Inertia when making requests. You don't need to set these manually; they're handled by the Inertia client-side adapter.
+Các header sau được Inertia tự động gửi khi thực hiện request. Bạn không cần thiết lập thủ công; client-side adapter của Inertia sẽ xử lý chúng.
 
 <ParamField header="X-Inertia" type="boolean">
-  Set to `true` to indicate this is an Inertia request.
+  Đặt thành `true` để chỉ ra đây là request Inertia.
 </ParamField>
 
 <ParamField header="X-Requested-With" type="string">
-  Set to `XMLHttpRequest` on all Inertia requests.
+  Được đặt thành `XMLHttpRequest` trong mọi request Inertia.
 </ParamField>
 
 <ParamField header="Accept" type="string">
-  Set to `text/html, application/xhtml+xml` to indicate acceptable response
-  types.
+  Đặt thành `text/html, application/xhtml+xml` để cho biết các kiểu response
+  được chấp nhận.
 </ParamField>
 
 <ParamField header="Content-Type" type="string">
-  Set to `application/json` for requests that do not include file uploads.
+  Đặt thành `application/json` cho request không chứa file upload.
 </ParamField>
 
 <ParamField header="X-Inertia-Version" type="string">
-  The current asset version to check for asset mismatches.
+  Phiên bản asset hiện tại dùng để kiểm tra asset mismatch.
 </ParamField>
 
 <ParamField header="X-XSRF-TOKEN" type="string">
-  The CSRF token read from the `XSRF-TOKEN` cookie. The cookie and header names
-  are configurable.
+  CSRF token được đọc từ cookie `XSRF-TOKEN`. Tên cookie và header
+  có thể cấu hình.
 </ParamField>
 
 <ParamField header="Purpose" type="string">
-  Set to `prefetch` when making [prefetch](/v3/data-props/prefetching) requests.
+  Đặt thành `prefetch` khi thực hiện request [prefetch](/v3/data-props/prefetching).
 </ParamField>
 
 <ParamField header="X-Inertia-Partial-Component" type="string">
-  The component name for [partial reloads](/v3/data-props/partial-reloads).
+  Tên component dành cho [partial reload](/v3/data-props/partial-reloads).
 </ParamField>
 
 <ParamField header="X-Inertia-Partial-Data" type="string">
-  Comma-separated list of props to include in partial reloads.
+  Danh sách props cần đưa vào partial reload, phân tách bằng dấu phẩy.
 </ParamField>
 
 <ParamField header="X-Inertia-Partial-Except" type="string">
-  Comma-separated list of props to exclude from partial reloads.
+  Danh sách props cần loại khỏi partial reload, phân tách bằng dấu phẩy.
 </ParamField>
 
 <ParamField header="X-Inertia-Reset" type="string">
-  Comma-separated list of props to reset on navigation.
+  Danh sách props cần reset khi điều hướng, phân tách bằng dấu phẩy.
 </ParamField>
 
 <ParamField header="Cache-Control" type="string">
-  Set to `no-cache` for reload requests to prevent serving stale content.
+  Đặt thành `no-cache` cho request reload để tránh phục vụ nội dung đã cũ.
 </ParamField>
 
 <ParamField header="X-Inertia-Error-Bag" type="string">
-  Specifies which error bag to use for [validation
-  errors](/v3/the-basics/validation).
+  Chỉ định error bag dùng cho [validation
+  error](/v3/the-basics/validation).
 </ParamField>
 
 <ParamField header="X-Inertia-Infinite-Scroll-Merge-Intent" type="string">
-  Indicates whether the requested data should be appended or prepended when
-  using [Infinite scroll](/v3/data-props/infinite-scroll).
+  Cho biết dữ liệu được yêu cầu nên append hay prepend khi
+  dùng [Infinite scroll](/v3/data-props/infinite-scroll).
 </ParamField>
 
 <ParamField header="X-Inertia-Except-Once-Props" type="string">
-  Comma-separated list of non-expired [once prop](/v3/data-props/once-props)
-  keys already loaded on the client. The server will skip resolving these props
-  unless explicitly requested via a partial reload or force refreshed
-  server-side.
+  Danh sách phân tách bằng dấu phẩy gồm các key [once prop](/v3/data-props/once-props) chưa hết hạn
+  và đã được tải ở client. Server sẽ bỏ qua việc resolve các prop này
+  trừ khi chúng được yêu cầu rõ ràng qua partial reload hoặc được force refresh
+  ở phía server.
 </ParamField>
 
-The following headers are used for [Precognition](/v3/the-basics/forms#precognition) validation requests.
+Các header sau được dùng cho request validation bằng [Precognition](/v3/the-basics/forms#precognition).
 
 <ParamField header="Precognition" type="boolean">
-  Set to `true` to indicate this is a Precognition validation request.
+  Đặt thành `true` để cho biết đây là request validation Precognition.
 </ParamField>
 
 <ParamField header="Precognition-Validate-Only" type="string">
-  Comma-separated list of field names to validate.
+  Danh sách tên field cần validation, phân tách bằng dấu phẩy.
 </ParamField>
 
-## Response Headers
+## Response header
 
-The following headers are set on an Inertia JSON page response. Official server-side adapters handle these automatically.
+Các header sau được đặt trên Inertia JSON page response. Server-side adapter chính thức tự động xử lý chúng.
 
 <ParamField header="X-Inertia" type="boolean">
-  Set to `true` to indicate this is an Inertia response.
+  Đặt thành `true` để cho biết đây là response Inertia.
 </ParamField>
 
 <ParamField header="Vary" type="string">
-  Set to `X-Inertia` to help browsers correctly differentiate between HTML and
-  JSON responses.
+  Đặt thành `X-Inertia` để giúp trình duyệt phân biệt chính xác giữa response HTML và
+  JSON.
 </ParamField>
 
-The following headers appear on `409 Conflict` control responses rather than page responses. A `409` carries no `X-Inertia` header, since it instructs the client to navigate rather than render a page.
+Các header sau xuất hiện trên control response `409 Conflict` thay vì page response. Response `409` không mang header `X-Inertia` vì nó yêu cầu client điều hướng thay vì render trang.
 
 <ParamField header="X-Inertia-Location" type="string">
-  The destination URL for a full `window.location` visit. Set on an external
-  location visit and on an asset-version mismatch reload.
+  URL đích cho full visit bằng `window.location`. Được đặt trên external
+  location visit và khi reload do asset version không khớp.
 </ParamField>
 
 <ParamField header="X-Inertia-Redirect" type="string">
-  The full redirect URL, including its fragment, for a redirect whose target
-  contains a URL fragment. Triggers a fresh Inertia `GET` visit instead of a
+  URL redirect đầy đủ, bao gồm fragment, dành cho redirect có target
+  chứa URL fragment. Kích hoạt một Inertia `GET` visit mới thay vì
   full-page reload.
 </ParamField>
 
 <ParamField header="X-Inertia-Version" type="string">
-  The current asset version, echoed on a version-mismatch `409` so the client
-  may observe it.
+  Asset version hiện tại, được echo trong response `409` do version không khớp để client
+  có thể quan sát giá trị đó.
 </ParamField>
 
-The following headers are used for [Precognition](/v3/the-basics/forms#precognition) validation responses.
+Các header sau được dùng cho response validation bằng [Precognition](/v3/the-basics/forms#precognition).
 
 <ParamField header="Precognition" type="string">
-  Set to `true` to indicate this is a Precognition validation response.
+  Đặt thành `true` để cho biết đây là response validation Precognition.
 </ParamField>
 
 <ParamField header="Precognition-Success" type="string">
-  Set to `true` when validation passes with no errors, combined with a `204 No
-  Content` status code.
+  Đặt thành `true` khi validation thành công và không có lỗi, kết hợp với status `204 No
+  Content`.
 </ParamField>
 
 <ParamField header="Vary" type="string">
-  Set to `Precognition` on all responses when the Precognition middleware is
-  applied.
+  Đặt thành `Precognition` trên mọi response khi middleware Precognition được
+  áp dụng.
 </ParamField>
 
-## The Page Object
+## Page object
 
-Inertia shares data between the server and client via a page object. This object includes the necessary information to render the page component, update the browser's history state, and track the site's asset version. The page object may include the following properties:
+Inertia chia sẻ dữ liệu giữa server và client thông qua page object. Object này chứa thông tin cần thiết để render page component, cập nhật history state của trình duyệt và theo dõi asset version của site. Page object có thể bao gồm các thuộc tính sau:
 
 <ParamField body="component" type="string">
-  The name of the JavaScript page component.
+  Tên của page component JavaScript.
 </ParamField>
 
 <ParamField body="props" type="object">
-  The page props. Contains all of the page data along with an `errors` object
-  (defaults to `{}` if there are no errors).
+  Các page prop. Chứa toàn bộ dữ liệu của trang cùng object `errors`
+  (mặc định là `{}` nếu không có lỗi).
 </ParamField>
 
 <ParamField body="url" type="string">
-  The page URL.
+  URL của trang.
 </ParamField>
 
 <ParamField body="version" type="string|number">
-  The current [asset version](/v3/advanced/asset-versioning).
+  [Asset version](/v3/advanced/asset-versioning) hiện tại.
 </ParamField>
 
 <ParamField body="encryptHistory" type="boolean">
-  Whether or not to [encrypt the current page's history
-  state](/v3/security/history-encryption). Only included when `true`.
+  Có [mã hóa history state của trang hiện tại
+  hay không](/v3/security/history-encryption). Chỉ được đưa vào khi là `true`.
 </ParamField>
 
 <ParamField body="clearHistory" type="boolean">
-  Whether or not to clear any [encrypted history
-  state](/v3/security/history-encryption#clearing-history). Only included when `true`.
+  Có xóa [encrypted history
+  state](/v3/security/history-encryption#clearing-history) hay không. Chỉ được đưa vào khi là `true`.
 </ParamField>
 
 <ParamField body="preserveFragment" type="boolean">
-  Whether to [preserve the URL fragment](/v3/the-basics/redirects#preserving-fragments) from the original request across a redirect.
+  Có [giữ URL fragment](/v3/the-basics/redirects#preserving-fragments) của request ban đầu qua redirect hay không.
 </ParamField>
 
 <ParamField body="mergeProps" type="array">
-  Array of prop keys that should be [merged](/v3/data-props/merging-props)
-  (appended) during navigation.
+  Mảng các key prop cần được [gộp](/v3/data-props/merging-props)
+  (append) trong quá trình điều hướng.
 </ParamField>
 
 <ParamField body="prependProps" type="array">
-  Array of prop keys that should be [prepended](/v3/data-props/merging-props)
-  during navigation.
+  Mảng các key prop cần được [prepend](/v3/data-props/merging-props)
+  trong quá trình điều hướng.
 </ParamField>
 
 <ParamField body="deepMergeProps" type="array">
-  Array of prop keys that should be [deep
-  merged](/v3/data-props/merging-props#deep-merge) during navigation.
+  Mảng các key prop cần được [deep
+  merge](/v3/data-props/merging-props#deep-merge) trong quá trình điều hướng.
 </ParamField>
 
 <ParamField body="matchPropsOn" type="array">
-  Array of prop keys to use for [matching when merging
-  props](/v3/data-props/merging-props#matching-items).
+  Mảng các key prop dùng để [khớp phần tử khi gộp
+  prop](/v3/data-props/merging-props#matching-items).
 </ParamField>
 
 <ParamField body="scrollProps" type="object">
-  Configuration for [infinite scroll](/v3/data-props/infinite-scroll) prop
-  merging behavior.
+  Cấu hình hành vi gộp prop cho [infinite scroll](/v3/data-props/infinite-scroll).
+  hành vi merge.
 </ParamField>
 
 <ParamField body="deferredProps" type="object">
-  Configuration for client-side [lazy loading of
-  props](/v3/data-props/deferred-props).
+  Cấu hình cho việc [lazy-load
+  prop](/v3/data-props/deferred-props) phía client.
 </ParamField>
 
 <ParamField body="rescuedProps" type="array">
-  Array of [deferred prop](/v3/data-props/deferred-props#error-handling) keys
-  that failed to resolve and were rescued server-side. Used by the client to
-  render the `rescue` slot on the `<Deferred>` component.
+  Mảng key [deferred prop](/v3/data-props/deferred-props#error-handling)
+  không resolve thành công và đã được rescue phía server. Client dùng danh sách này để
+  render slot `rescue` trên component `<Deferred>`.
 </ParamField>
 
 <ParamField body="sharedProps" type="array">
-  Array of top-level prop keys registered via `Inertia::share()`. Used by the
-  client to carry shared props over during [instant
-  visits](/v3/the-basics/instant-visits).
+  Mảng key prop cấp cao nhất được đăng ký qua `Inertia::share()`. Client dùng chúng để
+  mang shared prop sang trong [instant
+  visit](/v3/the-basics/instant-visits).
 </ParamField>
 
 <ParamField body="onceProps" type="object">
-  Configuration for [once props](/v3/data-props/once-props) that should only be
-  resolved once and reused on subsequent pages. Each entry maps a key to an
-  object containing the `prop` name and optional `expiresAt` timestamp (in
-  milliseconds).
+  Cấu hình cho [once props](/v3/data-props/once-props), là các prop chỉ nên được
+  resolve một lần rồi tái sử dụng ở các trang sau. Mỗi entry ánh xạ một key tới
+  object chứa tên `prop` và timestamp `expiresAt` tùy chọn (tính bằng
+  millisecond).
 </ParamField>
 
 <ParamField body="flash" type="object">
-  Flash session data for the current request. Only included when flash data
-  exists. The client exposes it through the `inertia:flash` event and strips it
-  from persisted history state.
+  Flash session data của request hiện tại. Chỉ được đưa vào khi có flash data.
+  Client cung cấp dữ liệu này qua event `inertia:flash` và loại bỏ nó
+  khỏi history state được lưu bền vững.
 </ParamField>
 
-Only `component`, `props`, `url`, and `version` are present on every page object, so a minimal one looks like this:
+Chỉ `component`, `props`, `url` và `version` luôn có mặt trên mọi page object, vì vậy một page object tối thiểu có dạng sau:
 
 ```json
 {
@@ -342,63 +343,63 @@ Only `component`, `props`, `url`, and `version` are present on every page object
 }
 ```
 
-The remaining metadata fields are conditional, emitted only when the corresponding prop behavior applies. Absent fields default on the client to an empty array, empty object, or `false`, so a server may omit an empty field or emit it explicitly with equivalent results.
+Các field metadata còn lại là có điều kiện, chỉ được phát ra khi hành vi prop tương ứng áp dụng. Field vắng mặt mặc định ở client thành mảng rỗng, object rỗng hoặc `false`, vì vậy server có thể bỏ field rỗng hoặc phát rõ field đó mà kết quả vẫn tương đương.
 
-## Prop Evaluation Model
+## Mô hình đánh giá prop
 
-Every prop your server returns falls into one or more categories. The category determines whether the prop is resolved for a given request and what metadata, if any, the page object carries to describe it. These rules are purely a server-side resolution concern; the client applies whatever metadata it receives.
+Mỗi prop server trả về thuộc một hoặc nhiều nhóm. Nhóm đó quyết định prop có được resolve cho request cụ thể hay không và page object mang metadata nào, nếu có, để mô tả nó. Các quy tắc này hoàn toàn là vấn đề resolve ở phía server; client chỉ áp dụng metadata mà nó nhận được.
 
-Resolution differs between the two request modes. A full visit resolves the complete set of eligible props. A partial reload resolves only the props the client asked for, keyed on the page component.
+Cách resolve khác nhau giữa hai chế độ request. Full visit resolve toàn bộ tập prop đủ điều kiện. Partial reload chỉ resolve những prop client yêu cầu, dựa trên page component.
 
 **Full visit**
 
-| Prop category                | Resolved?                                | Metadata emitted                                               |
+| Nhóm prop                     | Có resolve?                               | Metadata được phát                                              |
 | :--------------------------- | :--------------------------------------- | :------------------------------------------------------------- |
-| Regular                      | Yes                                      | none                                                           |
-| Always                       | Yes (immune to `only`/`except`)          | none                                                           |
-| Optional                     | No (not resolved, not announced)         | none                                                           |
-| Deferred                     | No (announced only)                      | `deferredProps`                                                |
-| Merge / deep merge / prepend | Yes                                      | `mergeProps`, `deepMergeProps`, `prependProps`, `matchPropsOn` |
-| Once                         | Yes, unless already remembered by client | `onceProps`                                                    |
-| Scroll                       | Yes                                      | `scrollProps`, `mergeProps`                                    |
+| Thông thường                 | Có                                       | không                                                          |
+| Always                       | Có (không bị ảnh hưởng bởi `only`/`except`) | không                                                       |
+| Optional                     | Không (không resolve, không công bố)     | không                                                          |
+| Deferred                     | Không (chỉ công bố)                      | `deferredProps`                                                |
+| Merge / deep merge / prepend | Có                                       | `mergeProps`, `deepMergeProps`, `prependProps`, `matchPropsOn` |
+| Once                         | Có, trừ khi client đã ghi nhớ            | `onceProps`                                                    |
+| Scroll                       | Có                                       | `scrollProps`, `mergeProps`                                    |
 
 **Partial reload**
 
-| Prop category                | Resolved?                                | Metadata emitted                                               |
+| Nhóm prop                     | Có resolve?                               | Metadata được phát                                              |
 | :--------------------------- | :--------------------------------------- | :------------------------------------------------------------- |
-| Regular                      | Only when requested via `only`/`except`  | none                                                           |
-| Always                       | Yes (immune to `only`/`except`)          | none                                                           |
-| Optional                     | Only when selected via `only`/`except`   | none                                                           |
-| Deferred                     | Only when selected via `only`/`except`   | `rescuedProps` (on rescue)                                     |
-| Merge / deep merge / prepend | When resolved                            | `mergeProps`, `deepMergeProps`, `prependProps`, `matchPropsOn` |
-| Once                         | Always when requested (except-once ignored) | `onceProps`                                                 |
-| Scroll                       | When resolved                            | `scrollProps`, `mergeProps`                                    |
+| Thông thường                 | Chỉ khi được yêu cầu qua `only`/`except` | không                                                          |
+| Always                       | Có (không bị ảnh hưởng bởi `only`/`except`) | không                                                       |
+| Optional                     | Chỉ khi được chọn qua `only`/`except`    | không                                                          |
+| Deferred                     | Chỉ khi được chọn qua `only`/`except`    | `rescuedProps` (khi rescue)                                    |
+| Merge / deep merge / prepend | Khi được resolve                         | `mergeProps`, `deepMergeProps`, `prependProps`, `matchPropsOn` |
+| Once                         | Luôn resolve khi được yêu cầu (bỏ qua except-once) | `onceProps`                                          |
+| Scroll                       | Khi được resolve                         | `scrollProps`, `mergeProps`                                    |
 
-A few metadata fields are mode-specific:
+Một số field metadata chỉ áp dụng cho từng chế độ cụ thể:
 
-- `deferredProps` is populated on full visits only. It is empty or absent on partial reloads, since deferred props resolve in the follow-up request.
-- `rescuedProps` is populated on partial reloads only, listing deferred props that failed to resolve.
-- Merge, scroll, and once metadata is emitted per response, alongside whichever props carry those behaviors.
+- `deferredProps` chỉ được điền trong full visit. Nó rỗng hoặc không tồn tại ở partial reload vì deferred prop được resolve trong request tiếp theo.
+- `rescuedProps` chỉ được điền trong partial reload, liệt kê các deferred prop không resolve thành công.
+- Metadata merge, scroll và once được phát theo từng response, cùng với những prop mang các hành vi đó.
 
-### Always Props
+### Always props
 
-Always props are resolved on every response in both modes. They ignore the partial reload filters entirely, so an always prop is sent even when a request lists it in `except`. They carry no page-object metadata, being purely a server-side resolution rule. The `errors` prop is an always prop, which is why every page object includes an `errors` object.
+Always prop được resolve trong mọi response ở cả hai chế độ. Chúng hoàn toàn bỏ qua filter partial reload, vì vậy một always prop vẫn được gửi kể cả khi request liệt kê nó trong `except`. Chúng không mang page-object metadata vì đây thuần túy là quy tắc resolve phía server. Prop `errors` là một always prop, đó là lý do mọi page object đều có object `errors`.
 
-### Composing Categories
+### Kết hợp các nhóm
 
-A prop may belong to several categories at once. A prop may be deferred and mergeable, once and deferred, or scroll and deferred. The metadata fields are independent, so the page object carries every label that applies, subject to the mode, partial filters, and reset rules above.
+Một prop có thể đồng thời thuộc nhiều nhóm. Prop có thể vừa deferred vừa mergeable, vừa once vừa deferred, hoặc vừa scroll vừa deferred. Các field metadata độc lập với nhau, vì vậy page object mang mọi nhãn áp dụng, tùy theo chế độ, partial filter và các quy tắc reset ở trên.
 
-## Partial Reloads
+## Tải lại một phần
 
-The partial reload option lets you request a subset of the props (data) from the server on subsequent visits to the _same_ page component. This may be a helpful performance optimization if it's acceptable that some page data becomes stale. See the [partial reloads](/v3/data-props/partial-reloads) documentation for details.
+Tùy chọn partial reload cho phép bạn yêu cầu một tập con của props (dữ liệu) từ server trong các lần truy cập tiếp theo tới _cùng_ page component. Đây có thể là tối ưu hiệu năng hữu ích nếu chấp nhận một phần dữ liệu trang có thể bị cũ. Xem tài liệu [partial reloads](/v3/data-props/partial-reloads) để biết chi tiết.
 
-A partial reload request includes the `X-Inertia-Partial-Component` header and may include `X-Inertia-Partial-Data` and/or `X-Inertia-Partial-Except` headers with the request.
+Request partial reload chứa header `X-Inertia-Partial-Component` và có thể kèm các header `X-Inertia-Partial-Data` và/hoặc `X-Inertia-Partial-Except`.
 
-The `X-Inertia-Partial-Data` header is a comma-separated list of the desired props (data) keys that should be returned.
+Header `X-Inertia-Partial-Data` là danh sách phân tách bằng dấu phẩy các key props (dữ liệu) cần được trả về.
 
-The `X-Inertia-Partial-Except` header is a comma-separated list of the props (data) keys that should not be returned. Including only the `X-Inertia-Partial-Except` header sends all props (data) except those listed. Both headers may be sent together, in which case the `X-Inertia-Partial-Data` list narrows the response first and the `X-Inertia-Partial-Except` list is then removed from it, so a prop named in both is excluded.
+Header `X-Inertia-Partial-Except` là danh sách phân tách bằng dấu phẩy các key props (dữ liệu) không nên được trả về. Nếu chỉ gửi `X-Inertia-Partial-Except`, server gửi mọi prop trừ các prop được liệt kê. Có thể gửi cả hai header cùng lúc; khi đó danh sách `X-Inertia-Partial-Data` thu hẹp response trước, rồi danh sách `X-Inertia-Partial-Except` được loại khỏi kết quả, vì vậy prop xuất hiện trong cả hai sẽ bị loại.
 
-The `X-Inertia-Partial-Component` header includes the name of the component that is being partially reloaded. This is necessary, since partial reloads only work for requests made to the same page component. If the final destination differs for some reason (e.g. the user was logged out and is now on the login page), no partial reloading occurs.
+Header `X-Inertia-Partial-Component` chứa tên component đang được partial reload. Điều này là bắt buộc vì partial reload chỉ hoạt động với request tới cùng page component. Nếu đích cuối cùng thay đổi vì lý do nào đó (ví dụ người dùng đã đăng xuất và giờ ở trang đăng nhập), partial reload sẽ không diễn ra.
 
 ```http
 REQUEST
@@ -425,13 +426,13 @@ Content-Type: application/json
 }
 ```
 
-### Resetting Props
+### Reset props
 
-The `X-Inertia-Reset` header lists prop paths the client wants to reset before new data is applied. A reset prop is re-resolved and returned unlabeled, present in `props` but absent from every merge array, so the client replaces the value instead of merging into it. The client sends reset paths in both the `X-Inertia-Reset` header and the `only` list. For scroll props, the server also sets `scrollProps[path].reset` in the metadata, which the [infinite scroll](/v3/data-props/infinite-scroll) component uses to re-sync its pagination state to the returned page. See [resetting props](/v3/data-props/merging-props#resetting-props) for the client-side API.
+Header `X-Inertia-Reset` liệt kê các path prop mà client muốn reset trước khi áp dụng dữ liệu mới. Prop bị reset sẽ được resolve lại và trả về không có nhãn, có mặt trong `props` nhưng vắng khỏi mọi mảng merge, vì vậy client thay thế giá trị thay vì gộp vào nó. Client gửi reset path trong cả header `X-Inertia-Reset` và danh sách `only`. Với scroll prop, server còn đặt `scrollProps[path].reset` trong metadata; component [infinite scroll](/v3/data-props/infinite-scroll) dùng giá trị này để đồng bộ lại trạng thái phân trang với trang được trả về. Xem [resetting props](/v3/data-props/merging-props#resetting-props) để biết API phía client.
 
-## Deferred and Optional Props
+## Deferred và optional props
 
-Deferred props let the server announce data that will load in a follow-up request. On a full visit the prop is skipped and its key is listed under `deferredProps`, grouped by the request group it belongs to. The client issues one partial reload per group to fetch them, and the group names themselves are arbitrary. See the [deferred props](/v3/data-props/deferred-props) documentation.
+Deferred prop cho phép server công bố dữ liệu sẽ được tải trong request tiếp theo. Trong full visit, prop bị bỏ qua và key được liệt kê trong `deferredProps`, theo nhóm request mà nó thuộc về. Client gửi một partial reload cho mỗi nhóm để lấy dữ liệu; tên nhóm có thể tùy ý. Xem tài liệu [deferred props](/v3/data-props/deferred-props).
 
 ```json
 {
@@ -451,11 +452,11 @@ Deferred props let the server announce data that will load in a follow-up reques
 }
 ```
 
-Optional props behave similarly but are never announced. They are skipped on full visits and resolved only when a partial reload selects them via `only` or `except`.
+Optional prop hoạt động tương tự nhưng không bao giờ được công bố. Chúng bị bỏ qua ở full visit và chỉ resolve khi partial reload chọn chúng qua `only` hoặc `except`.
 
-### Rescued Deferred Props
+### Deferred props được rescue
 
-A deferred prop resolved with `rescue: true` that throws does not fail the response, which is still a `200` carrying every other prop. The server reports the exception through your framework's error handling, omits the prop from `props` entirely (it is not sent as `null`), and adds its key to the top-level `rescuedProps` array. The client uses this list to render the `rescue` slot on the `<Deferred>` component. See [error handling](/v3/data-props/deferred-props#error-handling).
+Một deferred prop được resolve với `rescue: true` mà ném exception sẽ không làm response thất bại; response vẫn là `200` và chứa mọi prop khác. Server báo exception qua cơ chế xử lý lỗi của framework, loại hoàn toàn prop khỏi `props` (không gửi dưới dạng `null`) và thêm key của nó vào mảng top-level `rescuedProps`. Client dùng danh sách này để render slot `rescue` trên component `<Deferred>`. Xem [xử lý lỗi](/v3/data-props/deferred-props#error-handling).
 
 ```json
 {
@@ -469,9 +470,9 @@ A deferred prop resolved with `rescue: true` that throws does not fail the respo
 }
 ```
 
-## Merging Props
+## Gộp props
 
-Merge props instruct the client to combine incoming prop data with data already on the page instead of replacing it. Arrays are appended or prepended, and objects are shallow or deep merged. The page object labels each merging prop under `mergeProps` (append), `prependProps` (prepend), or `deepMergeProps` (deep merge). Merging applies on partial reloads only, so a full visit always replaces the prop even when it carries a merge label. See the [merging props](/v3/data-props/merging-props) documentation.
+Merge prop yêu cầu client kết hợp dữ liệu prop mới với dữ liệu đã có trên trang thay vì thay thế. Mảng được append hoặc prepend, còn object được shallow merge hoặc deep merge. Page object đánh dấu mỗi prop cần gộp trong `mergeProps` (append), `prependProps` (prepend) hoặc `deepMergeProps` (deep merge). Việc gộp chỉ áp dụng cho partial reload, vì vậy full visit luôn thay thế prop kể cả khi prop mang nhãn merge. Xem tài liệu [merging props](/v3/data-props/merging-props).
 
 ```json
 {
@@ -512,13 +513,13 @@ Merge props instruct the client to combine incoming prop data with data already 
 }
 ```
 
-### Matching Items
+### Khớp phần tử
 
-The `matchPropsOn` array tells the client which field identifies each item so existing entries may be updated in place rather than duplicated. Each entry has the form `"<propPath>.<keyField>"` and is split on the last dot: everything before the final segment is the prop path, and the final segment is the key field. `conversations.data.id` keys the array at `conversations.data` on its `id` field. See [matching items](/v3/data-props/merging-props#matching-items).
+Mảng `matchPropsOn` cho client biết field nào định danh từng phần tử để entry hiện có có thể được cập nhật tại chỗ thay vì bị nhân bản. Mỗi entry có dạng `"<propPath>.<keyField>"` và được tách tại dấu chấm cuối cùng: phần trước segment cuối là prop path, segment cuối là key field. `conversations.data.id` định danh mảng tại `conversations.data` theo field `id`. Xem [matching items](/v3/data-props/merging-props#matching-items).
 
-## Once Props
+## Once props
 
-Once props are resolved a single time and remembered by the client, then reused on subsequent pages that include the same prop. The page object carries an `onceProps` configuration. Each entry maps a key to the prop name and an optional expiration timestamp in milliseconds. See the [once props](/v3/data-props/once-props) documentation.
+Once prop được resolve một lần và client ghi nhớ, sau đó tái sử dụng ở các trang tiếp theo có cùng prop. Page object mang cấu hình `onceProps`. Mỗi entry ánh xạ một key tới tên prop và timestamp hết hạn tùy chọn tính bằng millisecond. Xem tài liệu [once props](/v3/data-props/once-props).
 
 ```json
 {
@@ -547,7 +548,7 @@ Once props are resolved a single time and remembered by the client, then reused 
 }
 ```
 
-On subsequent Inertia requests, the client sends the loaded, non-expired once keys in the `X-Inertia-Except-Once-Props` header. The server skips resolving those props and excludes them from the response, and the client reuses the previously loaded values.
+Trong các request Inertia tiếp theo, client gửi các once key đã tải và chưa hết hạn trong header `X-Inertia-Except-Once-Props`. Server bỏ qua việc resolve các prop đó và không đưa chúng vào response; client tái sử dụng giá trị đã tải trước đó.
 
 ```http
 REQUEST
@@ -582,15 +583,15 @@ Content-Type: application/json
 }
 ```
 
-Note that `plans` is included in `onceProps` but not in `props` since it was already loaded on the client. The `onceProps` key identifies the once prop across pages, while `prop` specifies the actual prop name. These may differ when using [custom keys](/v3/data-props/once-props#custom-keys).
+Lưu ý `plans` có trong `onceProps` nhưng không có trong `props` vì nó đã được tải ở client. Key `onceProps` định danh once prop xuyên trang, còn `prop` chỉ định tên prop thực tế. Hai giá trị này có thể khác nhau khi dùng [custom key](/v3/data-props/once-props#custom-keys).
 
-### Force-Fresh and Partial Reloads
+### Force-fresh và partial reload
 
-The server may send a fresh value for a once prop even when its key appears in `X-Inertia-Except-Once-Props`, for example when the underlying data has changed. The returned value and its new `expiresAt` replace the client's copy. On a partial reload the except-once header is ignored, so a requested once prop is always resolved.
+Server có thể gửi giá trị mới cho once prop kể cả khi key của nó xuất hiện trong `X-Inertia-Except-Once-Props`, ví dụ khi dữ liệu nền đã thay đổi. Giá trị trả về cùng `expiresAt` mới sẽ thay thế bản sao ở client. Trong partial reload, header except-once bị bỏ qua, vì vậy once prop được yêu cầu luôn được resolve.
 
-## Infinite Scroll
+## Infinite scroll
 
-Infinite scroll builds on merge props. The prop's inner array is labeled for merging (typically `<path>.data`), and the page object carries a `scrollProps` entry describing the paginator's cursor. See the [infinite scroll](/v3/data-props/infinite-scroll) documentation.
+Infinite scroll xây dựng trên merge prop. Mảng bên trong của prop được đánh dấu để gộp (thường là `<path>.data`), còn page object mang entry `scrollProps` mô tả cursor của paginator. Xem tài liệu [infinite scroll](/v3/data-props/infinite-scroll).
 
 ```json
 {
@@ -625,13 +626,13 @@ Infinite scroll builds on merge props. The prop's inner array is labeled for mer
 }
 ```
 
-Every scroll response re-emits the merge label and a fresh cursor. A reset request additionally sets `scrollProps[path].reset` to `true`, which tells the client to re-sync its pagination state to the returned page. A deferred scroll prop emits no `scrollProps` on the full visit, since it resolves in the follow-up request.
+Mỗi scroll response đều phát lại nhãn merge và một cursor mới. Request reset còn đặt `scrollProps[path].reset` thành `true`, báo cho client đồng bộ lại trạng thái phân trang theo page được trả về. Deferred scroll prop không phát `scrollProps` trong full visit vì nó được resolve ở request tiếp theo.
 
-## Asset Versioning
+## Quản lý phiên bản asset
 
-The page object carries a `version` identifier representing the current version of your site's assets. It may be a number, string, or file hash, as long as the value changes when the assets do, and a server that does not track asset versions should send an empty string. The client echoes the active page's version back in the `X-Inertia-Version` header, and the server compares the two, typically in its middleware layer.
+Page object mang định danh `version` đại diện cho phiên bản asset hiện tại của site. Giá trị có thể là số, chuỗi hoặc file hash, miễn là thay đổi khi asset thay đổi; server không theo dõi asset version nên gửi chuỗi rỗng. Client gửi lại version của page đang hoạt động trong header `X-Inertia-Version`, còn server so sánh hai giá trị, thường ở lớp middleware.
 
-Matching versions let the request continue as normal. A mismatch on a `GET` request causes the server to immediately return a `409 Conflict` with the target URL in an `X-Inertia-Location` header and its current version in `X-Inertia-Version`, so the client lands on the correct destination even after a server-side redirect. Non-`GET` requests never receive a mismatch `409`, though the `GET` redirect that follows one still may. Server-side adapters also reflash any flash session data on a `409` so it survives the follow-up request.
+Nếu version khớp, request tiếp tục bình thường. Nếu không khớp trên request `GET`, server lập tức trả `409 Conflict` với URL đích trong header `X-Inertia-Location` và version hiện tại trong `X-Inertia-Version`, giúp client đến đúng đích kể cả sau server-side redirect. Request không phải `GET` không bao giờ nhận `409` do version mismatch, dù request `GET` sau redirect vẫn có thể nhận. Server-side adapter cũng reflash mọi flash session data trên `409` để dữ liệu tồn tại qua request tiếp theo.
 
 ```http
 REQUEST
@@ -647,45 +648,45 @@ X-Inertia-Location: https://example.com/events/80
 X-Inertia-Version: 2f8a1c9e4b7d0a3f6c5e8b1d4a7f0c2e
 ```
 
-See the [asset versioning](/v3/advanced/asset-versioning) page for configuring the version and for how background requests are treated.
+Xem trang [asset versioning](/v3/advanced/asset-versioning) để biết cách cấu hình version và cách background request được xử lý.
 
-## Redirects
+## Redirect
 
-Inertia relies on standard HTTP redirects for navigation after a server-side action. A `302 Found` returned after a `PUT`, `PATCH`, or `DELETE` is converted to `303 See Other` so the browser issues a `GET` to the redirect target, avoiding a repeated non-GET request.
+Inertia dựa vào HTTP redirect tiêu chuẩn để điều hướng sau một thao tác phía server. `302 Found` được trả về sau request `PUT`, `PATCH` hoặc `DELETE` sẽ được chuyển thành `303 See Other` để trình duyệt gửi `GET` tới redirect target, tránh lặp lại request không phải GET.
 
-External redirects point outside your Inertia app, where the Inertia request headers cannot survive the hop, so an XHR visit may not follow them. The server returns a `409 Conflict` with an `X-Inertia-Location` header instead, and the client performs a full `window.location` visit.
+External redirect trỏ ra ngoài ứng dụng Inertia, nơi các request header của Inertia không thể đi theo, vì vậy XHR visit có thể không follow được. Thay vào đó server trả `409 Conflict` cùng header `X-Inertia-Location`, và client thực hiện full visit bằng `window.location`.
 
-A non-prefetch redirect whose target contains a URL fragment is returned as a `409 Conflict` with an `X-Inertia-Redirect` header holding the full URL, and the client makes a fresh Inertia `GET` visit to that URL. This is distinct from the `preserveFragment` page-object field, which carries the original request's fragment across an ordinary redirect. See the [redirects](/v3/the-basics/redirects) documentation.
+Redirect không phải prefetch có target chứa URL fragment được trả về dưới dạng `409 Conflict` với header `X-Inertia-Redirect` chứa URL đầy đủ, sau đó client thực hiện Inertia `GET` visit mới tới URL đó. Cơ chế này khác field `preserveFragment` của page object, vốn mang fragment của request ban đầu qua redirect thông thường. Xem tài liệu [redirects](/v3/the-basics/redirects).
 
-## Validation Errors
+## Lỗi validation
 
-Validation errors are shared through the `errors` prop. The Laravel adapter registers `errors` as an always prop, so it is present on every page object and defaults to `{}` when there are no errors.
+Validation error được chia sẻ qua prop `errors`. Laravel adapter đăng ký `errors` là always prop nên nó có mặt trong mọi page object và mặc định là `{}` khi không có lỗi.
 
-Each key may map to either a single message or an array of messages, and the client renders whichever shape it receives. The choice is left to the server, so the Laravel adapter sends the first error per field by default and may be [configured](/v3/the-basics/validation#multiple-errors-per-field) to send all error messages for each field.
+Mỗi key có thể ánh xạ tới một message hoặc một mảng message, và client render đúng shape nhận được. Việc chọn shape thuộc về server; vì vậy Laravel adapter mặc định gửi lỗi đầu tiên của mỗi field và có thể được [cấu hình](/v3/the-basics/validation#multiple-errors-per-field) để gửi toàn bộ error message cho từng field.
 
-Requests may scope errors to a named error bag with the `X-Inertia-Error-Bag` header. The server namespaces the returned errors under that bag, so multiple forms on a page may keep their errors separate. See the [validation](/v3/the-basics/validation) documentation.
+Request có thể scope error vào một error bag có tên bằng header `X-Inertia-Error-Bag`. Server namespace các error được trả về dưới bag đó, nhờ vậy nhiều form trên cùng trang có thể giữ lỗi riêng biệt. Xem tài liệu [validation](/v3/the-basics/validation).
 
-## HTTP Status Codes
+## HTTP status code
 
-Inertia uses specific HTTP status codes to handle different scenarios.
+Inertia sử dụng các HTTP status code cụ thể để xử lý những tình huống khác nhau.
 
-| Status Code       | Description                                                                                                                                                                                                                                                           |
+| Status code        | Mô tả                                                                                                                                                                                                                                                                |
 | :---------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **200 OK**        | Standard successful response for both HTML and Inertia JSON responses.                                                                                                                                                                                                |
-| **302 Found**     | Standard redirect response.                                                                                                                                                                                                                                           |
-| **303 See Other** | The redirect status after a non-GET request, which tells the browser to follow it with a `GET`. See [redirects](#redirects).                                                                                                                                          |
-| **409 Conflict**  | A control response rather than a page, used for an [asset version mismatch](#asset-versioning), an external redirect, or a fragment redirect. See [redirects](#redirects).                                                                                            |
+| **200 OK**        | Response thành công tiêu chuẩn cho cả HTML và Inertia JSON response.                                                                                                                                                                                                 |
+| **302 Found**     | Redirect response tiêu chuẩn.                                                                                                                                                                                                                                        |
+| **303 See Other** | Status redirect sau request không phải GET, yêu cầu trình duyệt follow bằng `GET`. Xem [redirects](#redirects).                                                                                                                                                       |
+| **409 Conflict**  | Control response thay vì page, dùng cho [asset version mismatch](#asset-versioning), external redirect hoặc fragment redirect. Xem [redirects](#redirects).                                                                                                         |
 
-The following status codes are used for [Precognition](/v3/the-basics/forms#precognition) validation requests.
+Các status code sau được dùng cho request validation bằng [Precognition](/v3/the-basics/forms#precognition).
 
-| Status Code                  | Description                                                                                    |
+| Status code                   | Mô tả                                                                                         |
 | :--------------------------- | :--------------------------------------------------------------------------------------------- |
-| **204 No Content**           | Successful Precognition validation request with no validation errors.                          |
-| **422 Unprocessable Entity** | Precognition validation request with validation errors. The response body contains the errors. |
+| **204 No Content**           | Request Precognition validation thành công và không có validation error.                       |
+| **422 Unprocessable Entity** | Request Precognition validation có validation error. Response body chứa các lỗi.               |
 
-## Server-Side Rendering
+## Server-side rendering
 
-Inertia does not server-side render the page components by default. Enabling [SSR](/v3/advanced/server-side-rendering) introduces a second wire contract, this time between your server-side adapter and Inertia's Node SSR server. The adapter POSTs the page object to the SSR server, which returns the pre-rendered markup for the HTML document.
+Mặc định Inertia không server-side render page component. Khi bật [SSR](/v3/advanced/server-side-rendering), một wire contract thứ hai được đưa vào, lần này giữa server-side adapter và Node SSR server của Inertia. Adapter POST page object tới SSR server; server này trả markup đã pre-render cho tài liệu HTML.
 
 ```http
 REQUEST
@@ -702,11 +703,11 @@ Server: Inertia.js SSR
 {"head":["<title>Birthday party<\/title>"],"body":"<script data-page=\"app\" type=\"application\/json\">{\"component\":\"Event\",...}<\/script><div data-server-rendered=\"true\" id=\"app\"><h1>Birthday party<\/h1><\/div>"}
 ```
 
-The response fills the two slots of the root template, which the Laravel adapter exposes as the `<x-inertia::head>` and `<x-inertia::app>` Blade components. The `head` array holds the elements belonging in the document's `<head>`, such as the title and meta tags. The `body` string takes the place of the page object script tag and root `<div>` that a non-SSR document would render, since the SSR server already includes both in its markup, and it carries `data-server-rendered="true"` so the client hydrates the existing DOM instead of mounting a fresh app. Slash escaping within the embedded page object is handled by the SSR server, so the adapter may print the `body` markup as-is.
+Response điền vào hai slot của root template, được Laravel adapter cung cấp dưới dạng Blade component `<x-inertia::head>` và `<x-inertia::app>`. Mảng `head` chứa các phần tử thuộc `<head>` của tài liệu, chẳng hạn title và meta tag. Chuỗi `body` thay thế page object script tag và root `<div>` mà tài liệu không SSR sẽ render, vì SSR server đã đưa cả hai vào markup; nó còn mang `data-server-rendered="true"` để client hydrate DOM hiện có thay vì mount ứng dụng mới. Việc escape dấu gạch chéo trong page object nhúng do SSR server xử lý, nên adapter có thể in markup `body` nguyên trạng.
 
-The SSR server exposes two additional endpoints. A `GET` request to `/health` returns `{"status":"OK"}` and may be used to verify the process is running before dispatching a render. A `POST` to `/shutdown` stops the process, which is how the Laravel adapter's `inertia:stop-ssr` command works.
+SSR server cung cấp thêm hai endpoint. Request `GET` tới `/health` trả `{"status":"OK"}` và có thể dùng để xác minh process đang chạy trước khi gửi render. Request `POST` tới `/shutdown` dừng process; đây là cách command `inertia:stop-ssr` của Laravel adapter hoạt động.
 
-A failed render returns a `500` response whose JSON body classifies the error rather than just reporting it.
+Render thất bại trả response `500` với JSON body phân loại lỗi thay vì chỉ báo lỗi chung.
 
 ```json
 {
@@ -722,6 +723,6 @@ A failed render returns a `500` response whose JSON body classifies the error ra
 }
 ```
 
-The `error` message, `hint`, and `timestamp` are always present, while `component`, `url`, `stack`, and `sourceLocation` appear whenever the SSR server can determine them. The `type` narrows the cause to `browser-api` for a browser global touched during render, which also sets `browserApi` to the offending API, `component-resolution` for a page component that could not be resolved, or `render` for anything else thrown by your components.
+Message `error`, `hint` và `timestamp` luôn có mặt, còn `component`, `url`, `stack` và `sourceLocation` xuất hiện khi SSR server có thể xác định. `type` thu hẹp nguyên nhân thành `browser-api` nếu một browser global bị truy cập trong lúc render, đồng thời đặt `browserApi` thành API gây lỗi; `component-resolution` nếu không resolve được page component; hoặc `render` với các exception khác do component ném ra.
 
-Adapters should treat a failed render as non-fatal, reporting the payload through the application's error handling and falling back to the standard client-side rendered document, so a broken SSR build never takes the site down. The Laravel adapter surfaces it as an [`SsrRenderFailed` event](/v3/advanced/server-side-rendering#error-handling) and adds a `connection` type of its own when the SSR server cannot be reached at all.
+Adapter nên xem render thất bại là lỗi không fatal: báo payload qua error handling của ứng dụng rồi fallback về tài liệu client-side rendered tiêu chuẩn, để SSR build lỗi không làm site ngừng hoạt động. Laravel adapter phát lỗi này thành [`SsrRenderFailed` event](/v3/advanced/server-side-rendering#error-handling) và bổ sung type `connection` riêng khi hoàn toàn không kết nối được tới SSR server.

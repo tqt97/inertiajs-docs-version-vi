@@ -1,29 +1,30 @@
 ---
-title: Server-Side Setup
+title: Thiết lập phía máy chủ
+description: "Bước đầu khi cài Inertia là cấu hình server-side framework. Inertia duy trì server-side adapter chính thức cho Laravel. Với framework khác, xem community…"
 ---
 
-The first step when installing Inertia is to configure your server-side framework. Inertia maintains an official server-side adapter for [Laravel](https://laravel.com/). For other frameworks, please see the [community adapters](/v3/installation/community-adapters).
+Bước đầu khi cài Inertia là cấu hình server-side framework. Inertia duy trì server-side adapter chính thức cho [Laravel](https://laravel.com/). Với framework khác, xem [community adapters](/v3/installation/community-adapters).
 
-Inertia is fine-tuned for Laravel, so the documentation examples on this website utilize Laravel. For examples of using Inertia with other server-side frameworks, please refer to the framework-specific documentation maintained by the relevant adapter.
+Inertia được tinh chỉnh chặt cho Laravel, vì vậy ví dụ tài liệu trên website này dùng Laravel. Với ví dụ dùng Inertia cùng server-side framework khác, hãy tham khảo tài liệu riêng do adapter tương ứng duy trì.
 
 <Card
     icon="laravel"
-    title="Laravel Starter Kits"
+    title="Laravel Starter Kit"
     href="https://laravel.com/docs/starter-kits"
     arrow="true"
-    cta="Start building"
+    cta="Bắt đầu xây dựng"
 >
-Laravel's starter kits provide out-of-the-box scaffolding for new Inertia applications.
+Các starter kit của Laravel cung cấp scaffold sẵn dùng cho ứng dụng Inertia mới.
 
-These starter kits are the absolute fastest way to start building a new Inertia project using Laravel and Vue or React. However, if you would like to manually install Inertia into your application, please consult the documentation below.
+Đây là cách nhanh nhất để bắt đầu dự án Inertia mới bằng Laravel và Vue hoặc React. Tuy nhiên, nếu muốn cài Inertia thủ công vào ứng dụng, hãy xem tài liệu bên dưới.
 
 </Card>
 
-## Installation
+## Cài đặt
 
 <Steps>
     <Step title="Install dependencies">
-        First, install the Inertia server-side adapter using the Composer package manager.
+        Trước tiên, hãy cài adapter phía máy chủ của Inertia bằng Composer package manager.
 
         ```bash
         composer require inertiajs/inertia-laravel
@@ -31,7 +32,7 @@ These starter kits are the absolute fastest way to start building a new Inertia 
     </Step>
 
     <Step title="Setup root template">
-        Next, create a `resources/views/app.blade.php` file. This root template will be loaded on the first page visit to your application. Inertia provides Blade components for rendering the head and body content.
+        Tiếp theo, tạo file `resources/views/app.blade.php`. Root template này được tải ở lần truy cập page đầu tiên. Inertia cung cấp Blade component để render nội dung head và body.
 
         ```blade resources/views/app.blade.php
         <html>
@@ -47,29 +48,29 @@ These starter kits are the absolute fastest way to start building a new Inertia 
         </html>
         ```
 
-        For React applications, it's recommended to include the `@viteReactRefresh` directive before the `@vite` directive to enable Fast Refresh in development.
+        Với ứng dụng React, nên đặt directive `@viteReactRefresh` trước `@vite` để bật Fast Refresh trong môi trường phát triển.
 
-        The `<x-inertia::app>` component renders a `<div>` element with an `id` of `app`. This element serves as the mounting point for your JavaScript application. You may customize the `id` by passing a different value to the component.
+        Component `<x-inertia::app>` render phần tử `<div>` với `id` là `app`. Element này là mounting point cho JavaScript application. Bạn có thể tùy chỉnh `id` bằng cách truyền giá trị khác vào component.
 
         ```blade
         <x-inertia::app id="custom-app-id" />
         ```
 
-        If you change the `id` of the root element, be sure to update it [client-side](/v3/installation/client-side-setup#defining-a-root-element) as well.
+        Nếu thay `id` của root element, hãy nhớ cập nhật cả [phía client](/v3/installation/client-side-setup#defining-a-root-element).
 
-        The `<x-inertia::head>` component also accepts [fallback content](/v3/the-basics/title-and-meta#ssr-fallback) via its slot for managing head elements when [SSR](/v3/advanced/server-side-rendering) is not active.
+        Component `<x-inertia::head>` cũng nhận [fallback content](/v3/the-basics/title-and-meta#ssr-fallback) qua slot để quản lý head element khi [SSR](/v3/advanced/server-side-rendering) không hoạt động.
 
-        By default, Inertia's Laravel adapter will assume your root template is named `app.blade.php`. You may change this using the `Inertia::setRootView()` method.
+        Mặc định, Laravel adapter của Inertia giả định root template có tên `app.blade.php`. Bạn có thể thay đổi bằng phương thức `Inertia::setRootView()`.
     </Step>
 
     <Step title="Register middleware">
-        Next, set up the Inertia middleware by publishing the `HandleInertiaRequests` middleware to your application with the following Artisan command.
+        Tiếp theo, thiết lập Inertia middleware bằng cách publish middleware `HandleInertiaRequests` vào ứng dụng bằng Artisan command sau.
 
         ```sh
         php artisan inertia:middleware
         ```
 
-        Once the middleware has been published, append the `HandleInertiaRequests` middleware to the `web` middleware group in your application's `bootstrap/app.php` file.
+        Sau khi middleware được publish, hãy thêm middleware `HandleInertiaRequests` vào group middleware `web` trong file `bootstrap/app.php` của ứng dụng.
 
         ```php
         use App\Http\Middleware\HandleInertiaRequests;
@@ -81,11 +82,11 @@ These starter kits are the absolute fastest way to start building a new Inertia 
         })
         ```
 
-        This middleware provides a `version()` method for setting your [asset version](/v3/advanced/asset-versioning), as well as a `share()` method for defining [shared data](/v3/data-props/shared-data).
+        Middleware này cung cấp phương thức `version()` để đặt [asset version](/v3/advanced/asset-versioning), cùng phương thức `share()` để định nghĩa [shared data](/v3/data-props/shared-data).
     </Step>
 
     <Step title="Create your first response">
-        That's it, you're ready to start creating Inertia [pages](/v3/the-basics/pages) and rendering them via [responses](/v3/the-basics/responses).
+        Vậy là xong, bạn đã sẵn sàng tạo Inertia [pages](/v3/the-basics/pages) và render chúng qua [responses](/v3/the-basics/responses).
 
         ```php
         use Inertia\Inertia;
@@ -109,9 +110,9 @@ These starter kits are the absolute fastest way to start building a new Inertia 
 
 </Steps>
 
-## Blade Directives
+## Blade directives
 
-Prior to v3, Inertia used `@inertiaHead` and `@inertia` Blade directives to render head and body content. These directives are still supported but do not offer SSR head [fallback content](/v3/the-basics/title-and-meta#ssr-fallback). The Blade components above are recommended for new applications.
+Trước v3, Inertia dùng Blade directive `@inertiaHead` và `@inertia` để render nội dung head và body. Các directive này vẫn được hỗ trợ nhưng không cung cấp [fallback content](/v3/the-basics/title-and-meta#ssr-fallback) cho SSR head. Các Blade component ở trên được khuyến nghị cho ứng dụng mới.
 
 ```blade resources/views/app.blade.php
 <html>
@@ -125,4 +126,4 @@ Prior to v3, Inertia used `@inertiaHead` and `@inertia` Blade directives to rend
 </html>
 ```
 
-You may customize the root element `id` by passing a value to the directive: `@inertia('custom-app-id')`.
+Bạn có thể tùy chỉnh `id` của root element bằng cách truyền giá trị vào directive: `@inertia('custom-app-id')`.

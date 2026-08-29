@@ -1,12 +1,13 @@
 ---
-title: Responses
+title: Response
+description: "Tạo Inertia response rất đơn giản. Để bắt đầu, gọi phương thức Inertia::render() trong controller hoặc route, truyền tên JavaScript page component muốn…"
 ---
 
-## Creating Responses
+## Tạo response
 
-Creating an Inertia response is simple. To get started, invoke the `Inertia::render()` method within your controller or route, providing both the name of the [JavaScript page component](/v3/the-basics/pages) that you wish to render, as well as any properties (data) for the page.
+Tạo Inertia response rất đơn giản. Để bắt đầu, gọi phương thức `Inertia::render()` trong controller hoặc route, truyền tên [JavaScript page component](/v3/the-basics/pages) muốn render cùng các property (dữ liệu) cho page.
 
-In the example below, we will pass a single property (`event`) which contains four attributes (`id`, `title`, `start_date` and `description`) to the `Event/Show` page component.
+Trong ví dụ bên dưới, chúng ta truyền một property duy nhất (`event`) chứa bốn attribute (`id`, `title`, `start_date` và `description`) cho page component `Event/Show`.
 
 ```php
 use Inertia\Inertia;
@@ -37,7 +38,7 @@ class EventsController extends Controller
 }
 ```
 
-The component name may also be a Backed Enum, which is useful for organizing page components with type-safe references.
+Tên component cũng có thể là Backed Enum, hữu ích để tổ chức page component với tham chiếu type-safe.
 
 ```php
 enum Page: string
@@ -52,18 +53,18 @@ return Inertia::render(Page::EventShow, [
 ```
 
 <Tip>
-  To ensure that pages load quickly, only return the minimum data required for
-  the page.
+  Để đảm bảo page tải nhanh, chỉ trả về lượng dữ liệu tối thiểu cần thiết cho
+  page.
 </Tip>
 
 <Note>
-  Be aware that all data returned from the controllers will be visible
-  client-side, so be sure to omit sensitive information.
+  Lưu ý rằng mọi dữ liệu trả từ controller đều sẽ hiển thị
+  ở phía client, vì vậy hãy chắc chắn loại bỏ thông tin nhạy cảm.
 </Note>
 
-## Properties
+## Property
 
-To pass data from the server to your page components, you can use properties. You can pass various types of values as props, including primitive types, arrays, objects, and several Laravel-specific types that are automatically resolved:
+Để truyền dữ liệu từ máy chủ vào page component, bạn có thể dùng property. Props có thể nhận nhiều loại giá trị, gồm primitive, array, object và một số kiểu riêng của Laravel được tự động resolve:
 
 ```php
 use App\Models\User;
@@ -93,13 +94,13 @@ Inertia::render('Dashboard', [
 ]);
 ```
 
-Arrayable objects like Eloquent models and collections are automatically converted using their `toArray()` method. Responsable objects like API resources and JSON responses are resolved through their `toResponse()` method.
+Các object `Arrayable` như Eloquent model và collection tự động được chuyển đổi qua phương thức `toArray()`. Các object `Responsable` như API resource và JSON response được resolve qua phương thức `toResponse()`.
 
-## `ProvidesInertiaProperty` Interface
+## Interface `ProvidesInertiaProperty`
 
-When passing props to your components, you may want to create custom classes that can transform themselves into the appropriate data format. While Laravel's `Arrayable` interface simply converts objects to arrays, Inertia offers the more powerful `ProvidesInertiaProperty` interface for context-aware transformations.
+Khi truyền props vào component, đôi khi bạn muốn tạo custom class có khả năng tự chuyển đổi sang định dạng dữ liệu thích hợp. Trong khi interface `Arrayable` của Laravel chỉ chuyển object thành array, Inertia cung cấp interface `ProvidesInertiaProperty` mạnh hơn với khả năng transform theo context.
 
-This interface requires a `toInertiaProperty` method that receives a `PropertyContext` object containing the property key (`$context->key`), all props for the page (`$context->props`), and the request instance (`$context->request`).
+Interface này yêu cầu phương thức `toInertiaProperty` nhận object `PropertyContext`, trong đó chứa property key (`$context->key`), toàn bộ props của page (`$context->props`) và request instance (`$context->request`).
 
 ```php
 use Inertia\PropertyContext;
@@ -121,7 +122,7 @@ class UserAvatar implements ProvidesInertiaProperty
 }
 ```
 
-Once defined, you can use this class directly as a prop value.
+Sau khi định nghĩa, bạn có thể dùng class này trực tiếp làm giá trị prop.
 
 ```php
 Inertia::render('Profile', [
@@ -130,7 +131,7 @@ Inertia::render('Profile', [
 ]);
 ```
 
-The `PropertyContext` gives you access to the property key, which enables powerful patterns like merging with shared data.
+`PropertyContext` cho phép truy cập property key, qua đó hỗ trợ các pattern mạnh như merge với dữ liệu dùng chung.
 
 ```php
 use Inertia\Inertia;
@@ -163,11 +164,11 @@ return Inertia::render('Dashboard', [
 ]);
 ```
 
-## `ProvidesInertiaProperties` Interface
+## Interface `ProvidesInertiaProperties`
 
-In some situations you may want to group related props together for reusability across different pages. You can accomplish this by implementing the `ProvidesInertiaProperties` interface.
+Trong một số tình huống, bạn muốn gom các prop liên quan lại để tái sử dụng trên nhiều trang. Bạn có thể làm điều đó bằng cách implement interface `ProvidesInertiaProperties`.
 
-This interface requires a `toInertiaProperties` method that returns an array of key-value pairs. The method receives a `RenderContext` object containing the component name (`$context->component`) and request instance (`$context->request`).
+Interface này yêu cầu method `toInertiaProperties` trả về array các cặp key-value. Method nhận object `RenderContext` chứa tên component (`$context->component`) và request instance (`$context->request`).
 
 ```php
 use App\Models\User;
@@ -194,7 +195,7 @@ class UserPermissions implements ProvidesInertiaProperties
 }
 ```
 
-You can use these prop classes directly in the `render()` and `with()` methods.
+Bạn có thể dùng trực tiếp các prop class này trong method `render()` và `with()`.
 
 ```php
 public function index(UserPermissions $permissions)
@@ -207,7 +208,7 @@ public function index(UserPermissions $permissions)
 }
 ```
 
-You can also combine multiple prop classes with other props in an array:
+Bạn cũng có thể kết hợp nhiều prop class với các prop khác trong một array:
 
 ```php
 public function index(UserPermissions $permissions)
@@ -225,29 +226,29 @@ public function index(UserPermissions $permissions)
 }
 ```
 
-## Root Template Data
+## Dữ liệu root template
 
-There are situations where you may want to access your prop data in your application's root Blade template. For example, you may want to add a meta description tag, Twitter card meta tags, or Facebook Open Graph meta tags. You can access this data via the `$page` variable.
+Có những trường hợp bạn muốn truy cập dữ liệu prop trong root Blade template của ứng dụng. Ví dụ, bạn có thể muốn thêm meta description, Twitter Card meta tag hoặc Facebook Open Graph meta tag. Bạn có thể truy cập dữ liệu này qua biến `$page`.
 
 ```blade
 <meta name="twitter:title" content="{{ $page['props']['event']->title }}">
 ```
 
-Sometimes you may even want to provide data to the root template that will not be sent to your JavaScript page component. This can be accomplished by invoking the `withViewData` method.
+Đôi khi bạn muốn cung cấp dữ liệu cho root template nhưng không gửi dữ liệu đó đến page component JavaScript. Có thể thực hiện bằng method `withViewData`.
 
 ```php
 return Inertia::render('Event', ['event' => $event])
     ->withViewData(['meta' => $event->meta]);
 ```
 
-After invoking the `withViewData` method, you can access the defined data as you would typically access a Blade template variable.
+Sau khi gọi `withViewData`, bạn có thể truy cập dữ liệu đã định nghĩa như cách truy cập biến Blade template thông thường.
 
 ```blade
 <meta name="description" content="{{ $meta }}">
 ```
 
-## Maximum Response Size
+## Kích thước response tối đa
 
-To enable client-side history navigation, all Inertia server responses are stored in the browser's history state. However, keep in mind that some browsers impose a size limit on how much data can be saved within the history state.
+Để hỗ trợ điều hướng history phía client, tất cả response Inertia từ máy chủ được lưu trong history state của trình duyệt. Tuy nhiên, hãy lưu ý một số trình duyệt giới hạn lượng dữ liệu có thể lưu trong history state.
 
-For example, [Firefox](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState) has a size limit of 16 MiB and throws a `NS_ERROR_ILLEGAL_VALUE` error if you exceed this limit. Typically, this is much more data than you'll ever practically need when building applications.
+Ví dụ, [Firefox](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState) giới hạn 16 MiB và ném lỗi `NS_ERROR_ILLEGAL_VALUE` nếu vượt quá giới hạn. Thông thường con số này lớn hơn rất nhiều so với lượng dữ liệu thực tế bạn cần trong ứng dụng.

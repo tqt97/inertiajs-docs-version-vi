@@ -1,14 +1,15 @@
 ---
-title: Merging Props
+title: Gộp props
+description: "Inertia ghi đè prop cùng tên khi reload page. Tuy nhiên đôi khi bạn cần merge dữ liệu mới với dữ liệu hiện có, ví dụ nút \"tải thêm\" cho kết quả phân trang…"
 ---
 
-Inertia overwrites props with the same name when reloading a page. However, you may need to merge new data with existing data instead. For example, when implementing a "load more" button for paginated results. The [Infinite scroll](/v3/data-props/infinite-scroll) component uses prop merging under the hood.
+Inertia ghi đè prop cùng tên khi reload page. Tuy nhiên đôi khi bạn cần merge dữ liệu mới với dữ liệu hiện có, ví dụ nút "tải thêm" cho kết quả phân trang. Component [Infinite scroll](/v3/data-props/infinite-scroll) dùng prop merging ở bên dưới.
 
-Prop merging only works during [partial reloads](/v3/data-props/partial-reloads). Full page visits will always replace props entirely, even if you've marked them for merging.
+Prop merging chỉ hoạt động trong [partial reload](/v3/data-props/partial-reloads). Full-page visit luôn thay toàn bộ prop kể cả khi đã đánh dấu merge.
 
-## Merge Methods
+## Các phương thức gộp
 
-To merge a prop instead of overwriting it, you may use the `Inertia::merge()` method when returning your response.
+Để gộp một prop thay vì ghi đè, bạn có thể dùng phương thức `Inertia::merge()` khi trả response.
 
 ```php
 Route::get('/items', function () {
@@ -30,7 +31,7 @@ Route::get('/items', function () {
 });
 ```
 
-The `Inertia::merge()` method will append new items to existing arrays at the root level. You may change this behavior to prepend items instead.
+Phương thức `Inertia::merge()` sẽ nối các phần tử mới vào cuối mảng hiện có ở cấp root. Bạn có thể đổi hành vi này để chèn các phần tử vào đầu mảng.
 
 ```php
 // Append at root level (default)...
@@ -40,7 +41,7 @@ Inertia::merge($items);
 Inertia::merge($items)->prepend();
 ```
 
-For more precise control, you can target specific nested properties for merging while replacing the rest of the object.
+Để kiểm soát chính xác hơn, bạn có thể chỉ định các thuộc tính lồng nhau cụ thể cần gộp trong khi phần còn lại của object vẫn được thay thế.
 
 ```php
 // Only append to the 'data' array, replace everything else...
@@ -50,7 +51,7 @@ Inertia::merge(User::paginate())->append('data');
 Inertia::merge($chatData)->prepend('messages');
 ```
 
-You can combine multiple operations and target several properties at once.
+Bạn có thể kết hợp nhiều thao tác và nhắm đến nhiều thuộc tính cùng lúc.
 
 ```php
 Inertia::merge($forumData)
@@ -62,11 +63,11 @@ Inertia::merge($dashboardData)
     ->append(['notifications', 'activities']);
 ```
 
-On the client side, Inertia handles all the merging automatically according to your server-side configuration.
+Ở phía client, Inertia tự động xử lý toàn bộ quá trình gộp theo cấu hình phía máy chủ của bạn.
 
-## Matching Items
+## Khớp các phần tử
 
-When merging arrays, you may use the `matchOn` parameter to match existing items by a specific field and update them instead of appending new ones.
+Khi gộp mảng, bạn có thể dùng tham số `matchOn` để khớp các phần tử hiện có theo một field cụ thể và cập nhật chúng thay vì nối thêm phần tử mới.
 
 ```php
 // Match posts by ID, update existing ones...
@@ -79,11 +80,11 @@ Inertia::merge($complexData)->append([
 ]);
 ```
 
-In the first example, Inertia will iterate over the `data` array and attempt to match each item by its `id` field. If a match is found, the existing item will be replaced. If no match is found, the new item will be appended.
+Trong ví dụ đầu tiên, Inertia sẽ duyệt mảng `data` và cố gắng khớp từng phần tử theo field `id`. Nếu tìm thấy phần tử khớp, phần tử hiện có sẽ được thay thế. Nếu không tìm thấy, phần tử mới sẽ được nối vào cuối.
 
-## Deep Merge
+## Deep merge
 
-Instead of specifying which nested paths should be merged, you may use `Inertia::deepMerge()` to ensure a deep merge of the entire structure.
+Thay vì chỉ định path lồng nhau cần merge, bạn có thể dùng `Inertia::deepMerge()` để deep merge toàn bộ cấu trúc.
 
 ```php
 Route::get('/chat', function () {
@@ -101,15 +102,15 @@ Route::get('/chat', function () {
 });
 ```
 
-`Inertia::deepMerge()` was introduced before `Inertia::merge()` had support for prepending and targeting nested paths. In most cases, `Inertia::merge()` with its append and prepend methods should be sufficient.
+`Inertia::deepMerge()` được giới thiệu trước khi `Inertia::merge()` hỗ trợ prepend và nhắm đến các path lồng nhau. Trong hầu hết trường hợp, `Inertia::merge()` cùng các phương thức append và prepend là đủ.
 
-## Client-Side Visits
+## Client-side visits
 
-You can also merge props directly on the client side without making a server request using [client side visits](/v3/the-basics/manual-visits#client-side-visits). Inertia provides [prop helper methods](/v3/the-basics/manual-visits#prop-helpers) that allow you to append, prepend, or replace prop values.
+Bạn cũng có thể merge prop trực tiếp phía client mà không gửi server request bằng [client side visits](/v3/the-basics/manual-visits#client-side-visits). Inertia cung cấp [prop helper methods](/v3/the-basics/manual-visits#prop-helpers) để append, prepend hoặc thay prop value.
 
-## Combining with Deferred Props
+## Kết hợp với deferred props
 
-You may combine [deferred props](/v3/data-props/deferred-props) with mergeable props to defer the loading of the prop and ultimately mark it as mergeable once it's loaded.
+Bạn có thể kết hợp [deferred props](/v3/data-props/deferred-props) với mergeable props để trì hoãn tải prop và cuối cùng đánh dấu nó mergeable sau khi tải.
 
 ```php
 Route::get('/users', function () {
@@ -122,9 +123,9 @@ Route::get('/users', function () {
 });
 ```
 
-## Combining with Once Props
+## Kết hợp với Once Props
 
-You may chain the `once()` modifier onto a merge prop to ensure the data is resolved only once and remembered by the client across subsequent navigations.
+Bạn có thể nối modifier `once()` vào merge prop để đảm bảo dữ liệu chỉ được resolve một lần và được phía client ghi nhớ qua các lần điều hướng tiếp theo.
 
 ```php
 return Inertia::render('Users/Index', [
@@ -132,13 +133,13 @@ return Inertia::render('Users/Index', [
 ]);
 ```
 
-For more information on once props, see the [once props](/v3/data-props/once-props) documentation.
+Để biết thêm về once props, xem tài liệu [once props](/v3/data-props/once-props).
 
-## Resetting Props
+## Reset props
 
-On the client side, you can indicate to the server that you would like to reset the prop. This is useful when you want to clear the prop value before merging new data, such as when the user enters a new search query on a paginated list.
+Ở phía client, bạn có thể cho server biết rằng mình muốn reset một prop. Điều này hữu ích khi cần xóa giá trị prop trước khi gộp dữ liệu mới, chẳng hạn khi người dùng nhập truy vấn tìm kiếm mới trên một danh sách phân trang.
 
-The `reset` request option accepts an array of the prop keys you would like to reset.
+Tùy chọn request `reset` nhận mảng key prop cần reset.
 
 ```js
 router.reload({

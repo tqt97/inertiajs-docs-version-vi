@@ -1,14 +1,15 @@
 ---
-title: View Transitions
+title: View Transition
+description: "Inertia hỗ trợ View Transitions API, cho phép tạo animation khi chuyển trang."
 ---
 
-Inertia supports the [View Transitions API](https://developer.chrome.com/docs/web-platform/view-transitions), allowing you to animate page transitions.
+Inertia hỗ trợ [View Transitions API](https://developer.chrome.com/docs/web-platform/view-transitions), cho phép tạo animation khi chuyển trang.
 
-The View Transitions API is a [relatively new browser feature](https://caniuse.com/view-transitions). Inertia gracefully falls back to standard page transitions in browsers that don't support the API.
+View Transitions API là [tính năng trình duyệt tương đối mới](https://caniuse.com/view-transitions). Với trình duyệt không hỗ trợ API này, Inertia tự động fallback về chuyển trang tiêu chuẩn một cách an toàn.
 
-## Enabling Transitions
+## Bật transition
 
-You may enable view transitions for a visit by setting the `viewTransition` option to `true`. By default, this will apply a cross-fade transition between pages.
+Bạn có thể bật view transition cho một visit bằng cách đặt tùy chọn `viewTransition` thành `true`. Mặc định, một hiệu ứng cross-fade sẽ được áp dụng giữa các trang.
 
 <CodeGroup>
 
@@ -32,9 +33,9 @@ router.visit("/another-page", { viewTransition: true });
 
 </CodeGroup>
 
-## Transition Callbacks
+## Callback transition
 
-You may also pass a callback to the `viewTransition` option, which will receive the standard [`ViewTransition`](https://developer.mozilla.org/en-US/docs/Web/API/ViewTransition) instance provided by the browser. This allows you to hook into the various promises provided by the API.
+Bạn cũng có thể truyền callback vào tùy chọn `viewTransition`; callback nhận instance [`ViewTransition`](https://developer.mozilla.org/en-US/docs/Web/API/ViewTransition) tiêu chuẩn do trình duyệt cung cấp. Điều này cho phép bạn hook vào các promise khác nhau của API.
 
 <CodeGroup>
 
@@ -76,9 +77,9 @@ router.visit("/another-page", {
 
 </CodeGroup>
 
-## Links
+## Liên kết
 
-The `viewTransition` option is also available on the `Link` component.
+Tùy chọn `viewTransition` cũng có trên component `Link`.
 
 <CodeGroup>
 
@@ -104,7 +105,7 @@ import { Link } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-You may also pass a callback to access the `ViewTransition` instance.
+Bạn cũng có thể truyền callback để truy cập instance `ViewTransition`.
 
 <CodeGroup>
 
@@ -147,9 +148,9 @@ import { Link } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-## Global Configuration
+## Cấu hình toàn cục
 
-You may enable view transitions globally for all visits by configuring the `visitOptions` callback when [initializing your Inertia app](/v3/installation/client-side-setup#configuring-defaults).
+Bạn có thể bật view transition trên toàn cục cho mọi visit bằng cách cấu hình callback `visitOptions` khi [khởi tạo ứng dụng Inertia](/v3/installation/client-side-setup#configuring-defaults).
 
 <CodeGroup>
 
@@ -194,9 +195,9 @@ createInertiaApp({
 
 </CodeGroup>
 
-## Customizing Transitions
+## Tùy chỉnh transition
 
-You may customize the transition animations using CSS. The View Transitions API uses several pseudo-elements that you can target with CSS to create custom animations. The following examples are taken from the [Chrome documentation](https://developer.chrome.com/docs/web-platform/view-transitions/same-document#customize_the_transition).
+Bạn có thể tùy chỉnh transition animation bằng CSS. View Transitions API dùng một số pseudo-element mà bạn có thể target bằng CSS để tạo animation riêng. Các ví dụ sau lấy từ [tài liệu Chrome](https://developer.chrome.com/docs/web-platform/view-transitions/same-document#customize_the_transition).
 
 ```css
 @keyframes fade-in {
@@ -231,7 +232,7 @@ You may customize the transition animations using CSS. The View Transitions API 
 }
 ```
 
-You may also animate individual elements between pages by assigning them a unique `view-transition-name`. For example, you may animate an avatar from a large size on a profile page to a small size on a dashboard.
+Bạn cũng có thể animate từng element riêng lẻ giữa các trang bằng cách gán `view-transition-name` duy nhất. Ví dụ, bạn có thể animate avatar từ kích thước lớn trên trang profile xuống kích thước nhỏ trên dashboard.
 
 <CodeGroup>
 
@@ -315,4 +316,4 @@ export default function Dashboard() {
 
 </CodeGroup>
 
-You may customize view transitions to your liking using any CSS animations you wish. For more information, please consult the [View Transitions API documentation](https://developer.chrome.com/docs/web-platform/view-transitions/same-document#customize_the_transition).
+Bạn có thể tùy chỉnh view transition theo ý muốn bằng bất kỳ CSS animation nào. Để biết thêm, xem [tài liệu View Transitions API](https://developer.chrome.com/docs/web-platform/view-transitions/same-document#customize_the_transition).

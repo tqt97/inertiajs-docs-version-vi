@@ -1,5 +1,6 @@
 ---
 title: Optimistic Updates
+description: "Inertia cho phép cập nhật UI ngay lập tức mà không chờ server phản hồi, chẳng hạn tăng bộ đếm like, bật/tắt bookmark hoặc thêm phần tử vào danh sách…"
 ---
 
 import { ClientSpecific } from "/snippets/client-specific.jsx"
@@ -7,11 +8,11 @@ import { ReactSpecific } from "/snippets/react-specific.jsx"
 import { SvelteSpecific } from "/snippets/svelte-specific.jsx"
 import { VueSpecific } from "/snippets/vue-specific.jsx"
 
-Inertia allows you to update the UI immediately without waiting for the server to respond, such as incrementing a like counter, toggling a bookmark, or adding an item to a list. Optimistic updates apply changes instantly while the request is in flight, automatically rolling back if the request fails.
+Inertia cho phép cập nhật UI ngay lập tức mà không chờ server phản hồi, chẳng hạn tăng bộ đếm like, bật/tắt bookmark hoặc thêm phần tử vào danh sách. Optimistic update áp dụng thay đổi tức thì trong lúc request đang chạy và tự động rollback nếu request thất bại.
 
-## Router Visits
+## Router visits
 
-You may chain the `optimistic()` method before any router visit. The callback receives the current page props and should return a partial update to apply immediately.
+Bạn có thể nối phương thức `optimistic()` trước bất kỳ router visit nào. Callback nhận page props hiện tại và nên trả partial update cần áp dụng ngay.
 
 <CodeGroup>
 
@@ -50,11 +51,11 @@ router.optimistic((props) => ({
 
 </CodeGroup>
 
-The optimistic update is applied immediately to the current page's props, so your component re-renders with the new values before the request is sent. When the server responds, Inertia replaces the optimistic data with the server's response. If the request fails, the props are automatically reverted to their original values.
+Optimistic update được áp dụng ngay vào props của page hiện tại, vì vậy component re-render với giá trị mới trước khi request được gửi. Khi server phản hồi, Inertia thay dữ liệu optimistic bằng response từ server. Nếu request thất bại, prop tự động được khôi phục về giá trị ban đầu.
 
-## Form Component
+## Component Form
 
-The `<Form>` component supports optimistic updates via the `optimistic` prop. Since the component manages input data internally, the form data is provided as a second callback argument.
+Component `<Form>` hỗ trợ optimistic update qua prop `optimistic`. Vì component quản lý input data nội bộ, form data được cung cấp làm đối số thứ hai của callback.
 
 <CodeGroup>
 
@@ -101,9 +102,9 @@ The `<Form>` component supports optimistic updates via the `optimistic` prop. Si
 
 </CodeGroup>
 
-## Form Helper
+## Form helper
 
-The `useForm` helper also supports optimistic updates via the same `optimistic()` method.
+Helper `useForm` cũng hỗ trợ optimistic update qua cùng phương thức `optimistic()`.
 
 <CodeGroup>
 
@@ -178,9 +179,9 @@ function save() {
 
 </CodeGroup>
 
-## HTTP Requests
+## HTTP requests
 
-The [`useHttp`](/v3/the-basics/http-requests) hook supports optimistic updates as well. Since HTTP requests don't interact with Inertia's page props, the optimistic callback receives and updates the form's own data. On failure, the form data is reverted to its pre-request state.
+Hook [`useHttp`](/v3/the-basics/http-requests) cũng hỗ trợ optimistic update. Vì HTTP request không tương tác với page props của Inertia, optimistic callback nhận và cập nhật dữ liệu riêng của form. Khi thất bại, form data được khôi phục về state trước request.
 
 <CodeGroup>
 
@@ -223,33 +224,33 @@ form.optimistic((data) => ({
 
 </CodeGroup>
 
-## How It Works
+## Cách hoạt động
 
-When an optimistic update is applied:
+Khi optimistic update được áp dụng:
 
-1. The returned props are compared against the current page props, and only the keys that actually changed are snapshotted
-2. The callback's return value is merged into the current data
-3. The request is sent to the server
-4. On success, the server's response replaces the optimistic data
-5. On failure, only the snapshotted keys are reverted, rolling back the optimistic changes
+1. Prop được trả về được so sánh với page prop hiện tại và chỉ những key thực sự thay đổi mới được snapshot
+2. Giá trị callback trả về được merge vào dữ liệu hiện tại
+3. Request được gửi tới server
+4. Khi thành công, response của server thay thế dữ liệu optimistic
+5. Khi thất bại, chỉ những key đã snapshot được khôi phục, rollback các thay đổi optimistic
 
-The callback should return a **partial** object containing only the keys you wish to update. The returned values are shallow-merged with the current data.
+Callback nên trả về object **partial** chỉ chứa các key bạn muốn cập nhật. Các giá trị trả về được shallow-merge với dữ liệu hiện tại.
 
-### Automatic Rollback
+### Tự động rollback
 
-Optimistic state is automatically reverted in several scenarios:
+Optimistic state tự động được khôi phục trong một số trường hợp:
 
-- **Validation errors (422)**: The optimistic state is reverted and the validation errors are preserved
-- **Server errors**: When the request fails for any other reason, the original state is restored
-- **Interrupted visits**: When a new visit interrupts an in-flight request, the previous optimistic state is restored before the new optimistic update is applied
+- **Validation error (422)**: Optimistic state được khôi phục và validation error được giữ lại
+- **Server error**: Khi request thất bại vì bất kỳ lý do nào khác, state ban đầu được khôi phục
+- **Visit bị gián đoạn**: Khi visit mới ngắt request đang chạy, optimistic state trước đó được khôi phục trước khi optimistic update mới được áp dụng
 
-### Concurrent Updates
+### Cập nhật đồng thời
 
-Multiple optimistic requests may be in flight at the same time. Inertia tracks which props each optimistic update touched, and server responses will not overwrite a prop until the last optimistic request that modified it has resolved.
+Nhiều optimistic request có thể chạy cùng lúc. Inertia theo dõi prop nào được mỗi optimistic update chạm tới, và server response sẽ không ghi đè một prop cho tới khi optimistic request cuối cùng sửa prop đó đã resolve.
 
-## Inline Option
+## Tùy chọn inline
 
-You may also pass the optimistic callback directly in the visit options instead of chaining.
+Bạn cũng có thể truyền optimistic callback trực tiếp trong visit options thay vì nối method.
 
 <CodeGroup>
 
@@ -285,7 +286,7 @@ router.post(`/posts/${post.id}/like`, {}, {
 
 </CodeGroup>
 
-The inline option works with `useHttp` submit methods as well.
+Tùy chọn inline cũng hoạt động với các phương thức submit của `useHttp`.
 
 ```js
 form.post('/api/likes', {

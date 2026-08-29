@@ -1,16 +1,17 @@
 ---
-title: Title & Meta
+title: Tiêu đề & Meta
+description: "Vì ứng dụng JavaScript dùng Inertia được render trong của tài liệu, chúng không thể render markup vào nằm ngoài scope. Để giải quyết, Inertia cung cấp…"
 ---
 
-Since Inertia-powered JavaScript apps are rendered within the document `<body>`, they are unable to render markup to the document `<head>`, as it's outside of their scope. To help with this, Inertia ships with a `<Head>` component which can be used to set the page `<title>`, `<meta>` tags, and other `<head>` elements.
+Vì ứng dụng JavaScript dùng Inertia được render trong `<body>` của tài liệu, chúng không thể render markup vào `<head>` nằm ngoài scope. Để giải quyết, Inertia cung cấp component `<Head>` để đặt `<title>`, các thẻ `<meta>` và phần tử `<head>` khác của page.
 
-The `<Head>` component will only replace `<head>` elements that are not in your server-side root template.
+Component `<Head>` chỉ thay thế các phần tử `<head>` không có trong root template phía máy chủ.
 
-The `<Head>` component is not available in the Svelte adapter, as Svelte already ships with its own `<svelte:head>` component.
+Component `<Head>` không có trong adapter Svelte vì Svelte đã cung cấp component `<svelte:head>` riêng.
 
-## Head Component
+## Component Head
 
-To add `<head>` elements to your page, use the `<Head>` component. Within this component, you can include the elements that you wish to add to the document `<head>`.
+Để thêm các phần tử `<head>` vào trang, hãy dùng component `<Head>`. Bên trong component này, bạn có thể đặt các phần tử muốn thêm vào `<head>` của tài liệu.
 
 <CodeGroup>
 
@@ -41,9 +42,9 @@ import { Head } from "@inertiajs/react";
 
 </CodeGroup>
 
-## Title Shorthand
+## Cú pháp rút gọn cho tiêu đề
 
-If you only need to add a `<title>` to the document `<head>`, you may simply pass the title as a prop to the `<Head>` component.
+Nếu chỉ cần thêm `<title>` vào `<head>` của tài liệu, bạn có thể truyền trực tiếp tiêu đề dưới dạng prop cho component `<Head>`.
 
 <CodeGroup>
 
@@ -65,9 +66,9 @@ import { Head } from "@inertiajs/react";
 
 </CodeGroup>
 
-## Title Callback
+## Callback tiêu đề
 
-You can globally modify the page `<title>` using the `title` callback in the `createInertiaApp` setup method. Typically, this method is invoked in your application's main JavaScript file. A common use case for the title callback is automatically adding an app name before or after each page title.
+Bạn có thể thay đổi `<title>` của trang trên toàn ứng dụng bằng callback `title` trong phương thức thiết lập `createInertiaApp`. Thông thường phương thức này được gọi trong file JavaScript chính của ứng dụng. Một trường hợp sử dụng phổ biến của callback tiêu đề là tự động thêm tên ứng dụng trước hoặc sau tiêu đề của từng trang.
 
 ```js
 createInertiaApp({
@@ -76,7 +77,7 @@ createInertiaApp({
 });
 ```
 
-The callback also receives the current [page object](/v3/the-basics/pages) as its second argument, which you may use to build titles from the page's props.
+Callback cũng nhận [page object](/v3/the-basics/pages) hiện tại làm đối số thứ hai, có thể dùng để xây title từ props của page.
 
 ```js
 createInertiaApp({
@@ -85,7 +86,7 @@ createInertiaApp({
 });
 ```
 
-After defining the `title` callback, the callback will automatically be invoked when you set a title using the `<Head>` component.
+Sau khi định nghĩa callback `title`, callback sẽ tự động được gọi mỗi khi bạn thiết lập tiêu đề bằng component `<Head>`.
 
 <CodeGroup>
 
@@ -107,13 +108,13 @@ import { Head } from '@inertiajs/react'
 
 </CodeGroup>
 
-In this example, this results in the following `<title>` tag.
+Trong ví dụ này, kết quả là thẻ `<title>` sau.
 
 ```html
 <title>Home - My App</title>
 ```
 
-The `title` callback will also be invoked when you set the title using a `<title>` tag within your `<Head>` component.
+Callback `title` cũng sẽ được gọi khi bạn thiết lập tiêu đề bằng thẻ `<title>` bên trong component `<Head>`.
 
 <CodeGroup>
 
@@ -139,9 +140,9 @@ import { Head } from "@inertiajs/react";
 
 </CodeGroup>
 
-## Multiple Head Instances
+## Nhiều instance Head
 
-It's possible to have multiple instances of the `<Head>` component throughout your application. For example, your layout can set some default `<Head>` elements, and then your individual pages can override those defaults.
+Bạn có thể có nhiều instance của component `<Head>` trong ứng dụng. Ví dụ, layout có thể thiết lập một số phần tử `<Head>` mặc định, sau đó từng trang riêng lẻ có thể ghi đè các giá trị mặc định đó.
 
 <CodeGroup>
 
@@ -197,9 +198,9 @@ import { Head } from "@inertiajs/react";
 
 </CodeGroup>
 
-Inertia will only ever render one `<title>` tag; however, all other tags will be stacked since it's valid to have multiple instances of them. To avoid duplicate tags in your `<head>`, you can use the `head-key` property, which will make sure the tag is only rendered once. This is illustrated in the example above for the `<meta name="description">` tag.
+Inertia chỉ render duy nhất một thẻ `<title>`; tuy nhiên, tất cả các thẻ khác sẽ được xếp chồng vì việc có nhiều instance của chúng là hợp lệ. Để tránh các thẻ trùng lặp trong `<head>`, bạn có thể dùng thuộc tính `head-key`, giúp đảm bảo mỗi thẻ chỉ được render một lần. Điều này được minh họa trong ví dụ trên với thẻ `<meta name="description">`.
 
-The code example above will render the following HTML.
+Ví dụ code ở trên sẽ render HTML sau.
 
 ```html
 <head>
@@ -209,9 +210,9 @@ The code example above will render the following HTML.
 </head>
 ```
 
-## Head Extension
+## Mở rộng Head
 
-When building a real application, it can sometimes be helpful to create a custom head component that extends Inertia's `<Head>` component. This gives you a place to set app-wide defaults, such as appending the app name to the page title.
+Khi xây dựng ứng dụng thực tế, đôi khi việc tạo một head component tùy chỉnh mở rộng component `<Head>` của Inertia sẽ hữu ích. Đây là nơi bạn có thể thiết lập các giá trị mặc định dùng toàn ứng dụng, chẳng hạn tự động nối tên ứng dụng vào tiêu đề trang.
 
 <CodeGroup>
 
@@ -254,7 +255,7 @@ export default Site;
 
 </CodeGroup>
 
-Once you have created the custom component, you can just start using it in your pages.
+Sau khi tạo component tùy chỉnh, bạn chỉ cần bắt đầu sử dụng nó trong các trang.
 
 <CodeGroup>
 
@@ -276,13 +277,13 @@ import AppHead from './AppHead'
 
 </CodeGroup>
 
-## Server-Side Head Elements
+## Head element phía server
 
-You may wish to include default head elements like `<title>` or `<meta>` tags in your root Blade template. This creates two challenges: preventing duplicates when [SSR](/v3/advanced/server-side-rendering) is active, and ensuring the client-side `<Head>` component may replace them during navigation.
+Bạn có thể muốn đưa các head element mặc định như `<title>` hoặc `<meta>` vào root Blade template. Điều này tạo hai thách thức: tránh trùng lặp khi [SSR](/v3/advanced/server-side-rendering) hoạt động và đảm bảo component `<Head>` phía client có thể thay thế chúng khi điều hướng.
 
-### SSR Fallback
+### SSR fallback
 
-The `<x-inertia::head>` Blade component accepts fallback content via its slot. This content is only rendered in the initial HTML when [SSR](/v3/advanced/server-side-rendering) is not active. When SSR is active, the `<Head>` component already provides these elements as part of the server-rendered response, so the fallback is skipped.
+Blade component `<x-inertia::head>` nhận nội dung fallback qua slot. Nội dung này chỉ được render trong HTML ban đầu khi [SSR](/v3/advanced/server-side-rendering) không hoạt động. Khi SSR hoạt động, component `<Head>` đã cung cấp các phần tử này như một phần của server-rendered response nên fallback bị bỏ qua.
 
 ```blade resources/views/app.blade.php
 <head>
@@ -294,11 +295,11 @@ The `<x-inertia::head>` Blade component accepts fallback content via its slot. T
 </head>
 ```
 
-### The `data-inertia` Attribute
+### Thuộc tính `data-inertia`
 
-The client-side `<Head>` component tracks the elements it manages by marking them with a `data-inertia` attribute. By default, it leaves any other tags in your Blade template untouched. Since there may only be one `<title>` tag, the `<Head>` component will always replace it. Other elements like `<meta>` and `<link>` may have multiple instances, so the component needs a way to identify which ones it should manage.
+Component `<Head>` phía client theo dõi các element nó quản lý bằng cách đánh dấu chúng với thuộc tính `data-inertia`. Mặc định nó để nguyên mọi tag khác trong Blade template. Vì chỉ có thể có một thẻ `<title>`, component `<Head>` luôn thay thế nó. Các element như `<meta>` và `<link>` có thể có nhiều instance, nên component cần cách nhận diện element nào mình phải quản lý.
 
-You may add the `data-inertia` attribute to elements in your Blade template to have the `<Head>` component adopt them. On the first client-side navigation, it will match these elements by key and replace or remove them as needed.
+Bạn có thể thêm thuộc tính `data-inertia` vào element trong Blade template để component `<Head>` tiếp quản chúng. Ở lần client-side navigation đầu tiên, nó sẽ khớp các element theo key rồi thay thế hoặc xóa khi cần.
 
 ```blade resources/views/app.blade.php
 <head>
@@ -308,4 +309,4 @@ You may add the `data-inertia` attribute to elements in your Blade template to h
 </head>
 ```
 
-The `data-inertia` value corresponds to the `head-key` property on your client-side `<Head>` elements.
+Giá trị `data-inertia` tương ứng với thuộc tính `head-key` trên các element `<Head>` phía client.

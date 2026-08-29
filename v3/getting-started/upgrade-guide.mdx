@@ -1,50 +1,51 @@
 ---
-title: Upgrade Guide for v3.0
+title: Hướng dẫn nâng cấp lên v3.0
+description: "Bạn có thể xem tài liệu cũ của Inertia.js v2.0 tại inertiajs.com/docs/v2."
 ---
 
-You can find the legacy docs for Inertia.js v2.0 at [inertiajs.com/docs/v2](/v2).
+Bạn có thể xem tài liệu cũ của Inertia.js v2.0 tại [inertiajs.com/docs/v2](/v2).
 
-## What's New
+## Có gì mới
 
-Inertia.js v3.0 is a major release focused on simplicity and developer experience. Axios has been replaced with a built-in XHR client for a smaller bundle, SSR now works out of the box during development without a separate Node.js server, and the new `@inertiajs/vite` plugin handles page resolution and SSR configuration automatically. This release also introduces standalone HTTP requests via the `useHttp` hook, optimistic updates with automatic rollback, layout props for sharing data between pages and layouts, and improved exception handling.
+Inertia.js v3.0 là major release tập trung vào sự đơn giản và trải nghiệm developer. Axios được thay bằng XHR client tích hợp để bundle nhỏ hơn; SSR hoạt động sẵn trong development mà không cần Node.js server riêng; plugin `@inertiajs/vite` mới tự động xử lý page resolution và cấu hình SSR. Release này còn giới thiệu HTTP request độc lập qua hook `useHttp`, optimistic update với rollback tự động, layout props để chia sẻ dữ liệu giữa page/layout và cơ chế xử lý exception tốt hơn.
 
 <Columns cols={2}>
-    <Card title="Vite Plugin" href="/v3/installation/client-side-setup#installation" icon="bolt">
-        Automatic page resolution, SSR setup, and optional setup/resolve callbacks.
+    <Card title="Plugin Vite" href="/v3/installation/client-side-setup#installation" icon="bolt">
+        Tự động page resolution, thiết lập SSR và callback setup/resolve tùy chọn.
     </Card>
-    <Card title="HTTP Requests" href="/v3/the-basics/http-requests" icon="globe">
-        Make standalone HTTP requests with the `useHttp` hook without triggering page visits.
+    <Card title="HTTP request" href="/v3/the-basics/http-requests" icon="globe">
+        Gửi HTTP request độc lập bằng hook `useHttp` mà không kích hoạt page visit.
     </Card>
-    <Card title="Optimistic Updates" href="/v3/the-basics/optimistic-updates" icon="sparkles">
-        Apply data changes instantly before the server responds, with automatic rollback on failure.
+    <Card title="Cập nhật lạc quan (optimistic updates)" href="/v3/the-basics/optimistic-updates" icon="sparkles">
+        Áp dụng thay đổi dữ liệu ngay trước khi server phản hồi, tự động rollback nếu thất bại.
     </Card>
-    <Card title="Layout Props" href="/v3/the-basics/layouts#layout-props" icon="layer-group">
-        Share dynamic data between pages and persistent layouts with the useLayoutProps hook.
+    <Card title="Props của layout" href="/v3/the-basics/layouts#layout-props" icon="layer-group">
+        Chia sẻ dữ liệu động giữa page và persistent layout bằng hook useLayoutProps.
     </Card>
-    <Card title="Simplified SSR" href="/v3/advanced/server-side-rendering" icon="server">
-        SSR works automatically in Vite dev mode. No separate Node.js server needed.
+    <Card title="SSR đơn giản hơn" href="/v3/advanced/server-side-rendering" icon="server">
+        SSR tự động hoạt động trong Vite dev mode. Không cần Node.js server riêng.
     </Card>
-    <Card title="Exception Handling" href="/v3/advanced/error-handling#production" icon="shield">
-        Render custom Inertia error pages directly from your exception handler, with shared data.
+    <Card title="Xử lý exception" href="/v3/advanced/error-handling#production" icon="shield">
+        Render custom Inertia error page trực tiếp từ exception handler, kèm shared data.
     </Card>
 </Columns>
 
-This release also includes several additional improvements:
+Release này cũng bao gồm nhiều cải tiến khác:
 
-- [Instant visits](/v3/the-basics/instant-visits) that swap to the target component before the server responds
-- [Form component generics](/v3/advanced/typescript#form-component) for type-safe errors and slot props
-- [Disable SSR per-route](/v3/advanced/server-side-rendering#disabling-ssr) via middleware or facade
-- [Improved SSR error messages](/v3/advanced/server-side-rendering#error-handling) with component names, URLs, and actionable hints
-- [Enum support](/v3/the-basics/responses) in `Inertia::render()` responses
-- [Page object in resolve callback](/v3/installation/client-side-setup#manual-setup) for context-aware component resolution
-- [Built-in HTTP interceptors](/v3/installation/client-side-setup#interceptors) without Axios
-- [Default layout](/v3/the-basics/layouts#default-layouts) option in `createInertiaApp`
-- [`preserveErrors`](/v3/data-props/partial-reloads#preserving-errors) option to preserve validation errors during partial reloads
-- [Blade components](/v3/installation/server-side-setup#setup-root-template) as an alternative to the `@inertia` and `@inertiaHead` directives, with SSR head fallback support
+- [Instant visits](/v3/the-basics/instant-visits) chuyển sang target component trước khi server phản hồi
+- [Generic cho Form component](/v3/advanced/typescript#form-component) để có error và slot prop type-safe
+- [Tắt SSR theo route](/v3/advanced/server-side-rendering#disabling-ssr) qua middleware hoặc facade
+- [Thông báo lỗi SSR tốt hơn](/v3/advanced/server-side-rendering#error-handling) với component name, URL và hint có thể hành động
+- [Hỗ trợ Enum](/v3/the-basics/responses) trong response `Inertia::render()`
+- [Page object trong resolve callback](/v3/installation/client-side-setup#manual-setup) để component resolution nhận biết context
+- [HTTP interceptor tích hợp](/v3/installation/client-side-setup#interceptors) không cần Axios
+- Tùy chọn [default layout](/v3/the-basics/layouts#default-layouts) trong `createInertiaApp`
+- Tùy chọn [`preserveErrors`](/v3/data-props/partial-reloads#preserving-errors) để giữ validation error trong partial reload
+- [Blade component](/v3/installation/server-side-setup#setup-root-template) thay thế cho directive `@inertia` và `@inertiaHead`, có hỗ trợ SSR head fallback
 
-## Upgrade Dependencies
+## Nâng cấp dependency
 
-To upgrade to Inertia.js v3.0, first use npm to install the client-side adapter of your choice:
+Để nâng cấp lên Inertia.js v3.0, trước tiên dùng npm để cài client-side adapter bạn muốn:
 
 <CodeGroup>
 
@@ -62,79 +63,79 @@ npm install @inertiajs/svelte@^3.0
 
 </CodeGroup>
 
-You may also install the new optional Vite plugin, which provides a simplified SSR setup and a `pages` shorthand for component resolution:
+Bạn cũng có thể cài Vite plugin tùy chọn mới, cung cấp thiết lập SSR đơn giản hơn và shorthand `pages` cho component resolution:
 
 ```bash
 npm install @inertiajs/vite@^3.0
 ```
 
-Next, upgrade the `inertiajs/inertia-laravel` package:
+Tiếp theo, nâng cấp package `inertiajs/inertia-laravel`:
 
 ```bash
 composer require inertiajs/inertia-laravel:^3.0
 ```
 
-After upgrading, republish the Inertia configuration file since it has been restructured in v3. You should review the updated config file and re-apply any customizations:
+Sau khi nâng cấp, hãy publish lại file cấu hình Inertia vì cấu trúc đã thay đổi trong v3. Bạn nên review config mới và áp dụng lại các tùy chỉnh:
 
 ```bash
 php artisan vendor:publish --provider="Inertia\\ServiceProvider" --force
 ```
 
-You should also clear your cached views since the `@inertia` Blade directive output has changed:
+Bạn cũng nên xóa cached view vì output của Blade directive `@inertia` đã thay đổi:
 
 ```bash
 php artisan view:clear
 ```
 
 
-## Breaking Changes
+## Breaking changes
 
 ---
 
-### Requirements
+### Yêu cầu
 
-#### PHP 8.2+ and Laravel 11+
+#### PHP 8.2+ và Laravel 11+
 
-The Laravel adapter now requires PHP 8.2 and Laravel 11 at a minimum.
+Laravel adapter hiện yêu cầu tối thiểu PHP 8.2 và Laravel 11.
 
 #### React 19+
 
-The React adapter now requires React 19. React 18 and below are no longer supported.
+React adapter giờ yêu cầu React 19. React 18 trở xuống không còn được hỗ trợ.
 
 #### Svelte 5+
 
-The Svelte adapter now requires Svelte 5. Svelte 4 and below are no longer supported. All Svelte code should be updated to use Svelte 5's runes syntax (`$props()`, `$state()`, `$effect()`, etc).
+Svelte adapter giờ yêu cầu Svelte 5. Svelte 4 trở xuống không còn được hỗ trợ. Toàn bộ code Svelte nên được cập nhật sang rune syntax của Svelte 5 (`$props()`, `$state()`, `$effect()`, v.v.).
 
-### Axios Removed
+### Đã loại bỏ Axios
 
-Inertia no longer ships with or requires Axios. For most applications, this requires no changes. The built-in XHR client supports [interceptors](/v3/installation/client-side-setup#interceptors) as well, so Axios interceptors may be migrated directly. You may also continue using Axios via the [Axios adapter](/v3/installation/client-side-setup#using-axios), or provide a fully [custom HTTP client](/v3/installation/client-side-setup#custom-http-client).
+Inertia không còn đi kèm hay yêu cầu Axios. Với phần lớn ứng dụng, không cần thay đổi. XHR client tích hợp cũng hỗ trợ [interceptors](/v3/installation/client-side-setup#interceptors), nên Axios interceptor có thể migrate trực tiếp. Bạn vẫn có thể tiếp tục dùng Axios qua [Axios adapter](/v3/installation/client-side-setup#using-axios), hoặc cung cấp [custom HTTP client](/v3/installation/client-side-setup#custom-http-client) hoàn toàn riêng.
 
-### `qs` Dependency Removed
+### Đã loại dependency `qs`
 
-The `qs` package has been replaced with a built-in query string implementation and is no longer included as a dependency of `@inertiajs/core`. Inertia's internal query string handling remains the same, but you should install `qs` directly if your application imports it.
+Package `qs` được thay bằng implementation query string tích hợp và không còn là dependency của `@inertiajs/core`. Cách Inertia xử lý query string nội bộ vẫn giữ nguyên, nhưng bạn nên cài trực tiếp `qs` nếu ứng dụng import package này.
 
 ```bash
 npm install qs
 ```
 
-### `lodash-es` Dependency Removed
+### Đã loại dependency `lodash-es`
 
-The `lodash-es` package has been replaced with `es-toolkit` and is no longer included as a dependency of `@inertiajs/core`. You should install `lodash-es` directly if your application imports it.
+Package `lodash-es` được thay bằng `es-toolkit` và không còn là dependency của `@inertiajs/core`. Bạn nên cài trực tiếp `lodash-es` nếu ứng dụng import package này.
 
 ```bash
 npm install lodash-es
 ```
 
-### Event Renames
+### Đổi tên Event
 
-Two global events have been renamed for clarity:
+Hai global event được đổi tên để rõ nghĩa hơn:
 
-| v2 Name | v3 Name | Document Event |
+| Tên v2 | Tên v3 | Document Event |
 |---|---|---|
 | `invalid` | `httpException` | `inertia:httpException` |
 | `exception` | `networkError` | `inertia:networkError` |
 
-Global event listeners should be updated accordingly:
+Global event listener nên được cập nhật tương ứng:
 
 ```js
 // Before (v2)
@@ -146,7 +147,7 @@ router.on('httpException', (event) => { ... })
 router.on('networkError', (event) => { ... })
 ```
 
-You may also handle these events per-visit using the new `onHttpException` and `onNetworkError` callbacks:
+Bạn cũng có thể xử lý các event này theo từng visit bằng callback `onHttpException` và `onNetworkError` mới:
 
 ```js
 router.post('/users', data, {
@@ -155,7 +156,7 @@ router.post('/users', data, {
 })
 ```
 
-Returning `false` from the `onHttpException` callback or calling `event.preventDefault()` on the global `httpException` event will prevent Inertia from navigating to the error page. This allows you to handle HTTP exceptions (4xx and 5xx responses) without leaving the current page.
+Trả `false` từ callback `onHttpException` hoặc gọi `event.preventDefault()` trên global event `httpException` sẽ ngăn Inertia điều hướng tới error page. Điều này cho phép tự xử lý HTTP exception (response 4xx/5xx) mà không rời page hiện tại.
 
 ```js
 router.post('/users', data, {
@@ -166,9 +167,9 @@ router.post('/users', data, {
 })
 ```
 
-### `router.cancel()` Replaced
+### `router.cancel()` đã được thay thế
 
-The `router.cancel()` method has been replaced by `router.cancelAll()`. In v2, `cancel()` only canceled synchronous requests. The new `cancelAll()` method cancels all synchronous, asynchronous, and prefetch requests by default. You may pass options to limit which request types are canceled.
+Phương thức `router.cancel()` được thay bằng `router.cancelAll()`. Trong v2, `cancel()` chỉ hủy synchronous request. `cancelAll()` mới mặc định hủy toàn bộ synchronous, asynchronous và prefetch request. Bạn có thể truyền option để giới hạn request type bị hủy.
 
 ```js
 // Before (v2) — only canceled sync requests
@@ -181,11 +182,11 @@ router.cancelAll()
 router.cancelAll({ async: false, prefetch: false })
 ```
 
-See the [visit cancellation](/v3/the-basics/manual-visits#visit-cancellation) documentation for more details.
+Xem tài liệu [visit cancellation](/v3/the-basics/manual-visits#visit-cancellation) để biết thêm.
 
-### Future Options Removed
+### Đã loại Future Options
 
-The `future` configuration namespace has been removed. All four future options from v2 are now always enabled and no longer configurable:
+Namespace cấu hình `future` đã bị loại. Cả bốn future option từ v2 giờ luôn bật và không còn cấu hình được:
 
 - `future.preserveEqualProps`
 - `future.useDataInertiaHeadAttribute`
@@ -211,11 +212,11 @@ createInertiaApp({
 })
 ```
 
-Initial page data is now always passed via a `<script type="application/json">` element. The legacy `data-page` attribute approach is no longer supported.
+Initial page data giờ luôn được truyền qua phần tử `<script type="application/json">`. Cách dùng thuộc tính `data-page` cũ không còn được hỗ trợ.
 
-### Head Element Attributes
+### Thuộc tính Head Element
 
-The `inertia` attribute used on elements in your root Blade template's `<head>` section has been renamed to `data-inertia`. You should update any head elements that use this attribute:
+Thuộc tính `inertia` dùng trên element trong section `<head>` của root Blade template đã đổi tên thành `data-inertia`. Bạn nên cập nhật các head element đang dùng thuộc tính này:
 
 ```html
 <!-- Before (v2) -->
@@ -225,9 +226,9 @@ The `inertia` attribute used on elements in your root Blade template's `<head>` 
 <title data-inertia>My Website</title>
 ```
 
-### Progress Indicator Exports Removed
+### Đã loại Progress Indicator Exports
 
-The named exports `hideProgress()` and `revealProgress()` have been removed. If needed, use the `progress` object directly:
+Các named export `hideProgress()` và `revealProgress()` đã bị loại. Nếu cần, hãy dùng trực tiếp object `progress`:
 
 ```js
 import { progress } from '@inertiajs/vue3'
@@ -236,19 +237,19 @@ progress.hide()
 progress.reveal()
 ```
 
-### Deferred Component Behavior (React)
+### Hành vi Deferred Component (React)
 
-The React `<Deferred>` component no longer resets to show the fallback during partial reloads. Previously, the fallback was shown each time a partial reload was triggered. Now the existing content remains visible while new data loads, consistent with the Vue and Svelte behavior.
+Component `<Deferred>` của React không còn reset để hiển thị fallback trong partial reload. Trước đây fallback xuất hiện mỗi lần partial reload được kích hoạt. Giờ nội dung hiện có vẫn hiển thị trong khi dữ liệu mới tải, nhất quán với Vue và Svelte.
 
-A new `reloading` slot prop is available across all adapters, allowing you to show a loading indicator during partial reloads while keeping the existing content visible. See the [deferred props](/v3/data-props/deferred-props#reloading) documentation for details.
+Slot prop `reloading` mới có trên mọi adapter, cho phép hiển thị loading indicator trong partial reload mà vẫn giữ nội dung hiện có. Xem tài liệu [deferred props](/v3/data-props/deferred-props#reloading) để biết chi tiết.
 
-### Form Processing Reset Timing
+### Thời điểm reset trạng thái xử lý Form
 
-The `useForm` helper now only resets `processing` and `progress` state in the `onFinish` callback, rather than immediately upon receiving a response. This ensures the processing state remains `true` until the visit is fully complete.
+Helper `useForm` giờ chỉ reset state `processing` và `progress` trong callback `onFinish`, thay vì ngay khi nhận response. Điều này đảm bảo processing state vẫn là `true` cho tới khi visit hoàn tất hoàn toàn.
 
-### LazyProp Removed
+### Đã loại LazyProp
 
-The `Inertia::lazy()` method and `LazyProp` class, deprecated in v2, have been removed. Use `Inertia::optional()` instead, which provides the same functionality:
+Phương thức `Inertia::lazy()` và class `LazyProp`, đã deprecated trong v2, đã bị loại bỏ. Hãy dùng `Inertia::optional()` thay thế; phương thức này cung cấp cùng chức năng:
 
 ```php
 // Before (v2)
@@ -262,9 +263,9 @@ return Inertia::render('Users/Index', [
 ]);
 ```
 
-### Config File Restructuring
+### Tái cấu trúc file Config
 
-The Laravel configuration file has been restructured. Page-related settings are now nested under `pages`, and the `testing` section has been simplified:
+File cấu hình Laravel đã được tái cấu trúc. Các setting liên quan page giờ nằm dưới `pages`, còn section `testing` được đơn giản hóa:
 
 ```php
 // Before (v2) - config/inertia.php
@@ -286,15 +287,15 @@ The Laravel configuration file has been restructured. Page-related settings are 
 ],
 ```
 
-The updated config file should have already been republished as part of the [upgrade dependencies](#upgrade-dependencies) step above.
+File config mới lẽ ra đã được publish lại trong bước [nâng cấp dependency](#upgrade-dependencies) ở trên.
 
-### Testing Concerns Removed
+### Đã loại các Testing Concerns
 
-The deprecated `Inertia\Testing\Concerns\Has`, `Inertia\Testing\Concerns\Matching`, and `Inertia\Testing\Concerns\Debugging` traits have been removed. These traits were deprecated in v1 and replaced by the `AssertableInertia` class. No action is required unless your application references these traits directly.
+Các trait deprecated `Inertia\Testing\Concerns\Has`, `Inertia\Testing\Concerns\Matching` và `Inertia\Testing\Concerns\Debugging` đã bị loại. Các trait này deprecated từ v1 và được thay bằng class `AssertableInertia`. Không cần hành động trừ khi ứng dụng tham chiếu trực tiếp các trait này.
 
-### React Arrow Function Layout Components
+### React Arrow Function Component dùng làm Layout
 
-The new layout implementation in v3 no longer supports arrow function components assigned directly to `.layout`. Inertia cannot reliably distinguish them from render functions at runtime. Wrapping the component in an array resolves this:
+Implementation layout mới trong v3 không còn hỗ trợ arrow function component gán trực tiếp vào `.layout`. Inertia không thể phân biệt chúng một cách đáng tin cậy với render function tại runtime. Bọc component trong mảng sẽ giải quyết vấn đề:
 
 ```jsx
 const Layout = ({ children }) => <main>{children}</main>
@@ -306,15 +307,15 @@ Dashboard.layout = Layout
 Dashboard.layout = [Layout]
 ```
 
-Function declaration components continue to work without any changes.
+Component khai báo bằng function declaration tiếp tục hoạt động mà không cần thay đổi.
 
-## Other Changes
+## Các thay đổi khác
 
 ---
 
 ### Blade Components
 
-Inertia now provides `<x-inertia::head>` and `<x-inertia::app>` Blade components as an alternative to the `@inertiaHead` and `@inertia` directives. The head component accepts fallback content via its slot that only renders when SSR is not active, solving the long-standing issue of duplicate `<title>` tags in SSR applications.
+Inertia giờ cung cấp Blade component `<x-inertia::head>` và `<x-inertia::app>` thay cho directive `@inertiaHead` và `@inertia`. Head component nhận fallback content qua slot và chỉ render khi SSR không hoạt động, giải quyết vấn đề lâu năm về thẻ `<title>` bị trùng trong ứng dụng SSR.
 
 ```blade resources/views/app.blade.php
 <html>
@@ -330,19 +331,19 @@ Inertia now provides `<x-inertia::head>` and `<x-inertia::app>` Blade components
 </html>
 ```
 
-The existing directives continue to work and require no changes.
+Các directive hiện có vẫn tiếp tục hoạt động và không cần thay đổi.
 
-### SSR in Development
+### SSR trong Development
 
-When using the new `@inertiajs/vite` plugin, SSR works automatically during development by simply running `npm run dev`. You no longer need to build your SSR bundle with `vite build --ssr` or start a separate Node.js server with `php artisan inertia:start-ssr` during development. These commands are now only required for [production deployments](/v3/advanced/server-side-rendering#running-the-ssr-server).
+Khi dùng plugin `@inertiajs/vite` mới, SSR tự động hoạt động trong development chỉ bằng cách chạy `npm run dev`. Bạn không còn cần build SSR bundle bằng `vite build --ssr` hoặc chạy Node.js server riêng bằng `php artisan inertia:start-ssr` trong development. Các command này giờ chỉ cần cho [production deployment](/v3/advanced/server-side-rendering#running-the-ssr-server).
 
 ### Middleware Priority
 
-The Inertia middleware is now automatically registered in Laravel's [middleware priority](https://laravel.com/docs/middleware#sorting-middleware) list, ensuring it runs before middleware like `ThrottleRequests`. This fixes an issue where `PUT`/`PATCH`/`DELETE` requests that were rate-limited could receive a `302` redirect instead of the correct `303`, causing the browser to retry the original request method on the redirect target. No action is required.
+Inertia middleware giờ tự động được đăng ký trong danh sách [middleware priority](https://laravel.com/docs/middleware#sorting-middleware) của Laravel, đảm bảo nó chạy trước middleware như `ThrottleRequests`. Điều này sửa lỗi khiến request `PUT`/`PATCH`/`DELETE` bị rate limit có thể nhận redirect `302` thay vì `303` đúng, làm browser retry HTTP method ban đầu trên redirect target. Không cần hành động bổ sung.
 
 ### Nested Prop Types
 
-Prop types like `Inertia::optional()`, `Inertia::defer()`, and `Inertia::merge()` now work inside closures and nested arrays. Inertia resolves them at any depth and uses dot-notation paths in partial reload metadata.
+Các prop type như `Inertia::optional()`, `Inertia::defer()` và `Inertia::merge()` giờ hoạt động bên trong closure và nested array. Inertia resolve chúng ở mọi depth và dùng dot-notation path trong partial reload metadata.
 
 ```php
 return Inertia::render('Dashboard', [
@@ -354,13 +355,13 @@ return Inertia::render('Dashboard', [
 ]);
 ```
 
-On the client side, the `only` and `except` options, as well as the `Deferred` and `WhenVisible` components, all support dot-notation for targeting nested props.
+Ở phía client, các option `only` và `except`, cũng như component `Deferred` và `WhenVisible`, đều hỗ trợ dot notation để target nested prop.
 
 ```js
 router.reload({ only: ['auth.notifications'] })
 ```
 
-Classes implementing the [`ProvidesInertiaProperties`](/v3/the-basics/responses#providesinertiaproperties-interface) interface also work at any nesting level.
+Các class implement interface [`ProvidesInertiaProperties`](/v3/the-basics/responses#providesinertiaproperties-interface) cũng hoạt động ở mọi mức nesting.
 
 ```php
 return Inertia::render('Dashboard', [
@@ -371,14 +372,14 @@ return Inertia::render('Dashboard', [
 ]);
 ```
 
-### ES2022 Build Target
+### Build Target ES2022
 
-Inertia packages now target ES2022, up from ES2020 in v2. You may use the [`@vitejs/plugin-legacy`](https://www.npmjs.com/package/@vitejs/plugin-legacy) Vite plugin if your application needs to support older browsers.
+Các package Inertia giờ target ES2022, tăng từ ES2020 trong v2. Bạn có thể dùng Vite plugin [`@vitejs/plugin-legacy`](https://www.npmjs.com/package/@vitejs/plugin-legacy) nếu ứng dụng cần hỗ trợ browser cũ.
 
-### ESM-Only Packages
+### Package chỉ dùng ESM
 
-All Inertia packages now ship as ES Modules only. CommonJS `require()` imports are no longer supported. You should update any `require()` calls to use `import` statements instead.
+Toàn bộ package Inertia giờ chỉ phát hành dạng ES Module. Import CommonJS bằng `require()` không còn được hỗ trợ. Bạn nên cập nhật mọi lệnh gọi `require()` sang câu lệnh `import`.
 
-### Page Object Changes
+### Thay đổi Page Object
 
-The `clearHistory` and `encryptHistory` properties in the [page object](/v3/core-concepts/the-protocol#the-page-object) are now optional and only included in the response when `true`. Previously, every response included `"clearHistory": false` and `"encryptHistory": false` even when history wasn't being cleared or encrypted.
+Các property `clearHistory` và `encryptHistory` trong [page object](/v3/core-concepts/the-protocol#the-page-object) giờ là tùy chọn và chỉ có trong response khi là `true`. Trước đây mọi response đều chứa `"clearHistory": false` và `"encryptHistory": false` kể cả khi history không bị xóa hay mã hóa.

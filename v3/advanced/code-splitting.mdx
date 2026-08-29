@@ -1,14 +1,15 @@
 ---
-title: Code Splitting
+title: Code splitting
+description: "Mặc định, Inertia lazy-load page component, tách mỗi page thành bundle riêng chỉ tải khi cần. Điều này giảm kích thước JavaScript bundle ban đầu nhưng cần…"
 ---
 
-By default, Inertia lazy-loads page components, splitting each page into its own bundle that is loaded on demand. This reduces the initial JavaScript bundle size but requires additional requests when visiting new pages.
+Mặc định, Inertia lazy-load page component, tách mỗi page thành bundle riêng chỉ tải khi cần. Điều này giảm kích thước JavaScript bundle ban đầu nhưng cần thêm request khi truy cập page mới.
 
-You may disable lazy loading to eagerly bundle all pages into a single file. Eager loading eliminates per-page requests but increases the initial bundle size.
+Bạn có thể tắt lazy loading để eager bundle mọi page vào một file. Eager loading loại request theo page nhưng tăng kích thước bundle ban đầu.
 
 ## Vite Plugin
 
-The `lazy` option in the `pages` shorthand controls how page components are loaded. It defaults to `true`.
+Tùy chọn `lazy` trong shorthand `pages` kiểm soát cách page component được tải. Mặc định là `true`.
 
 ```js
 createInertiaApp({
@@ -19,9 +20,9 @@ createInertiaApp({
 })
 ```
 
-## Manual Vite
+## Vite thủ công
 
-You may configure code splitting manually using Vite's `import.meta.glob()` function when not using the Inertia Vite plugin. Pass `{ eager: true }` to bundle all pages, or omit it to lazy-load them.
+Bạn có thể cấu hình code splitting thủ công bằng `import.meta.glob()` của Vite khi không dùng Inertia Vite plugin. Truyền `{ eager: true }` để bundle mọi page, hoặc bỏ option để lazy-load.
 
 <CodeGroup>
 
@@ -56,13 +57,13 @@ resolve: name => {
 
 ## Webpack
 
-To use code splitting with Webpack, enable [dynamic imports](https://github.com/tc39/proposal-dynamic-import) with a Babel plugin:
+Để dùng code splitting với Webpack, bật [dynamic imports](https://github.com/tc39/proposal-dynamic-import) bằng Babel plugin:
 
 ```bash
 npm install @babel/plugin-syntax-dynamic-import
 ```
 
-Next, create a `.babelrc` file in your project with the following configuration:
+Tiếp theo, tạo file `.babelrc` trong project với cấu hình sau:
 
 ```json
 {
@@ -70,9 +71,9 @@ Next, create a `.babelrc` file in your project with the following configuration:
 }
 ```
 
-If you're using Laravel Mix, the Babel plugin for dynamic imports is already installed and configured, and you can skip these steps. We recommend using Laravel Mix 6 or later, as there are known issues with older versions.
+Nếu dùng Laravel Mix, Babel plugin cho dynamic import đã được cài và cấu hình nên có thể bỏ qua. Khuyến nghị Laravel Mix 6 trở lên vì các version cũ có vấn đề đã biết.
 
-Finally, update the `resolve` callback in your app's initialization code to use `import` instead of `require`.
+Cuối cùng, cập nhật callback `resolve` trong code khởi tạo app để dùng `import` thay `require`.
 
 <CodeGroup>
 
@@ -93,7 +94,7 @@ resolve: name => import(`./Pages/${name}.svelte`), // [!code ++]
 
 </CodeGroup>
 
-You should also consider using cache busting to force browsers to load the latest version of your assets. To accomplish this, add the following configuration to your Webpack configuration file.
+Bạn cũng nên cân nhắc cache busting để ép browser tải asset version mới nhất. Thêm cấu hình sau vào file cấu hình Webpack.
 
 ```js
 output: {

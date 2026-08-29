@@ -1,29 +1,30 @@
 ---
-title: Client-Side Setup
+title: Thiết lập phía client
+description: "Sau khi đã cấu hình server-side framework, bạn cần thiết lập client-side framework. Inertia hiện hỗ trợ React, Vue và Svelte."
 ---
 
 import { ReactSpecific } from "/snippets/react-specific.jsx"
 import { SvelteSpecific } from "/snippets/svelte-specific.jsx"
 import { VueSpecific } from "/snippets/vue-specific.jsx"
 
-Once you have your [server-side framework configured](/v3/installation/server-side-setup), you then need to set up your client-side framework. Inertia currently provides support for React, Vue, and Svelte.
+Sau khi đã [cấu hình server-side framework](/v3/installation/server-side-setup), bạn cần thiết lập client-side framework. Inertia hiện hỗ trợ React, Vue và Svelte.
 
 <Card
     icon="laravel"
-    title="Laravel Starter Kits"
+    title="Laravel Starter Kit"
     href="https://laravel.com/docs/starter-kits"
     arrow="true"
-    cta="Start building"
+    cta="Bắt đầu xây dựng"
 >
-Laravel's starter kits provide out-of-the-box scaffolding for new Inertia applications.
+Các starter kit của Laravel cung cấp scaffold sẵn dùng cho ứng dụng Inertia mới.
 
-These starter kits are the absolute fastest way to start building a new Inertia project using Laravel and Vue or React. However, if you would like to manually install Inertia into your application, please consult the documentation below.
+Đây là cách nhanh nhất để bắt đầu dự án Inertia mới bằng Laravel và Vue hoặc React. Tuy nhiên, nếu muốn cài Inertia thủ công vào ứng dụng, hãy xem tài liệu bên dưới.
 
 </Card>
 
-## Prerequisites
+## Điều kiện tiên quyết
 
-Inertia requires your client-side framework and its corresponding [Vite plugin](https://laravel.com/docs/vite#vue) to be installed and configured. You may skip this section if your application already has these set up.
+Inertia yêu cầu client-side framework và [Vite plugin](https://laravel.com/docs/vite#vue) tương ứng được cài đặt và cấu hình. Bạn có thể bỏ qua phần này nếu ứng dụng đã thiết lập sẵn.
 
 <CodeGroup>
 ```bash Vue icon="vuejs"
@@ -39,7 +40,7 @@ npm install svelte @sveltejs/vite-plugin-svelte
 ```
 </CodeGroup>
 
-Then, add the framework plugin to your `vite.config.js` file.
+Sau đó, thêm plugin của framework vào file `vite.config.js`.
 
 <CodeGroup>
 ```js Vue icon="vuejs"
@@ -91,15 +92,15 @@ export default defineConfig({
 ```
 </CodeGroup>
 
-For more information on configuring these plugins, consult Laravel's [Vite documentation](https://laravel.com/docs/vite#vue).
+Để biết thêm về cấu hình các plugin này, hãy xem [tài liệu Vite](https://laravel.com/docs/vite#vue) của Laravel.
 
-## Installation
+## Cài đặt
 
-The `@inertiajs/vite` plugin supports Vite 7 and Vite 8.
+Plugin `@inertiajs/vite` hỗ trợ Vite 7 và Vite 8.
 
 <Steps>
     <Step title="Install dependencies">
-        Install the Inertia client-side adapter and Vite plugin.
+        Cài Inertia client-side adapter và Vite plugin.
 
         <CodeGroup>
         ```bash Vue icon="vuejs"
@@ -117,7 +118,7 @@ The `@inertiajs/vite` plugin supports Vite 7 and Vite 8.
     </Step>
 
     <Step title="Configure Vite">
-        Add the Inertia plugin to your `vite.config.js` file.
+        Thêm plugin Inertia vào file `vite.config.js`.
 
         ```js vite.config.js
         import inertia from '@inertiajs/vite'
@@ -137,7 +138,7 @@ The `@inertiajs/vite` plugin supports Vite 7 and Vite 8.
     </Step>
 
     <Step title="Initialize the Inertia app">
-        Update your main JavaScript file to boot your Inertia app. The Vite plugin handles page resolution and mounting automatically, so a minimal entry point is all you need.
+        Cập nhật file JavaScript chính để boot ứng dụng Inertia. Vite plugin tự động xử lý page resolution và mounting, vì vậy chỉ cần entry point tối thiểu.
 
         <CodeGroup>
         ```js Vue icon="vuejs"
@@ -159,14 +160,14 @@ The `@inertiajs/vite` plugin supports Vite 7 and Vite 8.
         ```
         </CodeGroup>
 
-        The plugin generates a default resolver that looks for pages in both `./pages` and `./Pages` directories, and the app mounts automatically.
+        Plugin tạo resolver mặc định tìm page trong cả thư mục `./pages` và `./Pages`, đồng thời tự động mount ứng dụng.
     </Step>
 
 </Steps>
 
 ### React Strict Mode
 
-The React adapter supports enabling React's [Strict Mode](https://react.dev/reference/react/StrictMode) via the `strictMode` option.
+React adapter hỗ trợ bật [Strict Mode](https://react.dev/reference/react/StrictMode) của React qua tùy chọn `strictMode`.
 
 ```jsx
 createInertiaApp({
@@ -175,9 +176,9 @@ createInertiaApp({
 })
 ```
 
-### Pages Shorthand
+### Cú pháp rút gọn Pages
 
-You may use the `pages` shorthand to customize which directory to search for page components.
+Bạn có thể dùng shorthand `pages` để tùy chỉnh thư mục tìm page component.
 
 <CodeGroup>
 
@@ -204,7 +205,7 @@ createInertiaApp({
 
 </CodeGroup>
 
-An object may also be provided for more control over how pages are resolved. You only need to include the options you wish to customize.
+Bạn cũng có thể truyền object để kiểm soát chi tiết hơn cách page được resolve. Chỉ cần cung cấp các option muốn tùy chỉnh.
 
 ```js
 createInertiaApp({
@@ -217,17 +218,17 @@ createInertiaApp({
 })
 ```
 
-| Option | Description |
+| Tùy chọn | Mô tả |
 |---|---|
-| `path` | The directory to search for page components. |
-| `extension` | A string or array of file extensions (e.g., `'.tsx'` or `['.tsx', '.jsx']`). Defaults to your framework's extension. |
-| `lazy` | Whether to lazy-load page components. Defaults to `true`. See [code splitting](/v3/advanced/code-splitting). |
-| `transform` | A callback that receives the page name and page object, returning a transformed name. |
+| `path` | Thư mục dùng để tìm page component. |
+| `extension` | Chuỗi hoặc mảng phần mở rộng file (ví dụ `'.tsx'` hoặc `['.tsx', '.jsx']`). Mặc định dùng extension của framework. |
+| `lazy` | Có lazy-load page component hay không. Mặc định là `true`. Xem [code splitting](/v3/advanced/code-splitting). |
+| `transform` | Callback nhận tên page và page object rồi trả tên đã biến đổi. |
 
 
-## Customizing the App
+## Tùy chỉnh ứng dụng
 
-Sometimes, you may wish to customize the app instance, for example, to register plugins, wrap it with providers, or set context values. Pass the `withApp` callback to `createInertiaApp` to customize the app before it renders.
+Đôi khi bạn muốn tùy chỉnh app instance, ví dụ đăng ký plugin, bọc bằng provider hoặc đặt context value. Truyền callback `withApp` vào `createInertiaApp` để tùy chỉnh app trước khi render.
 
 <CodeGroup>
 
@@ -276,18 +277,18 @@ createInertiaApp({
 </CodeGroup>
 
 <VueSpecific>
-The callback receives the Vue app instance, allowing you to call `app.use()`, `app.provide()`, `app.component()`, and any other app-level method.
+Callback nhận Vue app instance, cho phép gọi `app.use()`, `app.provide()`, `app.component()` và các app-level method khác.
 </VueSpecific>
 
 <ReactSpecific>
-The callback receives the React element and must return a new element. This is where you may wrap your app with context providers.
+Callback nhận React element và phải trả về element mới. Đây là nơi bạn có thể bọc ứng dụng bằng context provider.
 </ReactSpecific>
 
 <SvelteSpecific>
-The callback receives a `Map` that serves as Svelte's component context. Values set here are accessible in your components via `getContext()`.
+Callback nhận `Map` đóng vai trò component context của Svelte. Giá trị đặt ở đây có thể được component truy cập bằng `getContext()`.
 </SvelteSpecific>
 
-A second argument provides the current rendering environment via `ssr`, allowing you to conditionally apply logic based on where the app is running.
+Đối số thứ hai cung cấp môi trường render hiện tại qua `ssr`, cho phép áp dụng logic có điều kiện dựa trên nơi ứng dụng đang chạy.
 
 <CodeGroup>
 
@@ -329,7 +330,7 @@ createInertiaApp({
 
 </CodeGroup>
 
-The second argument also includes the current `page` object, giving you access to the component name, URL, version, and shared props before the app renders. This is useful for configuring plugins or providers with server-driven state, such as the user's locale.
+Đối số thứ hai cũng chứa object `page` hiện tại, cho phép truy cập component name, URL, version và shared props trước khi app render. Điều này hữu ích để cấu hình plugin hoặc provider bằng state do server cung cấp, chẳng hạn locale của người dùng.
 
 <CodeGroup>
 
@@ -363,11 +364,11 @@ createInertiaApp({
 
 </CodeGroup>
 
-## AI Assistants and IDE Integrations
+## AI Assistant và tích hợp IDE
 
-AI assistants and IDE integrations often write state files into your project root. With `laravel-vite-plugin`'s `refresh: true` enabled, these writes may trigger unexpected full page reloads, since Vite's watcher only ignores `node_modules` and `.git` by default.
+AI assistant và tích hợp IDE thường ghi state file vào root project. Khi bật `refresh: true` của `laravel-vite-plugin`, các thao tác ghi này có thể gây full-page reload ngoài ý muốn vì watcher của Vite mặc định chỉ bỏ qua `node_modules` và `.git`.
 
-You may extend Vite's `server.watch.ignored` option to exclude these paths.
+Bạn có thể mở rộng tùy chọn `server.watch.ignored` của Vite để loại các path này.
 
 ```js vite.config.js
 export default defineConfig({
@@ -384,13 +385,13 @@ export default defineConfig({
 })
 ```
 
-Adjust the list to match your installed tools. See Vite's [server.watch](https://vite.dev/config/server-options.html#server-watch) documentation for additional options.
+Điều chỉnh danh sách phù hợp với các tool đã cài. Xem tài liệu [server.watch](https://vite.dev/config/server-options.html#server-watch) của Vite để biết thêm tùy chọn.
 
-## Manual Setup
+## Thiết lập thủ công
 
-If you prefer not to use the Vite plugin, you may provide the `resolve` and `setup` callbacks manually. The `resolve` callback tells Inertia how to load a page component and receives the component name and the full [page object](/v3/core-concepts/the-protocol). The `setup` callback initializes the client-side framework.
+Nếu không muốn dùng Vite plugin, bạn có thể tự cung cấp callback `resolve` và `setup`. Callback `resolve` cho Inertia biết cách tải page component và nhận component name cùng full [page object](/v3/core-concepts/the-protocol). Callback `setup` khởi tạo client-side framework.
 
-<Note>A manual `setup` callback prevents the Vite plugin from auto-generating [SSR](/v3/advanced/server-side-rendering) handling. You should create a [separate SSR entry point](/v3/advanced/server-side-rendering#ssr-entry-point) and update your app to use [client-side hydration](/v3/advanced/server-side-rendering#client-side-hydration).</Note>
+<Note>Callback `setup` thủ công khiến Vite plugin không thể tự sinh xử lý [SSR](/v3/advanced/server-side-rendering). Bạn nên tạo [SSR entry point riêng](/v3/advanced/server-side-rendering#ssr-entry-point) và cập nhật app để dùng [client-side hydration](/v3/advanced/server-side-rendering#client-side-hydration).</Note>
 
 <CodeGroup>
 
@@ -443,9 +444,9 @@ createInertiaApp({
 
 </CodeGroup>
 
-By default, page components are lazy-loaded, splitting each page into its own bundle. To eagerly bundle all pages into a single file instead, see the [code splitting](/v3/advanced/code-splitting) documentation.
+Mặc định, page component được lazy-load, tách mỗi page thành bundle riêng. Để eager bundle mọi page vào một file duy nhất, xem tài liệu [code splitting](/v3/advanced/code-splitting).
 
-The `laravel-vite-plugin` package also provides a [`resolvePageComponent`](https://laravel.com/docs/vite#inertia) helper that may be used to resolve page components.
+Package `laravel-vite-plugin` cũng cung cấp helper [`resolvePageComponent`](https://laravel.com/docs/vite#inertia) có thể dùng để resolve page component.
 
 <CodeGroup>
 
@@ -469,9 +470,9 @@ resolve: name => resolvePageComponent(`./Pages/${name}.svelte`, import.meta.glob
 
 </CodeGroup>
 
-## Configuring Defaults
+## Cấu hình giá trị mặc định
 
-You may pass a `defaults` object to `createInertiaApp()` to configure default settings for various features. You don't have to pass a default for every key, just the ones you want to tweak.
+Bạn có thể truyền object `defaults` vào `createInertiaApp()` để cấu hình giá trị mặc định cho nhiều tính năng. Không cần truyền mặc định cho mọi key, chỉ cần những key bạn muốn điều chỉnh.
 
 ```js
 createInertiaApp({
@@ -496,11 +497,11 @@ createInertiaApp({
 });
 ```
 
-The `visitOptions` callback receives the target URL and the current visit options, and should return an object with any options you want to override. For more details on the available configuration options, see the [forms](/v3/the-basics/forms#form-errors), [prefetching](/v3/data-props/prefetching), and [manual visits](/v3/the-basics/manual-visits#global-visit-options) documentation.
+Callback `visitOptions` nhận target URL và visit option hiện tại, rồi nên trả object chứa option cần override. Để biết thêm về các cấu hình có sẵn, xem tài liệu [forms](/v3/the-basics/forms#form-errors), [prefetching](/v3/data-props/prefetching) và [manual visits](/v3/the-basics/manual-visits#global-visit-options).
 
-### Updating Configuration at Runtime
+### Cập nhật cấu hình khi runtime
 
-You may also update configuration values at runtime using the exported `config` instance. This is particularly useful when you need to adjust settings based on user preferences or application state.
+Bạn cũng có thể cập nhật giá trị cấu hình khi runtime bằng instance `config` được export. Điều này đặc biệt hữu ích khi cần điều chỉnh setting dựa trên preference của người dùng hoặc state ứng dụng.
 
 <CodeGroup>
 
@@ -554,9 +555,9 @@ const duration = config.get("form.recentlySuccessfulDuration");
 
 </CodeGroup>
 
-## Defining a Root Element
+## Định nghĩa root element
 
-By default, Inertia assumes that your application's root template has a root element with an `id` of `app`. If your application's root element has a different `id`, you can provide it using the `id` property.
+Mặc định, Inertia giả định root template của ứng dụng có root element với `id` là `app`. Nếu root element của ứng dụng có `id` khác, bạn có thể cung cấp nó bằng thuộc tính `id`.
 
 ```js
 createInertiaApp({
@@ -565,11 +566,11 @@ createInertiaApp({
 });
 ```
 
-If you change the `id` of the root element, be sure to update it [server-side](/v3/installation/server-side-setup#root-template) as well.
+Nếu thay `id` của root element, hãy nhớ cập nhật cả [phía server](/v3/installation/server-side-setup#root-template).
 
 ## Content Security Policy
 
-For applications using a [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) that restricts inline styles, you may pass a `nonce` to `createInertiaApp()`. The nonce is applied to the inline styles Inertia injects for the [progress bar](/v3/advanced/progress-indicators) and the [error modal](/v3/advanced/error-handling), allowing them through your CSP.
+Với ứng dụng dùng [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) hạn chế inline style, bạn có thể truyền `nonce` vào `createInertiaApp()`. Nonce được áp dụng cho inline style mà Inertia inject cho [progress bar](/v3/advanced/progress-indicators) và [error modal](/v3/advanced/error-handling), cho phép chúng vượt qua CSP.
 
 ```js
 createInertiaApp({
@@ -578,13 +579,13 @@ createInertiaApp({
 });
 ```
 
-## HTTP Client
+## HTTP client
 
-Unlike Inertia 2 and earlier, Inertia 3 uses a built-in XHR client for all requests. No additional HTTP libraries like Axios are required.
+Khác Inertia 2 trở về trước, Inertia 3 dùng XHR client tích hợp cho mọi request. Không cần thư viện HTTP bổ sung như Axios.
 
-### Using Axios
+### Sử dụng Axios
 
-You may provide the `axiosAdapter` as the `http` option when creating your Inertia app. This is useful when your application requires a custom Axios instance.
+Bạn có thể cung cấp `axiosAdapter` làm tùy chọn `http` khi tạo ứng dụng Inertia. Điều này hữu ích khi ứng dụng cần custom Axios instance.
 
 ```js
 import { axiosAdapter } from '@inertiajs/core'
@@ -595,7 +596,7 @@ createInertiaApp({
 })
 ```
 
-A custom Axios instance may also be provided to the adapter.
+Bạn cũng có thể truyền custom Axios instance cho adapter.
 
 ```js
 import axios from 'axios'
@@ -611,9 +612,9 @@ createInertiaApp({
 })
 ```
 
-### Interceptors
+### Interceptor
 
-The built-in XHR client supports interceptors for modifying requests, inspecting responses, or handling errors. These interceptors apply to all HTTP requests made by Inertia, including those from the router, `useForm`, `<Form>`, and `useHttp`.
+XHR client tích hợp hỗ trợ interceptor để sửa request, kiểm tra response hoặc xử lý error. Các interceptor áp dụng cho mọi HTTP request do Inertia tạo, bao gồm từ router, `useForm`, `<Form>` và `useHttp`.
 
 <CodeGroup>
 
@@ -682,8 +683,8 @@ removeRequestHandler()
 
 </CodeGroup>
 
-Each `on*` method returns a cleanup function that removes the handler when called. Request handlers receive the request config and must return it (modified or not). Response handlers receive the response and must also return it. Handlers may be asynchronous.
+Mỗi method `on*` trả cleanup function để xóa handler khi được gọi. Request handler nhận request config và phải trả lại config đó, dù có sửa hay không. Response handler nhận response và cũng phải trả response. Handler có thể là bất đồng bộ.
 
-### Custom HTTP Client
+### Custom HTTP client
 
-For full control over how requests are made, you may provide a completely custom HTTP client via the `http` option. A custom client must implement the `request` method, which receives an `HttpRequestConfig` and returns a promise resolving to an `HttpResponse`. Review the [xhrHttpClient.ts](https://github.com/inertiajs/inertia/blob/3.x/packages/core/src/xhrHttpClient.ts) source for a reference implementation.
+Để toàn quyền kiểm soát cách request được thực hiện, bạn có thể cung cấp HTTP client hoàn toàn tùy chỉnh qua tùy chọn `http`. Custom client phải implement phương thức `request`, nhận `HttpRequestConfig` và trả promise resolve thành `HttpResponse`. Xem source [xhrHttpClient.ts](https://github.com/inertiajs/inertia/blob/3.x/packages/core/src/xhrHttpClient.ts) làm implementation tham chiếu.

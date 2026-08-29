@@ -1,85 +1,86 @@
 ---
 title: DevTools
+description: "Inertia DevTools là Chrome extension ghi lại mọi Inertia visit và hiển thị trong DevTools panel riêng, cho biết chính xác mỗi visit đã gửi và nhận gì: prop…"
 ---
 
-Inertia DevTools is a Chrome extension that records every Inertia visit and displays it in a dedicated DevTools panel, showing exactly what each visit sent and received: which props were returned, whether they were deferred or merged, what the request headers were, and which route and controller handled it.
+Inertia DevTools là Chrome extension ghi lại mọi Inertia visit và hiển thị trong DevTools panel riêng, cho biết chính xác mỗi visit đã gửi và nhận gì: prop nào được trả về, chúng deferred hay merged, request header nào được gửi và route/controller nào xử lý.
 
-DevTools is a local development tool, designed to run alongside your local development server. The recorder is disabled outside your local environment by default, so DevTools stays out of production unless you explicitly allow it.
+DevTools là công cụ development local, được thiết kế để chạy cùng local development server. Recorder mặc định bị tắt ngoài local environment, nên DevTools không đi vào production trừ khi bạn cho phép rõ ràng.
 
-## Installation
+## Cài đặt
 
 <Steps>
 
 <Step title="Bump the client-side and server-side libraries">
 
-There is no separate package to install in your app. DevTools ships inside the libraries you already use, so you only need the client-side adapter at `^3.6` and the Laravel adapter at `^3.2`.
+Không có package riêng cần cài trong app. DevTools nằm trong các library bạn đã dùng; chỉ cần client-side adapter phiên bản `^3.6` và Laravel adapter `^3.2`.
 
 </Step>
 
 <Step title="Install the Chrome extension">
 
-Install Inertia DevTools from the [Chrome Web Store](https://chromewebstore.google.com/detail/inertiajs-devtools/cbaffpghpcbmgbnlpamegieokkpdlnih), or download the latest release from [GitHub](https://github.com/inertiajs/inertia-devtools/releases) and load it unpacked.
+Cài Inertia DevTools từ [Chrome Web Store](https://chromewebstore.google.com/detail/inertiajs-devtools/cbaffpghpcbmgbnlpamegieokkpdlnih), hoặc tải release mới nhất từ [GitHub](https://github.com/inertiajs/inertia-devtools/releases) rồi load unpacked.
 
 </Step>
 
 <Step title="Enable or disable (optional)">
 
-DevTools is enabled automatically in development, so most applications need no configuration to get started. To turn it on or off explicitly, or to access it from another environment, see [Enabling DevTools](#enabling-devtools).
+DevTools tự động bật trong development, nên phần lớn ứng dụng không cần cấu hình ban đầu. Để bật/tắt rõ ràng hoặc truy cập từ environment khác, xem [Bật DevTools](#enabling-devtools).
 
 </Step>
 
 <Step title="Open the panel">
 
-Open Chrome DevTools on your Inertia app and select the "Inertia" panel. Navigate around your application and each visit will appear in the timeline.
+Mở Chrome DevTools trên ứng dụng Inertia rồi chọn panel "Inertia". Điều hướng trong app và mỗi visit sẽ xuất hiện trên timeline.
 
 </Step>
 
 </Steps>
 
 <Note>
-Run the Vite development server for full functionality. In dev mode Inertia exposes the hooks the panel relies on for client-side detail such as visit options and request grouping. Without it, requests are still recorded, but some client-side features are unavailable.
+Chạy Vite development server để có đầy đủ chức năng. Ở dev mode, Inertia expose hook panel cần cho chi tiết phía client như visit option và request grouping. Nếu không chạy, request vẫn được ghi nhưng một số client-side feature không có.
 </Note>
 
-## The Timeline
+## Timeline
 
-Every Inertia request is listed in the timeline on the left, with a live indicator while it is in flight. You may filter by method, request type, or status, or search by URL and component. Request types include full visits, [partial reloads](/v3/data-props/partial-reloads), [deferred prop loads](/v3/data-props/deferred-props), [polls](/v3/data-props/polling), [prefetches](/v3/data-props/prefetching), and [Precognition validation](/v3/the-basics/forms#precognition). Related requests are grouped rather than listed separately, so a page visit and its follow-up requests appear together. The grouping is determined on the client because only the browser can distinguish a poll from a full navigation or know whether a prefetch was served from cache.
+Mỗi Inertia request được liệt kê trong timeline bên trái, có live indicator khi đang chạy. Bạn có thể filter theo method, request type hoặc status, hoặc tìm theo URL và component. Request type gồm full visit, [partial reload](/v3/data-props/partial-reloads), [deferred prop load](/v3/data-props/deferred-props), [poll](/v3/data-props/polling), [prefetch](/v3/data-props/prefetching) và [Precognition validation](/v3/the-basics/forms#precognition). Request liên quan được group thay vì liệt kê riêng, nên page visit và follow-up request xuất hiện cùng nhau. Grouping được xác định phía client vì chỉ browser mới phân biệt poll với full navigation hoặc biết prefetch có được phục vụ từ cache hay không.
 
 <Frame>
   <img className="block dark:hidden" src="/images/devtools-light-mode.webp" alt="Inertia DevTools panel" />
   <img className="hidden dark:block" src="/images/devtools-dark-mode.webp" alt="Inertia DevTools panel" />
 </Frame>
 
-## Inspecting a Request
+## Kiểm tra một Request
 
-Selecting a request opens its detail, split into four tabs.
+Chọn request sẽ mở phần chi tiết, chia thành bốn tab.
 
-The **Props** tab lists every prop as a tree, with a badge indicating whether it is deferred, optional, merged, or shared with `share()`, and a `file:line` link into your editor. Values expand inline. Alongside it, the **HTTP** tab shows the request and response headers and bodies with sensitive values redacted, and the **Route** tab shows the matched route name, URI, and controller action.
+Tab **Props** liệt kê mọi prop dạng cây, có badge cho biết prop deferred, optional, merged hay shared bằng `share()`, cùng link `file:line` vào editor. Value có thể expand inline. Tab **HTTP** hiển thị request/response header và body với giá trị nhạy cảm đã redact, còn tab **Route** hiển thị matched route name, URI và controller action.
 
-The **Page** tab shows the full page state after Inertia has handled the response. A partial reload might send only one prop over the wire, but Inertia merges it into the existing page, so this tab shows the complete result, not only what arrived in the response.
+Tab **Page** hiển thị full page state sau khi Inertia xử lý response. Partial reload có thể chỉ gửi một prop trên wire, nhưng Inertia merge nó vào page hiện có, nên tab này hiển thị kết quả hoàn chỉnh chứ không chỉ dữ liệu vừa tới.
 
-## Client-Side Events
+## Client-side events
 
-Some interactions never reach the server, so the Network tab shows nothing for them. The extension records them as their own timeline entries: [Client Side Visits](/v3/the-basics/manual-visits#client-side-visits) and requests served from the [prefetch](/v3/data-props/prefetching) cache.
+Một số tương tác không bao giờ tới server nên Network tab không hiển thị gì. Extension ghi chúng thành timeline entry riêng: [Client Side Visits](/v3/the-basics/manual-visits#client-side-visits) và request được phục vụ từ cache [prefetch](/v3/data-props/prefetching).
 
-## Editor Links
+## Editor links
 
-File references throughout the panel link directly to your editor. You may use the editor picker in the toolbar to choose your editor. VS Code, PhpStorm, Cursor, and Zed register their URL schemes on install and work out of the box. Sublime Text ships no URL-scheme handler, so its links do nothing until you install one such as [SublimeUrl](https://github.com/inopinatus/sublime_url).
+File reference trong panel liên kết trực tiếp tới editor. Bạn có thể dùng editor picker trên toolbar để chọn editor. VS Code, PhpStorm, Cursor và Zed đăng ký URL scheme khi cài và hoạt động ngay. Sublime Text không có URL-scheme handler, nên link không hoạt động cho tới khi cài handler như [SublimeUrl](https://github.com/inopinatus/sublime_url).
 
-## How It Works
+## Cách hoạt động
 
-DevTools consists of two pieces that split the work across each request. The Laravel adapter records the server side as the response is prepared, while the Chrome extension captures the client side, and the two are paired into a single timeline entry. They communicate over a [documented protocol](/v3/advanced/devtools-protocol) that any server adapter may implement, with the Laravel adapter serving as the reference implementation. Entries are stored locally over the same origin, so nothing is sent to a remote service and no account or cloud sync is required.
+DevTools gồm hai phần chia việc trên mỗi request. Laravel adapter ghi server side khi response được chuẩn bị, còn Chrome extension capture client side; hai phần được ghép thành một timeline entry. Chúng giao tiếp qua [protocol đã được tài liệu hóa](/v3/advanced/devtools-protocol) mà bất kỳ server adapter nào cũng có thể implement, với Laravel adapter làm implementation tham chiếu. Entry được lưu local cùng origin nên không gửi gì tới remote service và không cần account hay cloud sync.
 
-## Enabling DevTools
+## Bật DevTools
 
-DevTools has two independent switches, one server-side and one client-side, both of which default to on in development and off in production.
+DevTools có hai switch độc lập, một phía server và một phía client; cả hai mặc định bật trong development và tắt trong production.
 
-The server recorder is controlled by the `INERTIA_DEVTOOLS_ENABLED` environment variable, enabled automatically in your local environment. You may set it explicitly to override that default.
+Server recorder được kiểm soát bằng environment variable `INERTIA_DEVTOOLS_ENABLED`, tự bật trong local environment. Bạn có thể đặt rõ giá trị để override mặc định.
 
 ```env
 INERTIA_DEVTOOLS_ENABLED=false
 ```
 
-The client hooks are controlled by the `dev` option in `createInertiaApp()`, which defaults to Vite's development mode. These hooks expose the visit options and request grouping described above, so turning them off leaves the timeline recording requests without that client-side detail.
+Client hook được kiểm soát bằng tùy chọn `dev` trong `createInertiaApp()`, mặc định theo development mode của Vite. Các hook expose visit option và request grouping đã mô tả; tắt chúng vẫn ghi request trên timeline nhưng thiếu chi tiết phía client.
 
 ```js
 createInertiaApp({
@@ -88,25 +89,25 @@ createInertiaApp({
 })
 ```
 
-To disable the panel itself, toggle the extension off from `chrome://extensions`.
+Để tắt chính panel, tắt extension trong `chrome://extensions`.
 
-## Configuration
+## Cấu hình
 
-The recorder is configured under the `devtools` key in your `config/inertia.php` file, with environment variables for the most common options.
+Recorder được cấu hình dưới key `devtools` trong file `config/inertia.php`, với environment variable cho các option phổ biến.
 
 ### Redaction
 
-Sensitive prop keys and headers are redacted before an entry is stored, so values such as passwords, tokens, and authorization headers never reach the panel. You may customize the redacted keys and headers under `devtools.redact` in your configuration file.
+Sensitive prop key và header được redact trước khi entry được lưu, nên giá trị như password, token và authorization header không bao giờ đến panel. Bạn có thể tùy chỉnh key/header bị redact dưới `devtools.redact` trong config.
 
-Certain paths are excluded from recording entirely, including the DevTools endpoints themselves and common tooling routes such as Telescope and Horizon. You may adjust the `devtools.except` array to record or ignore additional paths.
+Một số path bị loại hoàn toàn khỏi recording, gồm chính DevTools endpoint và tooling route phổ biến như Telescope, Horizon. Có thể điều chỉnh mảng `devtools.except` để record hoặc ignore thêm path.
 
 ### Storage
 
-Entries are written to `storage/inertia-devtools` and pruned automatically. You may adjust the retention, limit, and storage path under `devtools.storage` in your configuration file.
+Entry được ghi vào `storage/inertia-devtools` và tự động prune. Bạn có thể điều chỉnh retention, limit và storage path dưới `devtools.storage` trong config.
 
-### Enabling Outside Local
+### Bật ngoài Local
 
-The recorder is restricted to your local environment by default. To allow access beyond it, define a gate and reference it with the `INERTIA_DEVTOOLS_GATE` environment variable.
+Recorder mặc định chỉ cho phép local environment. Để cho phép truy cập ngoài local, hãy định nghĩa gate và tham chiếu nó bằng environment variable `INERTIA_DEVTOOLS_GATE`.
 
 ```php
 // app/Providers/AppServiceProvider.php
@@ -122,6 +123,6 @@ INERTIA_DEVTOOLS_ENABLED=true
 INERTIA_DEVTOOLS_GATE=viewInertiaDevTools
 ```
 
-Outside your local environment, the DevTools endpoints authorize each request against the gate, refusing access when no gate is configured. Your local environment is always allowed, so a gate can never lock you out of DevTools while you work locally.
+Ngoài local environment, DevTools endpoint authorize mỗi request qua gate và từ chối nếu không cấu hình gate. Local environment luôn được phép nên gate không thể khóa bạn khỏi DevTools khi làm việc local.
 
-The endpoints run the `web` middleware group before they authorize, so the session has resolved the authenticated user by the time the gate runs. You may adjust that stack under `devtools.middleware` in your configuration file if your application authenticates its users another way.
+Endpoint chạy middleware group `web` trước khi authorize, nên session đã resolve authenticated user khi gate chạy. Có thể điều chỉnh stack dưới `devtools.middleware` nếu ứng dụng xác thực user theo cách khác.
