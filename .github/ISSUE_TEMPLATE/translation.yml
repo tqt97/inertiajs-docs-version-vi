@@ -1,0 +1,30 @@
+name: Báo lỗi bản dịch
+about: Báo câu dịch chưa đúng, chưa tự nhiên hoặc thiếu nội dung
+labels: [translation]
+body:
+  - type: dropdown
+    id: version
+    attributes:
+      label: Version
+      options: [v1, v2, v3]
+    validations:
+      required: true
+  - type: input
+    id: page
+    attributes:
+      label: Trang
+      placeholder: v3/the-basics/forms
+    validations:
+      required: true
+  - type: textarea
+    id: issue
+    attributes:
+      label: Nội dung cần sửa
+      description: Mô tả câu/đoạn đang có vấn đề và lý do.
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Đề xuất
+      description: Nếu có, hãy đề xuất cách diễn đạt hoặc nguồn đối chiếu.

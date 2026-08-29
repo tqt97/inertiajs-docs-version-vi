@@ -1,0 +1,33 @@
+name: Sample / thực chiến
+about: Báo lỗi code sample hoặc đề xuất một bài thực chiến mới
+title: "[Sample] "
+labels: ["sample"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Loại yêu cầu
+      options:
+        - Code sample không còn đúng
+        - Thiếu failure/loading/error case
+        - Đề xuất bài sample mới
+        - Cải thiện cách giải thích
+    validations:
+      required: true
+  - type: input
+    id: page
+    attributes:
+      label: Trang liên quan
+      placeholder: samples/crud/full-flow
+  - type: textarea
+    id: details
+    attributes:
+      label: Mô tả
+      description: Nêu behavior hiện tại, behavior mong đợi và version/package nếu liên quan.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Tài liệu/source đối chiếu
+      description: Nếu đây là API drift, vui lòng thêm link official docs/source nếu có.

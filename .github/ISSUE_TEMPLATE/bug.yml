@@ -1,0 +1,22 @@
+name: Báo lỗi website/docs
+about: Báo link hỏng, navigation, rendering, config hoặc vấn đề khác
+labels: [bug]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Trang hoặc khu vực
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Hiện tượng
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Mong đợi
+    validations:
+      required: true
