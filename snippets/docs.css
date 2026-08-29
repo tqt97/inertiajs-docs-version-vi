@@ -1,0 +1,3 @@
+svg[style*="regular/s.svg"] {
+    mask-image: url("/docs/assets/svelte.svg") !important;
+}

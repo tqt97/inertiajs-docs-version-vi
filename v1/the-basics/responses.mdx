@@ -1,0 +1,55 @@
+---
+title: Responses
+---
+
+import V1EOLWarning from "/snippets/v1-eol-warning.mdx";
+
+<V1EOLWarning />
+
+## Creating Responses
+
+Creating an Inertia response is simple. To get started, invoke the `Inertia::render()` method within your controller or route, providing both the name of the [JavaScript page component](/v1/the-basics/pages) that you wish to render, as well as any props (data) for the page.
+
+In the example below, we will pass a single prop (`event`) which contains four attributes (`id`, `title`, `start_date` and `description`) to the `Event/Show` page component.
+
+```php
+use Inertia\Inertia;
+
+class EventsController extends Controller
+{
+    public function show(Event $event)
+    {
+        return Inertia::render('Event/Show', [
+            'event' => $event->only(
+                'id',
+                'title',
+                'start_date',
+                'description'
+            ),
+        ]);
+
+        // Alternatively, you can use the inertia() helper...
+        return inertia('Event/Show', [
+            'event' => $event->only(
+                'id',
+                'title',
+                'start_date',
+                'description'
+            ),
+        ]);
+    }
+}
+```
+
+```html
+<meta name="twitter:title" content="{{ $page['props']['event']->title }}">
+```
+
+```php
+return Inertia::render('Event', ['event' => $event])
+    ->withViewData(['meta' => $event->meta]);
+```
+
+```html
+<meta name="description" content="{{ $meta }}">
+```

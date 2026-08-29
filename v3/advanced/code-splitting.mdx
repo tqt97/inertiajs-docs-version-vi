@@ -1,0 +1,102 @@
+---
+title: Code Splitting
+---
+
+By default, Inertia lazy-loads page components, splitting each page into its own bundle that is loaded on demand. This reduces the initial JavaScript bundle size but requires additional requests when visiting new pages.
+
+You may disable lazy loading to eagerly bundle all pages into a single file. Eager loading eliminates per-page requests but increases the initial bundle size.
+
+## Vite Plugin
+
+The `lazy` option in the `pages` shorthand controls how page components are loaded. It defaults to `true`.
+
+```js
+createInertiaApp({
+    pages: {
+        lazy: false, // Bundle all pages into a single file
+    },
+    // ...
+})
+```
+
+## Manual Vite
+
+You may configure code splitting manually using Vite's `import.meta.glob()` function when not using the Inertia Vite plugin. Pass `{ eager: true }` to bundle all pages, or omit it to lazy-load them.
+
+<CodeGroup>
+
+```js Vue icon="vuejs"
+resolve: name => {
+    const pages = import.meta.glob('./Pages/**/*.vue') // [!code --:2]
+    return pages[`./Pages/${name}.vue`]()
+    const pages = import.meta.glob('./Pages/**/*.vue', { eager: true }) // [!code ++:2]
+    return pages[`./Pages/${name}.vue`]
+},
+```
+
+```js React icon="react"
+resolve: name => {
+    const pages = import.meta.glob('./Pages/**/*.jsx') // [!code --:2]
+    return pages[`./Pages/${name}.jsx`]()
+    const pages = import.meta.glob('./Pages/**/*.jsx', { eager: true }) // [!code ++:2]
+    return pages[`./Pages/${name}.jsx`]
+},
+```
+
+```js Svelte icon="s"
+resolve: name => {
+    const pages = import.meta.glob('./Pages/**/*.svelte') // [!code --:2]
+    return pages[`./Pages/${name}.svelte`]()
+    const pages = import.meta.glob('./Pages/**/*.svelte', { eager: true }) // [!code ++:2]
+    return pages[`./Pages/${name}.svelte`]
+},
+```
+
+</CodeGroup>
+
+## Webpack
+
+To use code splitting with Webpack, enable [dynamic imports](https://github.com/tc39/proposal-dynamic-import) with a Babel plugin:
+
+```bash
+npm install @babel/plugin-syntax-dynamic-import
+```
+
+Next, create a `.babelrc` file in your project with the following configuration:
+
+```json
+{
+    "plugins": ["@babel/plugin-syntax-dynamic-import"]
+}
+```
+
+If you're using Laravel Mix, the Babel plugin for dynamic imports is already installed and configured, and you can skip these steps. We recommend using Laravel Mix 6 or later, as there are known issues with older versions.
+
+Finally, update the `resolve` callback in your app's initialization code to use `import` instead of `require`.
+
+<CodeGroup>
+
+```js Vue icon="vuejs"
+resolve: name => require(`./Pages/${name}`), // [!code --]
+resolve: name => import(`./Pages/${name}`), // [!code ++]
+```
+
+```js React icon="react"
+resolve: name => require(`./Pages/${name}`), // [!code --]
+resolve: name => import(`./Pages/${name}`), // [!code ++]
+```
+
+```js Svelte icon="s"
+resolve: name => require(`./Pages/${name}.svelte`), // [!code --]
+resolve: name => import(`./Pages/${name}.svelte`), // [!code ++]
+```
+
+</CodeGroup>
+
+You should also consider using cache busting to force browsers to load the latest version of your assets. To accomplish this, add the following configuration to your Webpack configuration file.
+
+```js
+output: {
+    chunkFilename: 'js/[name].js?id=[chunkhash]',
+}
+```
