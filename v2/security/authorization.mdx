@@ -1,14 +1,15 @@
 ---
-title: Authorization
+title: Phân quyền
+description: "Khi dùng Inertia, việc phân quyền tốt nhất nên được xử lý ở phía máy chủ trong các authorization policy của ứng dụng. Tuy nhiên, bạn có thể thắc mắc làm sao…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
 
 <V2UpgradeWarning />
 
-When using Inertia, authorization is best handled server-side in your application's authorization policies. However, you may be wondering how to perform checks against your authorization policies from within your Inertia page components since you won't have access to your framework's server-side helpers.
+Khi dùng Inertia, việc phân quyền tốt nhất nên được xử lý ở phía máy chủ trong các authorization policy của ứng dụng. Tuy nhiên, bạn có thể thắc mắc làm sao kiểm tra policy phân quyền từ bên trong page component Inertia khi không thể truy cập các helper phía máy chủ của framework.
 
-The simplest approach to solving this problem is to pass the results of your authorization checks as props to your page components.
+Cách đơn giản nhất để giải quyết là truyền kết quả của các phép kiểm tra phân quyền dưới dạng props cho page component.
 
 ```php
 class UsersController extends Controller

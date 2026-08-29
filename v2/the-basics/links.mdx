@@ -1,16 +1,17 @@
 ---
-title: Links
+title: Liên kết
+description: "Để tạo liên kết đến các trang khác trong ứng dụng Inertia, thông thường bạn sẽ dùng component của Inertia. Component này là lớp bọc nhẹ quanh liên kết anchor…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
 
 <V2UpgradeWarning />
 
-To create links to other pages within an Inertia app, you will typically use the Inertia `<Link>` component. This component is a light wrapper around a standard anchor `<a>` link that intercepts click events and prevents full page reloads. This is [how Inertia provides a single-page app experience](/v2/core-concepts/how-it-works) once your application has been loaded.
+Để tạo liên kết đến các trang khác trong ứng dụng Inertia, thông thường bạn sẽ dùng component `<Link>` của Inertia. Component này là lớp bọc nhẹ quanh liên kết anchor `<a>` tiêu chuẩn, chặn sự kiện click và ngăn tải lại toàn bộ trang. Đây là [cách Inertia mang lại trải nghiệm ứng dụng một trang](/v2/core-concepts/how-it-works) sau khi ứng dụng được tải.
 
-## Creating Links
+## Tạo liên kết
 
-To create an Inertia link, use the Inertia `<Link>` component. Any attributes you provide to this component will be proxied to the underlying HTML tag.
+Để tạo liên kết Inertia, hãy dùng component `<Link>`. Mọi attribute truyền vào component sẽ được proxy xuống thẻ HTML bên dưới.
 
 <CodeGroup>
 
@@ -36,7 +37,7 @@ import { inertia, Link } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-By default, Inertia renders links as anchor `<a>` elements. However, you can change the tag using the `as` prop.
+Mặc định, Inertia render liên kết dưới dạng phần tử anchor `<a>`. Tuy nhiên, bạn có thể thay đổi thẻ bằng prop `as`.
 
 <CodeGroup>
 
@@ -70,12 +71,12 @@ import { Link } from '@inertiajs/svelte'
 </CodeGroup>
 
 <Info>
-    Creating `POST`/`PUT`/`PATCH`/ `DELETE` anchor `<a>` links is discouraged as it causes "Open Link in New Tab / Window" accessibility issues. The component automatically renders a{` `} `<button>` element when using these methods.
+    Không khuyến khích tạo liên kết anchor `<a>` dùng `POST`/`PUT`/`PATCH`/`DELETE` vì gây vấn đề accessibility với "Open Link in New Tab / Window". Component tự động render phần tử{` `} `<button>` khi sử dụng các method này.
 </Info>
 
-## Method
+## Phương thức
 
-You can specify the HTTP request method for an Inertia link request using the `method` prop. The default method used by links is `GET`, but you can use the `method` prop to make `POST`, `PUT`, `PATCH`, and `DELETE` requests via links.
+Bạn có thể chỉ định HTTP method cho request của liên kết Inertia bằng prop `method`. Method mặc định của liên kết là `GET`, nhưng bạn có thể dùng prop `method` để thực hiện request `POST`, `PUT`, `PATCH` và `DELETE` thông qua liên kết.
 
 <CodeGroup>
 
@@ -105,7 +106,7 @@ import { inertia, Link } from '@inertiajs/svelte'
 
 <Badge>v2.0.6+</Badge>
 
-When using [Wayfinder](https://github.com/laravel/wayfinder) in conjunction with the `Link`component, you can simply pass the resulting object directly to the `href` prop. The `Link` will infer the HTTP method and URL directly from the Wayfinder object.
+Khi dùng [Wayfinder](https://github.com/laravel/wayfinder) cùng component `Link`, bạn chỉ cần truyền object kết quả trực tiếp vào prop `href`. `Link` sẽ tự suy ra HTTP method và URL từ object Wayfinder.
 
 <CodeGroup>
 
@@ -134,9 +135,9 @@ import { show } from 'App/Http/Controllers/UserController'
 
 </CodeGroup>
 
-## Data
+## Dữ liệu
 
-When making `POST` or `PUT` requests, you may wish to add additional data to the request. You can accomplish this using the `data` prop. The provided data can be an `object` or `FormData` instance.
+Khi thực hiện request `POST` hoặc `PUT`, bạn có thể muốn gửi thêm dữ liệu trong request. Bạn có thể làm việc này bằng prop `data`. Dữ liệu được cung cấp có thể là một `object` hoặc instance `FormData`.
 
 <CodeGroup>
 
@@ -162,9 +163,9 @@ import { inertia, Link } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-## Custom Headers
+## Header tùy chỉnh
 
-The `headers` prop allows you to add custom headers to an Inertia link. However, the headers Inertia uses internally to communicate its state to the server take priority and therefore cannot be overwritten.
+Prop `headers` cho phép thêm header tùy chỉnh vào liên kết Inertia. Tuy nhiên, các header Inertia sử dụng nội bộ để truyền trạng thái của nó đến máy chủ có độ ưu tiên cao hơn và vì vậy không thể bị ghi đè.
 
 <CodeGroup>
 
@@ -190,9 +191,9 @@ import { inertia, Link } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-## Browser History
+## Lịch sử trình duyệt
 
-The `replace` prop allows you to specify the browser's history behavior. By default, page visits push (new) state (`window.history.pushState`) into the history; however, it's also possible to replace state (`window.history.replaceState`) by setting the `replace` prop to `true`. This will cause the visit to replace the current history state instead of adding a new history state to the stack.
+Prop `replace` cho phép xác định hành vi lịch sử của trình duyệt. Mặc định, các lần truy cập trang sẽ push state mới (`window.history.pushState`) vào history; tuy nhiên, bạn cũng có thể thay thế state (`window.history.replaceState`) bằng cách đặt prop `replace` thành `true`. Khi đó, lần truy cập sẽ thay thế history state hiện tại thay vì thêm một state mới vào stack.
 
 <CodeGroup>
 
@@ -218,9 +219,9 @@ import { inertia, Link } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-## State Preservation
+## Giữ lại state
 
-You can preserve a page component's local state using the `preserve-state` prop. This will prevent a page component from fully re-rendering. The `preserve-state` prop is especially helpful on pages that contain forms, since you can avoid manually repopulating input fields and can also maintain a focused input.
+Bạn có thể giữ lại state cục bộ của page component bằng prop `preserve-state`. Điều này ngăn page component render lại hoàn toàn. Prop `preserve-state` đặc biệt hữu ích ở các trang chứa form vì bạn không cần tự điền lại các input và vẫn có thể duy trì input đang focus.
 
 <CodeGroup>
 
@@ -252,9 +253,9 @@ import { inertia, Link } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-## Scroll Preservation
+## Giữ vị trí cuộn
 
-You can use the `preserveScroll` prop to prevent Inertia from automatically resetting the scroll position when making a page visit.
+Bạn có thể dùng prop `preserveScroll` để ngăn Inertia tự động đặt lại vị trí cuộn khi thực hiện một lần truy cập trang.
 
 <CodeGroup>
 
@@ -280,11 +281,11 @@ import { inertia, Link } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-For more information on managing scroll position, check out the documentation on [scroll management](/v2/advanced/scroll-management).
+Để biết thêm về quản lý vị trí cuộn, hãy xem tài liệu [quản lý cuộn](/v2/advanced/scroll-management).
 
-## Partial Reloads
+## Tải lại một phần
 
-The `only` prop allows you to specify that only a subset of a page's props (data) should be retrieved from the server on subsequent visits to that page.
+Prop `only` cho phép bạn chỉ định rằng chỉ một tập con props (dữ liệu) của trang cần được lấy từ máy chủ trong các lần truy cập tiếp theo đến trang đó.
 
 <CodeGroup>
 
@@ -310,11 +311,11 @@ import { inertia, Link } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-For more information on this topic, check out the complete documentation on [partial reloads](/v2/data-props/partial-reloads).
+Để biết thêm về chủ đề này, hãy xem tài liệu đầy đủ về [partial reload](/v2/data-props/partial-reloads).
 
-## View Transitions
+## View Transition
 
-You may enable [View transitions](/v2/the-basics/view-transitions) for a link by setting the `viewTransition` prop to `true`. This will use the browser's View Transitions API to animate the page transition.
+Bạn có thể bật [View transition](/v2/the-basics/view-transitions) cho một liên kết bằng cách đặt prop `viewTransition` thành `true`. Inertia sẽ dùng View Transitions API của trình duyệt để animate chuyển trang.
 
 <CodeGroup>
 
@@ -338,9 +339,9 @@ import { Link } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-## Active States
+## Trạng thái active
 
-It's common to set an active state for navigation links based on the current page. This can be accomplished when using Inertia by inspecting the `page` object and doing string comparisons against the `page.url` and `page.component` properties.
+Việc thiết lập trạng thái active cho liên kết điều hướng dựa trên trang hiện tại là rất phổ biến. Với Inertia, bạn có thể làm điều này bằng cách kiểm tra object `page` và so sánh chuỗi với các property `page.url` và `page.component`.
 
 <CodeGroup>
 
@@ -396,10 +397,10 @@ import { inertia, Link, page } from '@inertiajs/svelte'
 
 </CodeGroup>
 
-You can perform exact match comparisons (`===`), `startsWith()` comparisons (useful for matching a subset of pages), or even more complex comparisons using regular expressions.
+Bạn có thể so sánh khớp chính xác (`===`), so sánh bằng `startsWith()` (hữu ích khi khớp một nhóm trang), hoặc thực hiện các phép so sánh phức tạp hơn bằng regular expression.
 
-Using this approach, you're not limited to just setting class names. You can use this technique to conditionally render any markup on active state, such as different link text or even an SVG icon that represents the link is active.
+Với cách tiếp cận này, bạn không bị giới hạn ở việc chỉ thiết lập class name. Bạn có thể dùng kỹ thuật này để render có điều kiện bất kỳ markup nào khi liên kết active, chẳng hạn nội dung liên kết khác hoặc thậm chí một icon SVG biểu thị liên kết đang active.
 
-## Data Loading Attribute
+## Thuộc tính loading của dữ liệu
 
-While a link is making an active request, a `data-loading` attribute is added to the link element. This allows you to style the link while it's in a loading state. The attribute is removed once the request is complete.
+Trong khi liên kết đang thực hiện request, attribute `data-loading` được thêm vào element liên kết. Điều này cho phép bạn style liên kết trong trạng thái loading. Attribute được gỡ khi request hoàn tất.

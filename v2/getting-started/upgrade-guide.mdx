@@ -1,42 +1,43 @@
 ---
-title: Upgrade Guide for v2.0
+title: Hướng dẫn nâng cấp lên v2.0
+description: "Bạn có thể xem tài liệu cũ của Inertia.js v1.0 tại inertiajs.com/docs/v1."
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
 
 <V2UpgradeWarning />
 
-You can find the legacy docs for Inertia.js v1.0 at [inertiajs.com/docs/v1](/v1).
+Bạn có thể xem tài liệu cũ của Inertia.js v1.0 tại [inertiajs.com/docs/v1](/v1).
 
-## What's New
+## Có gì mới
 
-Inertia.js v2.0 is a huge step forward for Inertia! The core library has been completely rewritten to architecturally support asynchronous requests, enabling a whole set of new features, including:
+Inertia.js v2.0 là một bước tiến rất lớn của Inertia! Core library đã được viết lại hoàn toàn về mặt kiến trúc để hỗ trợ asynchronous request, qua đó mở ra nhiều tính năng mới, bao gồm:
 
 <Columns cols={2}>
-    <Card title="Polling" href="/v2/data-props/polling" icon="clock">
-        Keep data fresh by automatically polling the server at a specified interval.
+    <Card title="Polling (thăm dò định kỳ)" href="/v2/data-props/polling" icon="clock">
+        Giữ dữ liệu luôn mới bằng cách tự động polling server theo khoảng thời gian được chỉ định.
     </Card>
-    <Card title="Prefetching" href="/v2/data-props/prefetching" icon="rocket">
-        Speed up navigation by prefetching data for links when they become visible.
+    <Card title="Tải trước (prefetching)" href="/v2/data-props/prefetching" icon="rocket">
+        Tăng tốc điều hướng bằng cách prefetch dữ liệu cho link khi chúng trở nên hiển thị.
     </Card>
-    <Card title="Deferred props" href="/v2/data-props/deferred-props" icon="timer">
-        Load non-essential data after the initial page load to improve performance.
+    <Card title="Props tải trì hoãn (deferred props)" href="/v2/data-props/deferred-props" icon="timer">
+        Tải dữ liệu không thiết yếu sau lần tải trang ban đầu để cải thiện hiệu năng.
     </Card>
-    <Card title="Infinite scrolling" href="/v2/data-props/merging-props" icon="refresh">
-        Seamlessly load more data as the user scrolls down the page.
+    <Card title="Cuộn vô hạn (infinite scrolling)" href="/v2/data-props/merging-props" icon="refresh">
+        Tải thêm dữ liệu liền mạch khi người dùng cuộn xuống trang.
     </Card>
-    <Card title="Lazy loading data on scroll" href="/v2/data-props/load-when-visible" icon="mouse">
-        Load data only when it becomes visible in the viewport.
+    <Card title="Tải dữ liệu khi cuộn đến" href="/v2/data-props/load-when-visible" icon="mouse">
+        Chỉ tải dữ liệu khi nó xuất hiện trong viewport.
     </Card>
-    <Card title="History encryption" href="/v2/security/history-encryption" icon="lock">
-        Clear page data from browser history state when logging out of an application.
+    <Card title="Mã hóa history" href="/v2/security/history-encryption" icon="lock">
+        Xóa dữ liệu trang khỏi history state của trình duyệt khi đăng xuất khỏi ứng dụng.
     </Card>
 </Columns>
 
 
-## Upgrade Dependencies
+## Nâng cấp dependency
 
-To upgrade to the Inertia.js v2.0, first use npm to install the client-side adapter of your choice:
+Để nâng cấp lên Inertia.js v2.0, trước tiên dùng npm để cài client-side adapter bạn muốn:
 
 <CodeGroup>
 
@@ -54,39 +55,39 @@ npm install @inertiajs/svelte@^2.0
 
 </CodeGroup>
 
-Next, upgrade the `inertiajs/inertia-laravel` package to use the `2.x` dev branch:
+Tiếp theo, nâng cấp package `inertiajs/inertia-laravel` để dùng nhánh dev `2.x`:
 
 ```bash
 composer require inertiajs/inertia-laravel:^2.0
 ```
 
-## Breaking Changes
+## Breaking changes
 
-While a significant release, Inertia.js v2.0 doesn't introduce many breaking changes. Here's a list of all the breaking changes:
+Mặc dù là một bản phát hành lớn, Inertia.js v2.0 không đưa ra quá nhiều breaking change. Dưới đây là toàn bộ thay đổi không tương thích ngược:
 
-### Dropped Laravel 8 and 9 Support
+### Ngừng hỗ trợ Laravel 8 và 9
 
-The Laravel adapter now requires Laravel 10 and PHP 8.1 at a minimum.
+Laravel adapter hiện yêu cầu tối thiểu Laravel 10 và PHP 8.1.
 
-### Dropped Vue 2 Support
+### Ngừng hỗ trợ Vue 2
 
-The Vue 2 adapter has been removed. Vue 2 reached End of Life on December 3, 2023, so this felt like it was time.
+Adapter Vue 2 đã bị loại bỏ. Vue 2 kết thúc vòng đời vào ngày 3 tháng 12 năm 2023, vì vậy đây là thời điểm phù hợp để ngừng hỗ trợ.
 
-### Router `replace` Method
+### Phương thức `replace` của Router
 
-The previously deprecated `router.replace` method has been re-instated, but its functionality has changed. It is now used to make [Client Side](/v2/the-basics/manual-visits#client-side-visits) page visits. To make server-side visits that replace the current history entry in the browser, use the `replace` option:
+Phương thức `router.replace` trước đây đã deprecated nay được khôi phục, nhưng chức năng đã thay đổi. Nó hiện được dùng để thực hiện [client-side visit](/v2/the-basics/manual-visits#client-side-visits). Để thực hiện server-side visit thay thế history entry hiện tại trong trình duyệt, hãy dùng tùy chọn `replace`:
 
 ```javascript
 router.get('/users', { search: 'John' }, { replace: true })
 ```
 
-### Svelte Adapter
+### Svelte adapter
 
-- Dropped support for Svelte 3 as it reached End of Life on June 20, 2023.
-- The `remember` helper has been rename to `useRemember` to be consistent with other helpers.
-- Updated `setup` callback in `app.js`. You need to pass `props` when initializing the `App` component. [See setup in app.js](/v2/installation/client-side-setup#initialize-the-inertia-app)
-- `setup` callback is now required in `ssr.js`. [See setup in ssr.js](/v2/advanced/server-side-rendering#add-server-entry-point)
+- Ngừng hỗ trợ Svelte 3 vì phiên bản này đã kết thúc vòng đời vào ngày 20 tháng 6 năm 2023.
+- Helper `remember` được đổi tên thành `useRemember` để nhất quán với các helper khác.
+- Callback `setup` trong `app.js` đã được cập nhật. Bạn cần truyền `props` khi khởi tạo component `App`. [Xem phần setup trong app.js](/v2/installation/client-side-setup#initialize-the-inertia-app)
+- Callback `setup` giờ là bắt buộc trong `ssr.js`. [Xem phần setup trong ssr.js](/v2/advanced/server-side-rendering#add-server-entry-point)
 
-### Partial Reloads Are Now Async
+### Partial reload giờ chạy bất đồng bộ
 
-Previously partial reloads in Inertia were synchronous, just like all Inertia requests. In v2.0, partial reloads are now asynchronous. Generally this is desirable, but if you were relying on these requests being synchronous, you may need to adjust your code.
+Trước đây partial reload trong Inertia chạy đồng bộ, giống mọi request Inertia khác. Trong v2.0, partial reload chuyển sang bất đồng bộ. Nhìn chung đây là hành vi mong muốn, nhưng nếu code của bạn phụ thuộc vào việc các request này chạy đồng bộ thì có thể cần điều chỉnh.

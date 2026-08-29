@@ -1,20 +1,21 @@
 ---
-title: Code Splitting
+title: Code splitting
+description: "Code splitting chia các trang khác nhau của ứng dụng thành những bundle nhỏ hơn, sau đó chỉ tải theo nhu cầu khi người dùng truy cập trang mới. Điều này có…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
 
 <V2UpgradeWarning />
 
-Code splitting breaks apart the various pages of your application into smaller bundles, which are then loaded on demand when visiting new pages. This can significantly reduce the size of the initial JavaScript bundle loaded by the browser, improving the time to first render.
+Code splitting chia các trang khác nhau của ứng dụng thành những bundle nhỏ hơn, sau đó chỉ tải theo nhu cầu khi người dùng truy cập trang mới. Điều này có thể giảm đáng kể kích thước JavaScript bundle ban đầu mà trình duyệt phải tải, qua đó cải thiện thời gian render đầu tiên.
 
-While code splitting is helpful for very large projects, it does require extra requests when visiting new pages. Generally speaking, if you're able to use a single bundle, your app is going to feel snappier.
+Mặc dù code splitting hữu ích cho các project rất lớn, nó cũng tạo thêm request khi truy cập trang mới. Nhìn chung, nếu có thể dùng một bundle duy nhất, ứng dụng thường sẽ cho cảm giác phản hồi nhanh hơn.
 
-To enable code splitting, you will need to tweak the `resolve` callback in your `createInertiaApp()` configuration, and how you do this is different depending on which bundler you're using.
+Để bật code splitting, bạn cần điều chỉnh callback `resolve` trong cấu hình `createInertiaApp()`. Cách thực hiện khác nhau tùy bundler đang sử dụng.
 
-## Using Vite
+## Sử dụng Vite
 
-Vite enables code splitting (or lazy-loading as they call it) by default when using their `import.meta.glob()` function, so simply omit the `{ eager: true }` option, or set it to `false`, to disable eager loading.
+Vite mặc định bật code splitting (hay cách họ gọi là lazy-loading) khi dùng hàm `import.meta.glob()`. Vì vậy, chỉ cần bỏ tùy chọn `{ eager: true }`, hoặc đặt nó thành `false`, để tắt eager loading.
 
 <CodeGroup>
 
@@ -47,15 +48,15 @@ resolve: name => {
 
 </CodeGroup>
 
-## Using Webpack
+## Sử dụng Webpack
 
-To use code splitting with Webpack, you will first need to enable [dynamic imports](https://github.com/tc39/proposal-dynamic-import) via a Babel plugin. Let's install it now.
+Để dùng code splitting với Webpack, trước tiên bạn cần bật [dynamic imports](https://github.com/tc39/proposal-dynamic-import) thông qua một Babel plugin. Hãy cài plugin này.
 
 ```bash
 npm install @babel/plugin-syntax-dynamic-import
 ```
 
-Next, create a `.babelrc` file in your project with the following configuration:
+Tiếp theo, tạo file `.babelrc` trong project với cấu hình sau:
 
 ```json
 {
@@ -63,9 +64,9 @@ Next, create a `.babelrc` file in your project with the following configuration:
 }
 ```
 
-If you're using Laravel Mix, the dynamic imports Babel plugin is already installed and configured, and you can skip these steps. We recommend using Laravel Mix 6 or above, as there are known issues with older versions.
+Nếu dùng Laravel Mix, Babel plugin cho dynamic import đã được cài và cấu hình sẵn, nên bạn có thể bỏ qua các bước này. Chúng tôi khuyến nghị Laravel Mix 6 trở lên vì các phiên bản cũ có một số vấn đề đã biết.
 
-Finally, update the `resolve` callback in your app's initialization code to use `import`instead of `require`.
+Cuối cùng, cập nhật callback `resolve` trong code khởi tạo ứng dụng để dùng `import` thay cho `require`.
 
 <CodeGroup>
 
@@ -86,7 +87,7 @@ resolve: name => import(`./Pages/${name}.svelte`), // [!code ++]
 
 </CodeGroup>
 
-You should also consider using cache busting to force browsers to load the latest version of your assets. To accomplish this, add the following configuration to your webpack configuration file.
+Bạn cũng nên cân nhắc cache busting để buộc trình duyệt tải phiên bản asset mới nhất. Để làm vậy, hãy thêm cấu hình sau vào file cấu hình webpack.
 
 ```js
 output: {

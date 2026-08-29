@@ -1,5 +1,6 @@
 ---
 title: Server-Side Rendering (SSR)
+description: "Server-side rendering render trước các trang JavaScript trên máy chủ, nhờ đó người truy cập nhận được HTML đã được render đầy đủ khi truy cập ứng dụng. Vì…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
@@ -11,21 +12,21 @@ import { ReactSpecific } from "/snippets/react-specific.jsx"
 import { SvelteSpecific } from "/snippets/svelte-specific.jsx"
 import { VueSpecific } from "/snippets/vue-specific.jsx"
 
-Server-side rendering pre-renders your JavaScript pages on the server, allowing your visitors to receive fully rendered HTML when they visit your application. Since fully rendered HTML is served by your application, it's also easier for search engines to index your site.
+Server-side rendering render trước các trang JavaScript trên máy chủ, nhờ đó người truy cập nhận được HTML đã được render đầy đủ khi truy cập ứng dụng. Vì ứng dụng phục vụ HTML hoàn chỉnh, các công cụ tìm kiếm cũng dễ index website hơn.
 
-Server-side rendering uses Node.js to render your pages in a background process; therefore, Node must be available on your server for server-side rendering to function properly.
+Server-side rendering sử dụng Node.js để render trang trong một tiến trình nền; vì vậy Node phải có sẵn trên máy chủ để SSR hoạt động đúng.
 
-## Laravel Starter Kits
+## Laravel Starter Kit
 
-If you are using [Laravel Starter Kits](https://laravel.com/docs/starter-kits), Inertia SSR is [supported](https://laravel.com/docs/starter-kits#inertia-ssr) through a build command:
+Nếu đang dùng [Laravel Starter Kits](https://laravel.com/docs/starter-kits), Inertia SSR được [hỗ trợ](https://laravel.com/docs/starter-kits#inertia-ssr) thông qua một build command:
 
 ```bash
 npm run build:ssr
 ```
 
-## Add Server Entry-Point
+## Thêm entry point phía máy chủ
 
-To manually configure SSR without a Laravel starter kit, first create an SSR entry point file within your Laravel project.
+Để cấu hình SSR thủ công mà không dùng Laravel starter kit, trước tiên hãy tạo file entry point SSR trong project Laravel.
 
 <CodeGroup>
 
@@ -43,7 +44,7 @@ touch resources/js/ssr.js
 
 </CodeGroup>
 
-This file is going to look very similar to your app entry point, except it's not going to run in the browser, but rather in Node.js. Here's a complete example.
+File này sẽ rất giống entry point của ứng dụng, ngoại trừ việc nó không chạy trong trình duyệt mà chạy trong Node.js. Dưới đây là ví dụ hoàn chỉnh.
 
 <CodeGroup>
 
@@ -109,13 +110,13 @@ createServer(page =>
 
 </CodeGroup>
 
-When creating this file, be sure to add anything that's missing from your `app.js` file that makes sense to run in SSR mode, such as plugins or custom mixins.
+Khi tạo file này, hãy nhớ bổ sung mọi phần còn thiếu so với `app.js` nhưng phù hợp để chạy ở chế độ SSR, chẳng hạn plugin hoặc custom mixin.
 
 ### Clustering
 
-By default, the SSR server will run on a single thread. Clustering starts multiple Node servers on the same port, requests are then handled by each thread in a round-robin way.
+Mặc định, SSR server chạy trên một thread duy nhất. Clustering khởi động nhiều Node server trên cùng một port, sau đó request được phân phối cho từng thread theo cơ chế round-robin.
 
-You may enable clustering by passing a second argument of options to `createServer`.
+Bạn có thể bật clustering bằng cách truyền một đối số options thứ hai vào `createServer`.
 
 <CodeGroup>
 
@@ -161,10 +162,10 @@ createServer(page =>
 
 </CodeGroup>
 
-## Client-Side Hydration
+## Hydration phía client
 
 <ClientSpecific>
-Since your website will be server-side rendered, you should also update your `app.js` file to use hydration instead of normal rendering. This allows <VueSpecific>Vue</VueSpecific><ReactSpecific>React</ReactSpecific><SvelteSpecific>Svelte</SvelteSpecific> to pick up the server-rendered HTML and make it interactive without re-rendering it.
+Vì website được render phía server, bạn cũng nên cập nhật file `app.js` để dùng hydration thay cho render thông thường. Điều này cho phép <VueSpecific>Vue</VueSpecific><ReactSpecific>React</ReactSpecific><SvelteSpecific>Svelte</SvelteSpecific> tiếp quản HTML đã được server render và làm cho giao diện có thể tương tác mà không cần render lại từ đầu.
 </ClientSpecific>
 
 <CodeGroup>
@@ -228,9 +229,9 @@ createInertiaApp({
 
 </CodeGroup>
 
-## Setup Vite
+## Thiết lập Vite
 
-Next, update your Vite configuration to build the new SSR entry point by adding a `ssr` property to Laravel's Vite plugin configuration in your `vite.config.js` file.
+Tiếp theo, cập nhật cấu hình Vite để build entry point SSR mới bằng cách thêm thuộc tính `ssr` vào cấu hình plugin Vite của Laravel trong file `vite.config.js`.
 
 <CodeGroup>
 
@@ -275,9 +276,9 @@ export default defineConfig({
 
 </CodeGroup>
 
-## Update NPM Script
+## Cập nhật NPM script
 
-Next, update the `build` script in your `package.json` file to also build your SSR entry point.
+Tiếp theo, cập nhật script `build` trong file `package.json` để build cả entry point SSR.
 
 ```json package.json
 "scripts": {
@@ -287,31 +288,31 @@ Next, update the `build` script in your `package.json` file to also build your S
 },
 ```
 
-Now you can build both your client-side and server-side bundles.
+Giờ bạn có thể build cả bundle phía client và phía máy chủ.
 
 ```bash
 npm run build
 ```
 
-## Running the SSR Server
+## Chạy SSR server
 
-Now that you have built both your client-side and server-side bundles, you should be able run the Node-based Inertia SSR server using the following command.
+Sau khi đã build cả bundle phía client và phía máy chủ, bạn có thể chạy Inertia SSR server dựa trên Node bằng command sau.
 
 ```bash
 php artisan inertia:start-ssr
 ```
 
-You may use the `--runtime` option to specify which runtime you want to use. This allows you to switch from the default Node.js runtime to Bun.
+Bạn có thể dùng tùy chọn `--runtime` để chỉ định runtime muốn sử dụng. Điều này cho phép chuyển từ runtime Node.js mặc định sang Bun.
 
 ```bash
 php artisan inertia:start-ssr --runtime=bun
 ```
 
-With the server running, you should be able to access your app within the browser with server-side rendering enabled. In fact, you should be able to disable JavaScript entirely and still navigate around your application.
+Khi server đang chạy, bạn có thể truy cập ứng dụng trong trình duyệt với server-side rendering được bật. Thực tế, bạn có thể tắt hoàn toàn JavaScript mà vẫn điều hướng được trong ứng dụng.
 
-## Disabling SSR
+## Tắt SSR
 
-Sometimes you may wish to disable server-side rendering for certain pages or routes in your application. You may do so by setting the `inertia.ssr.enabled` configuration value to `false` for the current request, typically in a service provider or middleware.
+Đôi khi bạn có thể muốn tắt server-side rendering cho một số trang hoặc route nhất định trong ứng dụng. Bạn có thể làm vậy bằng cách đặt giá trị cấu hình `inertia.ssr.enabled` thành `false` cho request hiện tại, thường trong service provider hoặc middleware.
 
 ```php
 if (request()->is('admin/*')) {
@@ -319,33 +320,33 @@ if (request()->is('admin/*')) {
 }
 ```
 
-## Deployment
+## Triển khai
 
-When deploying your SSR enabled app to production, you'll need to build both the client-side (`app.js`) and server-side bundles (`ssr.js`), and then run the SSR server as a background process, typically using a process monitoring tool such as Supervisor.
+Khi triển khai ứng dụng có SSR lên production, bạn cần build cả bundle phía client (`app.js`) và phía máy chủ (`ssr.js`), sau đó chạy SSR server như một background process, thường thông qua công cụ giám sát tiến trình như Supervisor.
 
 ```bash
 php artisan inertia:start-ssr
 ```
 
-To stop the SSR server, for instance when you deploy a new version of your website, you may utilize the `inertia:stop-ssr` Artisan command. Your process monitor (such as Supervisor) should be responsible for automatically restarting the SSR server after it has stopped.
+Để dừng SSR server, chẳng hạn khi triển khai phiên bản mới của website, bạn có thể dùng Artisan command `inertia:stop-ssr`. Công cụ giám sát tiến trình (như Supervisor) cần chịu trách nhiệm tự động khởi động lại SSR server sau khi nó dừng.
 
 ```bash
 php artisan inertia:stop-ssr
 ```
 
-You may use the `inertia:check-ssr` Artisan command to verify that the SSR server is running. This can be helpful after deployment and works well as a Docker health check to ensure the server is responding as expected.
+Bạn có thể dùng Artisan command `inertia:check-ssr` để xác minh SSR server đang chạy. Điều này hữu ích sau khi deploy và rất phù hợp làm Docker health check để đảm bảo server phản hồi đúng như mong đợi.
 
 ```bash
 php artisan inertia:check-ssr
 ```
 
-By default, a check is performed to ensure the server-side bundle exists before dispatching a request to the SSR server. In some cases, such as when your app runs on multiple servers or is containerized, the web server may not have access to the SSR bundle. To disable this check, you may set the `inertia.ssr.ensure_bundle_exists` configuration value to `false`.
+Mặc định, hệ thống sẽ kiểm tra server-side bundle tồn tại trước khi gửi request tới SSR server. Trong một số trường hợp, chẳng hạn ứng dụng chạy trên nhiều server hoặc trong container, web server có thể không truy cập được SSR bundle. Để tắt kiểm tra này, đặt giá trị cấu hình `inertia.ssr.ensure_bundle_exists` thành `false`.
 
 ### Laravel Cloud
 
-To run the SSR server on Laravel Cloud, you may use Cloud's [native support for Inertia SSR](https://cloud.laravel.com/docs/compute#inertia-ssr).
+Để chạy SSR server trên Laravel Cloud, bạn có thể dùng [hỗ trợ Inertia SSR nguyên bản của Cloud](https://cloud.laravel.com/docs/compute#inertia-ssr).
 
 ### Laravel Forge
 
-To run the SSR server on Forge, you may enable it via the [Inertia SSR toggle](https://forge.laravel.com/docs/sites/laravel#inertia-server-side-rendering-ssr) in your site's application panel. Forge will create the required daemon and, optionally, update your deploy script to restart the SSR server on each deployment.
+Để chạy SSR server trên Forge, bạn có thể bật nó bằng [tùy chọn Inertia SSR](https://forge.laravel.com/docs/sites/laravel#inertia-server-side-rendering-ssr) trong panel ứng dụng của site. Forge sẽ tạo daemon cần thiết và, nếu bạn chọn, cập nhật deploy script để khởi động lại SSR server sau mỗi lần deploy.
 

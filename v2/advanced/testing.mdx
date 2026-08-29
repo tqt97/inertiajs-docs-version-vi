@@ -1,26 +1,27 @@
 ---
-title: Testing
+title: Kiểm thử
+description: "Có nhiều cách khác nhau để kiểm thử một ứng dụng Inertia. Trang này cung cấp cái nhìn tổng quan nhanh về các công cụ hiện có."
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
 
 <V2UpgradeWarning />
 
-There are many different ways to test an Inertia application. This page provides a quick overview of the tools available.
+Có nhiều cách khác nhau để kiểm thử một ứng dụng Inertia. Trang này cung cấp cái nhìn tổng quan nhanh về các công cụ hiện có.
 
-## End-to-end Tests
+## Kiểm thử end-to-end
 
-One popular approach to testing your JavaScript page components is to use an end-to-end testing tool like [Cypress](https://www.cypress.io/) or [Pest](https://pestphp.com). These are browser automation tools that allow you to run real simulations of your app in the browser. These tests are known to be slower; however, since they test your application at the same layer as your end users, they can provide a lot of confidence that your app is working correctly. And, since these tests are run in the browser, your JavaScript code is actually executed and tested as well.
+Một cách phổ biến để kiểm thử các JavaScript page component là dùng công cụ end-to-end như [Cypress](https://www.cypress.io/) hoặc [Pest](https://pestphp.com). Đây là các công cụ tự động hóa trình duyệt, cho phép chạy những mô phỏng thực tế của ứng dụng ngay trong trình duyệt. Các test này thường chậm hơn; tuy nhiên, vì chúng kiểm thử ứng dụng ở cùng lớp mà người dùng cuối tương tác, chúng mang lại mức độ tin cậy cao rằng ứng dụng đang hoạt động đúng. Đồng thời, do test chạy trong trình duyệt, JavaScript của bạn cũng thực sự được thực thi và kiểm thử.
 
-## Client-Side Unit Tests
+## Unit test phía client
 
-Another approach to testing your page components is using a client-side unit testing framework, such as [Vitest](https://vitest.dev/), [Jest](https://jestjs.io/), or [Mocha](https://mochajs.org/). This approach allows you to test your JavaScript page components in isolation using Node.js.
+Một cách khác để kiểm thử page component là dùng framework unit test phía client như [Vitest](https://vitest.dev/), [Jest](https://jestjs.io/) hoặc [Mocha](https://mochajs.org/). Cách tiếp cận này cho phép bạn kiểm thử độc lập các JavaScript page component bằng Node.js.
 
-## Endpoint Tests
+## Kiểm thử endpoint
 
-In addition to testing your JavaScript page components, you will likely want to also test the Inertia responses that are returned by your server-side framework. A popular approach to doing this is using endpoint tests, where you make requests to your application and examine the responses. Laravel [provides tooling](https://laravel.com/docs/http-tests) for executing these types of tests.
+Ngoài kiểm thử page component JavaScript, bạn có thể cũng muốn kiểm thử các response Inertia do framework phía máy chủ trả về. Một cách phổ biến là dùng endpoint test, trong đó bạn gửi request đến ứng dụng và kiểm tra response. Laravel [cung cấp công cụ](https://laravel.com/docs/http-tests) để thực hiện loại test này.
 
-However, to make this process even easier, Inertia's Laravel adapter provides additional HTTP testing tools. Let's take a look at an example.
+Tuy nhiên, để quá trình này dễ dàng hơn nữa, adapter Laravel của Inertia cung cấp thêm các công cụ HTTP testing. Hãy xem một ví dụ.
 
 ```php
 use Inertia\Testing\AssertableInertia as Assert;
@@ -56,9 +57,9 @@ class PodcastsControllerTest extends TestCase
 }
 ```
 
-As you can see in the example above, you may use these assertion methods to assert against the content of the data provided to the Inertia response. In addition, you may assert that array data has a given length as well as scope your assertions.
+Như ví dụ trên, bạn có thể dùng các phương thức assertion này để kiểm tra nội dung dữ liệu được truyền vào response Inertia. Ngoài ra, bạn có thể assert dữ liệu mảng có độ dài nhất định cũng như giới hạn phạm vi assertion.
 
-You may use the `inertiaProps` method to retrieve the props returned in the response. You can pass a key to retrieve a specific property, and nested properties are supported using "dot" notation.
+Bạn có thể dùng phương thức `inertiaProps` để lấy các prop được trả về trong response. Có thể truyền một key để lấy thuộc tính cụ thể; các thuộc tính lồng nhau được hỗ trợ bằng ký pháp "dot".
 
 ```php
 $response = $this->get('/podcasts/41');
@@ -73,7 +74,7 @@ $response->inertiaProps('podcast');
 $response->inertiaProps('podcast.id');
 ```
 
-Let's dig into the `assertInertia` method and the available assertions in detail. First, to assert that the Inertia response has a property, you may use the `has` method. You can think of this method as being similar to PHP's `isset` function.
+Hãy xem chi tiết phương thức `assertInertia` và các assertion có sẵn. Trước tiên, để xác nhận response Inertia có một thuộc tính, bạn có thể dùng phương thức `has`. Có thể xem phương thức này tương tự hàm `isset` của PHP.
 
 ```php
 $response->assertInertia(fn (Assert $page) => $page
@@ -85,7 +86,7 @@ $response->assertInertia(fn (Assert $page) => $page
 );
 ```
 
-To assert that an Inertia property has a specified amount of items, you may provide the expected size as the second argument to the `has` method.
+Để assert một property Inertia có số lượng item cụ thể, bạn có thể truyền kích thước mong đợi làm đối số thứ hai cho phương thức `has`.
 
 ```php
 $response->assertInertia(fn (Assert $page) => $page
@@ -97,7 +98,7 @@ $response->assertInertia(fn (Assert $page) => $page
 );
 ```
 
-The `has` method may also be used to scope properties in order to lessen repetition when asserting against nested properties.
+Phương thức `has` cũng có thể được dùng để scope các property, giúp giảm lặp khi assert trên các property lồng nhau.
 
 ```php
 $response->assertInertia(fn (Assert $page) => $page
@@ -119,7 +120,7 @@ $response->assertInertia(fn (Assert $page) => $page
 );
 ```
 
-When scoping into Inertia properties that are arrays or collections, you may also assert that a specified number of items are present in addition to scoping into the first item.
+Khi scope vào các property Inertia là mảng hoặc collection, bạn cũng có thể assert số lượng item cụ thể đồng thời scope vào item đầu tiên.
 
 ```php
 $response->assertInertia(fn (Assert $page) => $page
@@ -131,7 +132,7 @@ $response->assertInertia(fn (Assert $page) => $page
 );
 ```
 
-To assert that an Inertia property has an expected value, you may use the `where` assertion.
+Để assert một property Inertia có giá trị mong đợi, bạn có thể dùng assertion `where`.
 
 ```php
 $response->assertInertia(fn (Assert $page) => $page
@@ -145,7 +146,7 @@ $response->assertInertia(fn (Assert $page) => $page
 );
 ```
 
-Inertia's testing methods will automatically fail when you haven't interacted with at least one of the props in a scope. While this is generally useful, you might run into situations where you're working with unreliable data (such as from an external feed), or with data that you really don't want interact with in order to keep your test simple. For these situations, the `etc` method exists.
+Các phương thức testing của Inertia sẽ tự động fail nếu bạn chưa tương tác với ít nhất một prop trong một scope. Điều này nhìn chung hữu ích, nhưng đôi khi bạn làm việc với dữ liệu không ổn định (chẳng hạn từ feed bên ngoài), hoặc có dữ liệu bạn thực sự không muốn tương tác để giữ test đơn giản. Trong các trường hợp đó, hãy dùng phương thức `etc`.
 
 ```php
 $response->assertInertia(fn (Assert $page) => $page
@@ -157,7 +158,7 @@ $response->assertInertia(fn (Assert $page) => $page
 );
 ```
 
-The `missing` method is the exact opposite of the `has` method, ensuring that the property does not exist. This method makes a great companion to the `etc` method.
+Phương thức `missing` hoàn toàn đối lập với `has`, dùng để đảm bảo property không tồn tại. Phương thức này kết hợp rất tốt với `etc`.
 
 ```php
 $response->assertInertia(fn (Assert $page) => $page
@@ -169,9 +170,9 @@ $response->assertInertia(fn (Assert $page) => $page
 );
 ```
 
-### Testing Partial Reloads
+### Kiểm thử partial reload
 
-You may use the `reloadOnly` and `reloadExcept` methods to test how your application responds to [partial reloads](/v2/data-props/partial-reloads). These methods perform a follow-up request and allow you to make assertions against the response.
+Bạn có thể dùng các phương thức `reloadOnly` và `reloadExcept` để kiểm thử cách ứng dụng phản hồi với [partial reload](/v2/data-props/partial-reloads). Các phương thức này thực hiện một request tiếp theo và cho phép bạn assertion trên response.
 
 ```php
 $response->assertInertia(fn (Assert $page) => $page
@@ -184,11 +185,11 @@ $response->assertInertia(fn (Assert $page) => $page
 );
 ```
 
-Instead of passing a single prop as a string, you may also pass an array of props to `reloadOnly` or `reloadExcept`.
+Thay vì truyền một prop duy nhất dưới dạng chuỗi, bạn cũng có thể truyền một mảng prop vào `reloadOnly` hoặc `reloadExcept`.
 
-### Testing Deferred Props
+### Kiểm thử deferred props
 
-You may use the `loadDeferredProps` method to test how your application responds to [deferred props](/v2/data-props/deferred-props). This method performs a follow-up request to load the deferred properties and allows you to make assertions against the response.
+Bạn có thể dùng phương thức `loadDeferredProps` để kiểm thử cách ứng dụng phản hồi với [deferred props](/v2/data-props/deferred-props). Phương thức này thực hiện request tiếp theo để tải các deferred property và cho phép bạn assertion trên response.
 
 ```php
 $response->assertInertia(fn (Assert $page) => $page
@@ -202,7 +203,7 @@ $response->assertInertia(fn (Assert $page) => $page
 );
 ```
 
-You may also load specific deferred prop groups by passing the group name as the first argument to the `loadDeferredProps` method.
+Bạn cũng có thể tải các nhóm deferred prop cụ thể bằng cách truyền tên nhóm làm đối số đầu tiên cho phương thức `loadDeferredProps`.
 
 ```php
 $response->assertInertia(fn (Assert $page) => $page
@@ -217,7 +218,7 @@ $response->assertInertia(fn (Assert $page) => $page
 );
 ```
 
-Instead of passing a single group as a string, you may also pass an array of groups to `loadDeferredProps`.
+Thay vì truyền một nhóm duy nhất dưới dạng chuỗi, bạn cũng có thể truyền một mảng nhóm vào `loadDeferredProps`.
 
 ```php
 $response->assertInertia(fn (Assert $page) => $page
@@ -229,9 +230,9 @@ $response->assertInertia(fn (Assert $page) => $page
 );
 ```
 
-### Testing Flash Data
+### Kiểm thử flash data
 
-You may use the `hasFlash` and `missingFlash` methods to test [flash data](/v2/data-props/flash-data) in your Inertia responses.
+Bạn có thể dùng các phương thức `hasFlash` và `missingFlash` để kiểm thử [flash data](/v2/data-props/flash-data) trong response Inertia.
 
 ```php
 $response->assertInertia(fn (Assert $page) => $page
@@ -249,9 +250,9 @@ $response->assertInertia(fn (Assert $page) => $page
 );
 ```
 
-#### Redirect Responses
+#### Redirect response
 
-The `hasFlash` and `missingFlash` methods above only work on rendered Inertia page responses. For redirect responses, you may use the `assertInertiaFlash` and `assertInertiaFlashMissing` methods directly on the test response to assert against the session's flash data.
+Các phương thức `hasFlash` và `missingFlash` ở trên chỉ hoạt động với response của Inertia page đã render. Với redirect response, bạn có thể dùng trực tiếp `assertInertiaFlash` và `assertInertiaFlashMissing` trên test response để assertion dữ liệu flash trong session.
 
 ```php
 $response = $this->post('/users');

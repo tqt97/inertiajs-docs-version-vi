@@ -1,5 +1,6 @@
 ---
-title: Forms
+title: Form
+description: "Inertia cung cấp hai cách chính để xây dựng form: component và helper useForm. Cả hai tích hợp với validation của framework phía máy chủ và xử lý submit form…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
@@ -11,11 +12,11 @@ import { ReactSpecific } from "/snippets/react-specific.jsx"
 import { SvelteSpecific } from "/snippets/svelte-specific.jsx"
 import { VueSpecific } from "/snippets/vue-specific.jsx"
 
-Inertia provides two primary ways to build forms: the `<Form>` component and the `useForm` helper. Both integrate with your server-side framework's validation and handle form submissions without full page reloads.
+Inertia cung cấp hai cách chính để xây dựng form: component `<Form>` và helper `useForm`. Cả hai tích hợp với validation của framework phía máy chủ và xử lý submit form mà không tải lại toàn bộ trang.
 
-## Form Component
+## Component Form
 
-Inertia provides a `<Form>` component that behaves much like a classic HTML form, but uses Inertia under the hood to avoid full page reloads. This is the simplest way to get started with forms in Inertia.
+Inertia cung cấp component `<Form>` hoạt động gần giống form HTML truyền thống nhưng sử dụng Inertia bên dưới để tránh tải lại toàn bộ trang. Đây là cách đơn giản nhất để bắt đầu làm việc với form trong Inertia.
 
 <CodeGroup>
 
@@ -60,10 +61,10 @@ export default () => (
 </CodeGroup>
 
 <ClientSpecific>
-Just like a traditional HTML form, there is no need to attach <VueSpecific>a `v-model`</VueSpecific><ReactSpecific>an `onChange` handler</ReactSpecific><SvelteSpecific>a `bind:`</SvelteSpecific> to your input fields, just give each input a `name` attribute <ReactSpecific>and a `defaultValue` (if applicable) </ReactSpecific>and the `Form` component will handle the data submission for you.
+Tương tự form HTML truyền thống, bạn không cần gắn <VueSpecific>`v-model`</VueSpecific><ReactSpecific>handler `onChange`</ReactSpecific><SvelteSpecific>`bind:`</SvelteSpecific> vào input; chỉ cần đặt attribute `name` cho từng input <ReactSpecific>và `defaultValue` nếu phù hợp </ReactSpecific>, component `Form` sẽ xử lý việc gửi dữ liệu.
 </ClientSpecific>
 
-The component also supports nested data structures, file uploads, and dotted key notation.
+Component cũng hỗ trợ cấu trúc dữ liệu lồng nhau, tải file và dotted key notation.
 
 <CodeGroup>
 
@@ -101,7 +102,7 @@ The component also supports nested data structures, file uploads, and dotted key
 
 </CodeGroup>
 
-You can pass a `transform` prop to modify the form data before submission. This is useful for injecting additional fields or transforming existing data, although hidden inputs work too.
+Bạn có thể truyền prop `transform` để sửa dữ liệu form trước khi submit. Điều này hữu ích khi cần chèn field bổ sung hoặc transform dữ liệu hiện có, dù hidden input cũng có thể dùng được.
 
 <CodeGroup>
 
@@ -144,7 +145,7 @@ You can pass a `transform` prop to modify the form data before submission. This 
 
 ### Wayfinder
 
-When using [Wayfinder](https://github.com/laravel/wayfinder), you can pass the resulting object directly to the `action` prop. The Form component will infer the HTTP method and URL from the Wayfinder object.
+Khi dùng [Wayfinder](https://github.com/laravel/wayfinder), bạn có thể truyền object kết quả trực tiếp vào prop `action`. Component Form sẽ tự suy ra HTTP method và URL từ object Wayfinder.
 
 <CodeGroup>
 
@@ -191,10 +192,10 @@ export default () => (
 
 </CodeGroup>
 
-### Default Values
+### Giá trị mặc định
 
 <ClientSpecific>
-You can set default values for form inputs using standard HTML attributes. Use <ReactSpecific>`defaultValue`</ReactSpecific><VueSpecific>`defaultValue`</VueSpecific><SvelteSpecific>`value`</SvelteSpecific>for text inputs and textareas, and <ReactSpecific>`defaultChecked`</ReactSpecific><VueSpecific>`defaultChecked`</VueSpecific><SvelteSpecific>`checked`</SvelteSpecific>for checkboxes and radios.
+Bạn có thể đặt giá trị mặc định cho input form bằng attribute HTML tiêu chuẩn. Dùng <ReactSpecific>`defaultValue`</ReactSpecific><VueSpecific>`defaultValue`</VueSpecific><SvelteSpecific>`value`</SvelteSpecific> cho text input và textarea, và <ReactSpecific>`defaultChecked`</ReactSpecific><VueSpecific>`defaultChecked`</VueSpecific><SvelteSpecific>`checked`</SvelteSpecific> cho checkbox và radio.
 </ClientSpecific>
 
 <CodeGroup>
@@ -251,13 +252,13 @@ You can set default values for form inputs using standard HTML attributes. Use <
 
 </CodeGroup>
 
-### Checkbox Inputs
+### Input checkbox
 
-When working with checkboxes, you may want to add an explicit `value` attribute such as `value="1"`. Without a value attribute, checked checkboxes will submit as `"on"`, which some server-side validation rules may not recognize as a proper boolean value.
+Khi làm việc với checkbox, bạn có thể muốn thêm attribute `value` rõ ràng như `value="1"`. Nếu không có value, checkbox được chọn sẽ submit thành `"on"`, giá trị mà một số validation rule phía máy chủ có thể không nhận diện là boolean hợp lệ.
 
-### Slot Props
+### Slot props
 
-The `<Form>` component exposes reactive state and helper methods through its default slot, giving you access to form processing state, errors, and utility functions.
+Component `<Form>` expose reactive state và các helper method qua default slot, cho phép truy cập trạng thái xử lý form, lỗi và utility function.
 
 <CodeGroup>
 
@@ -399,9 +400,9 @@ The `<Form>` component exposes reactive state and helper methods through its def
 
 </CodeGroup>
 
-The `defaults` method allows you to update the form's default values to match the current field values. When called, subsequent `reset()` calls will restore fields to these new defaults, and the `isDirty` property will track changes from these updated defaults. Unlike `useForm`, this method accepts no arguments and always uses all current form values.
+Method `defaults` cho phép cập nhật giá trị mặc định của form theo giá trị field hiện tại. Sau khi gọi, các lần `reset()` tiếp theo sẽ khôi phục field về các mặc định mới này và property `isDirty` sẽ theo dõi thay đổi so với chúng. Khác với `useForm`, method này không nhận đối số và luôn dùng toàn bộ giá trị hiện tại của form.
 
-The `errors` object uses dotted notation for nested fields, allowing you to display validation messages for complex form structures.
+Object `errors` dùng dotted notation cho field lồng nhau, cho phép hiển thị validation message cho cấu trúc form phức tạp.
 
 <CodeGroup>
 
@@ -445,9 +446,9 @@ The `errors` object uses dotted notation for nested fields, allowing you to disp
 
 </CodeGroup>
 
-### Props and Options
+### Props và options
 
-In addition to `action` and `method`, the `<Form>` component accepts several props. Many of them are identical to the options available in Inertia's [visit options](/v2/the-basics/manual-visits).
+Ngoài `action` và `method`, component `<Form>` nhận nhiều prop khác. Nhiều prop giống hệt các tùy chọn có trong [visit options](/v2/the-basics/manual-visits) của Inertia.
 
 <CodeGroup>
 
@@ -533,13 +534,13 @@ In addition to `action` and `method`, the `<Form>` component accepts several pro
 
 </CodeGroup>
 
-Some props are intentionally grouped under `options` instead of being top-level to avoid confusion. For example, `only`, `except`, and `reset` relate to *partial reloads*, not *partial submissions*. The general rule: top-level props are for the form submission itself, while `options` control how Inertia handles the subsequent visit.
+Một số prop được chủ ý nhóm dưới `options` thay vì đặt ở top-level để tránh nhầm lẫn. Ví dụ, `only`, `except` và `reset` liên quan đến *partial reload*, không phải *partial submission*. Quy tắc chung: prop top-level dành cho chính quá trình submit form, còn `options` kiểm soát cách Inertia xử lý visit tiếp theo.
 
 <ClientSpecific>
-When setting the <ReactSpecific>`disableWhileProcessing`</ReactSpecific><SvelteSpecific>`disableWhileProcessing`</SvelteSpecific><VueSpecific>`disable-while-processing`</VueSpecific>prop, the `Form` component will add the `inert` attribute to the HTML `form`tag while the form is processing to prevent user interaction.
+Khi đặt prop <ReactSpecific>`disableWhileProcessing`</ReactSpecific><SvelteSpecific>`disableWhileProcessing`</SvelteSpecific><VueSpecific>`disable-while-processing`</VueSpecific>, component `Form` sẽ thêm attribute `inert` vào thẻ HTML `form` trong lúc form đang xử lý để ngăn người dùng tương tác.
 </ClientSpecific>
 
-To style the form while it's processing, you can target the inert form in the following ways.
+Để style form trong lúc đang xử lý, bạn có thể target form inert theo các cách sau.
 
 <CodeGroup>
 
@@ -563,9 +564,9 @@ form[inert] {
 
 </CodeGroup>
 
-### Events
+### Sự kiện
 
-The `<Form>` component emits all the standard visit [events](/v2/advanced/events) for form submissions.
+Component `<Form>` phát đầy đủ các [event](/v2/advanced/events) visit tiêu chuẩn khi submit form.
 
 <CodeGroup>
 
@@ -645,11 +646,11 @@ The `<Form>` component emits all the standard visit [events](/v2/advanced/events
 
 </CodeGroup>
 
-### Resetting the Form
+### Reset form
 
-The `Form` component provides several attributes that allow you to reset the form after a submission.
+Component `Form` cung cấp một số attribute cho phép reset form sau khi submit.
 
-`resetOnSuccess` may be used to reset the form after a successful submission.
+Có thể dùng `resetOnSuccess` để reset form sau khi submit thành công.
 
 <CodeGroup>
 
@@ -705,7 +706,7 @@ The `Form` component provides several attributes that allow you to reset the for
 
 </CodeGroup>
 
-`resetOnError` may be used to reset the form after errors.
+Có thể dùng `resetOnError` để reset form sau khi xảy ra lỗi.
 
 <CodeGroup>
 
@@ -761,9 +762,9 @@ The `Form` component provides several attributes that allow you to reset the for
 
 </CodeGroup>
 
-### Setting New Default Values
+### Thiết lập giá trị mặc định mới
 
-The `Form` component provides the `setDefaultsOnSuccess` attribute to set the current form values as the new defaults after a successful submission.
+Component `Form` cung cấp attribute `setDefaultsOnSuccess` để đặt các giá trị hiện tại của form làm mặc định mới sau khi submit thành công.
 
 <CodeGroup>
 
@@ -795,9 +796,9 @@ The `Form` component provides the `setDefaultsOnSuccess` attribute to set the cu
 
 </CodeGroup>
 
-### Dotted Key Notation
+### Dotted key notation
 
-The `<Form>` component supports dotted key notation for creating nested objects from flat input names. This provides a convenient way to structure form data.
+Component `<Form>` hỗ trợ dotted key notation để tạo object lồng nhau từ tên input phẳng. Đây là cách thuận tiện để tổ chức dữ liệu form.
 
 <CodeGroup>
 
@@ -832,7 +833,7 @@ The `<Form>` component supports dotted key notation for creating nested objects 
 
 </CodeGroup>
 
-The example above would generate the following data structure.
+Ví dụ trên sẽ tạo ra cấu trúc dữ liệu sau.
 
 ```json
 {
@@ -846,7 +847,7 @@ The example above would generate the following data structure.
 }
 ```
 
-If you need literal dots in your field names (not as nested object separators), you can escape them using backslashes.
+Nếu cần dấu chấm literal trong tên field (không dùng làm dấu phân tách object lồng nhau), bạn có thể escape bằng dấu gạch chéo ngược.
 
 <CodeGroup>
 
@@ -878,7 +879,7 @@ If you need literal dots in your field names (not as nested object separators), 
 
 </CodeGroup>
 
-The example above would generate the following data structure.
+Ví dụ trên sẽ tạo ra cấu trúc dữ liệu sau.
 
 ```json
 {
@@ -889,9 +890,9 @@ The example above would generate the following data structure.
 }
 ```
 
-### Programmatic Access
+### Truy cập bằng code
 
-You can access the form's methods programmatically using refs. This provides an alternative to [slot props](#slot-props) when you need to trigger form actions from outside the form.
+Bạn có thể truy cập các method của form bằng code thông qua ref. Đây là lựa chọn thay thế cho [slot props](#slot-props) khi cần kích hoạt action của form từ bên ngoài form.
 
 <CodeGroup>
 
@@ -960,13 +961,13 @@ function handleSubmit() {
 
 </CodeGroup>
 
-In React and Vue, refs provide access to all form methods and reactive state. In Svelte, refs expose only methods, so reactive state like `isDirty` and `errors` should be accessed via [slot props](#slot-props) instead.
+Trong React và Vue, ref cho phép truy cập toàn bộ method và reactive state của form. Trong Svelte, ref chỉ expose method, vì vậy reactive state như `isDirty` và `errors` nên được truy cập qua [slot props](#slot-props).
 
-### Form Context
+### Form context
 
 <Badge>v2.3.9+</Badge>
 
-Sometimes you may wish to access form state or methods from deeply nested child components without passing props through multiple levels. The `useFormContext` hook provides access to the parent `<Form>` component's state and methods from any child component.
+Đôi khi bạn muốn truy cập state hoặc method của form từ các child component lồng sâu mà không phải truyền prop qua nhiều tầng. Hook `useFormContext` cho phép truy cập state và method của component `<Form>` cha từ bất kỳ child component nào.
 
 <CodeGroup>
 
@@ -1025,19 +1026,19 @@ const form = useFormContext()
 
 </CodeGroup>
 
-The context provides access to all the same properties and methods available through [slot props](#slot-props).
+Context cung cấp đầy đủ property và method giống như [slot props](#slot-props).
 
 ### Precognition
 
 <Badge>v2.3+</Badge>
 
-The `<Form>` component includes built-in support for [Laravel Precognition](https://laravel.com/docs/precognition), enabling real-time form validation without duplicating your server-side validation rules on the client.
+Component `<Form>` tích hợp sẵn hỗ trợ [Laravel Precognition](https://laravel.com/docs/precognition), cho phép validation form theo thời gian thực mà không cần sao chép validation rule phía máy chủ sang client.
 
 <Note>
-Precognition requires server-side support. Laravel users should see the [Laravel Precognition documentation](https://laravel.com/docs/precognition) for setup instructions. For other frameworks, see the [protocol page](/v2/core-concepts/the-protocol#request-headers) for implementation details.
+Precognition yêu cầu hỗ trợ phía máy chủ. Người dùng Laravel nên xem [tài liệu Laravel Precognition](https://laravel.com/docs/precognition) để biết cách thiết lập. Với framework khác, xem [trang giao thức](/v2/core-concepts/the-protocol#request-headers) để biết chi tiết triển khai.
 </Note>
 
-Once your server is configured, call `validate()` with a field name to trigger validation for that field. The `invalid()` helper checks if a field has validation errors, while `validating` indicates when a request is in progress.
+Sau khi cấu hình máy chủ, gọi `validate()` với tên field để kích hoạt validation cho field đó. Helper `invalid()` kiểm tra field có lỗi validation hay không, còn `validating` cho biết request đang được xử lý.
 
 <CodeGroup>
 
@@ -1134,7 +1135,7 @@ Once your server is configured, call `validate()` with a field name to trigger v
 
 </CodeGroup>
 
-You may also use the `valid()` helper to check if a field has passed validation.
+Bạn cũng có thể dùng helper `valid()` để kiểm tra field đã pass validation hay chưa.
 
 <CodeGroup>
 
@@ -1187,12 +1188,12 @@ You may also use the `valid()` helper to check if a field has passed validation.
 </CodeGroup>
 
 <Warning>
-A form input will only appear as valid or invalid once it has changed and a validation response has been received.
+Một input form chỉ được xem là valid hoặc invalid sau khi nó đã thay đổi và response validation đã được nhận.
 </Warning>
 
-#### Validating Multiple Fields
+#### Validation nhiều field
 
-You may validate multiple fields at once using the `only` option. This is particularly useful when building wizard-style forms where you want to validate all visible fields before proceeding to the next step.
+Bạn có thể validation nhiều field cùng lúc bằng tùy chọn `only`. Điều này đặc biệt hữu ích khi xây dựng form dạng wizard, nơi bạn muốn validation toàn bộ field đang hiển thị trước khi sang bước tiếp theo.
 
 <CodeGroup>
 
@@ -1280,9 +1281,9 @@ You may validate multiple fields at once using the `only` option. This is partic
 
 </CodeGroup>
 
-#### Touch and Validate
+#### Touch và validate
 
-The `touch()` method marks fields as "touched" without triggering validation. You may then validate all touched fields by calling `validate()` without arguments.
+Method `touch()` đánh dấu các field là "touched" mà không kích hoạt validation. Sau đó bạn có thể validation tất cả field đã touched bằng cách gọi `validate()` không có đối số.
 
 <CodeGroup>
 
@@ -1346,11 +1347,11 @@ The `touch()` method marks fields as "touched" without triggering validation. Yo
 
 </CodeGroup>
 
-The `touched()` helper may also be called without arguments to check if any field has been touched. The `reset()` method clears the touched state for reset fields.
+Helper `touched()` cũng có thể được gọi không đối số để kiểm tra có field nào đã touched hay chưa. Method `reset()` xóa touched state của các field được reset.
 
 #### Options
 
-The `validate()` method accepts an options object with callbacks and configuration.
+Method `validate()` nhận object options chứa callback và cấu hình.
 
 ```js
 validate('username', {
@@ -1369,7 +1370,7 @@ validate('username', {
 })
 ```
 
-You may also call `validate()` with only an options object to validate specific fields.
+Bạn cũng có thể gọi `validate()` chỉ với object options để validation các field cụ thể.
 
 ```js
 validate({
@@ -1378,7 +1379,7 @@ validate({
 })
 ```
 
-Validation requests are automatically debounced. The first request fires immediately, then subsequent changes are debounced (1500ms by default). You may customize this timeout.
+Request validation tự động được debounce. Request đầu tiên chạy ngay lập tức, các thay đổi tiếp theo được debounce (mặc định 1500ms). Bạn có thể tùy chỉnh timeout này.
 
 <CodeGroup>
 
@@ -1402,7 +1403,7 @@ Validation requests are automatically debounced. The first request fires immedia
 
 </CodeGroup>
 
-By default, files are excluded from validation requests to avoid unnecessary uploads. You may enable file validation when you need to validate file inputs like size or mime type.
+Mặc định, file bị loại khỏi request validation để tránh upload không cần thiết. Bạn có thể bật validation file khi cần kiểm tra input file như kích thước hoặc MIME type.
 
 <CodeGroup>
 
@@ -1426,7 +1427,7 @@ By default, files are excluded from validation requests to avoid unnecessary upl
 
 </CodeGroup>
 
-By default, validation errors are simplified to strings (the first error message). You may keep errors as arrays to display all error messages for fields with multiple validation rules.
+Mặc định, lỗi validation được đơn giản hóa thành chuỗi (message lỗi đầu tiên). Bạn có thể giữ lỗi dưới dạng array để hiển thị toàn bộ message cho field có nhiều validation rule.
 
 <CodeGroup>
 
@@ -1450,9 +1451,9 @@ By default, validation errors are simplified to strings (the first error message
 
 </CodeGroup>
 
-## Form Helper
+## Form helper
 
-In addition to the `<Form>` component, Inertia also provides a `useForm` helper for when you need programmatic control over your form's data and submission behavior.
+Ngoài component `<Form>`, Inertia còn cung cấp helper `useForm` khi bạn cần kiểm soát bằng code đối với dữ liệu form và hành vi submit.
 
 <CodeGroup>
 
@@ -1566,7 +1567,7 @@ function submit(e) {
 
 </CodeGroup>
 
-To submit the form, you may use the `get`, `post`, `put`, `patch`and `delete` methods.
+Để submit form, bạn có thể dùng các phương thức `get`, `post`, `put`, `patch` và `delete`.
 
 <CodeGroup>
 
@@ -1601,7 +1602,7 @@ $form.delete(url, options)
 
 </CodeGroup>
 
-The submit methods support all of the typical [visit options](/v2/the-basics/manual-visits), such as `preserveState`, `preserveScroll`, and event callbacks, which can be helpful for performing tasks on successful form submissions. For example, you might use the `onSuccess` callback to reset inputs to their original state.
+Các method submit hỗ trợ mọi [visit option](/v2/the-basics/manual-visits) thông thường như `preserveState`, `preserveScroll` và event callback, hữu ích để thực hiện tác vụ sau khi submit thành công. Ví dụ, bạn có thể dùng callback `onSuccess` để reset input về trạng thái ban đầu.
 
 <CodeGroup>
 
@@ -1630,9 +1631,9 @@ $form.post('/profile', {
 
 </CodeGroup>
 
-You may pass the HTTP method and URL as the first two arguments to `useForm()`, then call `submit()` without arguments to dispatch the request. This also unlocks real-time validation. See [Precognition](#precognition-2) for details.
+Bạn có thể truyền HTTP method và URL làm hai đối số đầu tiên cho `useForm()`, sau đó gọi `submit()` không đối số để gửi request. Cách này cũng mở khóa validation theo thời gian thực. Xem [Precognition](#precognition-2) để biết chi tiết.
 
-If you need to modify the form data before it's sent to the server, you can do so via the `transform()` method.
+Nếu cần thay đổi dữ liệu form trước khi gửi đến máy chủ, bạn có thể thực hiện thông qua phương thức `transform()`.
 
 <CodeGroup>
 
@@ -1665,7 +1666,7 @@ $form
 
 </CodeGroup>
 
-You can use the `processing` property to track if a form is currently being submitted. This can be helpful for preventing double form submissions by disabling the submit button.
+Bạn có thể dùng thuộc tính `processing` để theo dõi form có đang được submit hay không. Điều này hữu ích để ngăn submit hai lần bằng cách disable nút submit.
 
 <CodeGroup>
 
@@ -1685,7 +1686,7 @@ const { processing } = useForm({ ... })
 
 </CodeGroup>
 
-If your form is uploading files, the current progress event is available via the `progress` property, allowing you to easily display the upload progress.
+Nếu form đang tải file lên, sự kiện tiến trình hiện tại có sẵn thông qua thuộc tính `progress`, giúp bạn dễ dàng hiển thị tiến độ tải lên.
 
 <CodeGroup>
 
@@ -1715,9 +1716,9 @@ const { progress } = useForm({ ... })
 
 </CodeGroup>
 
-### Form Errors
+### Lỗi form
 
-If there are form validation errors, they are available via the `errors` property. When building Laravel powered Inertia applications, form errors will automatically be populated when your application throws instances of `ValidationException`, such as when using `{'$request->validate()'}`.
+Nếu có lỗi validation của form, chúng có sẵn thông qua thuộc tính `errors`. Khi xây dựng ứng dụng Inertia dùng Laravel, lỗi form sẽ tự động được điền khi ứng dụng ném ra instance `ValidationException`, chẳng hạn khi dùng `{'$request->validate()'}`.
 
 <CodeGroup>
 
@@ -1739,9 +1740,9 @@ const { errors } = useForm({ ... })
 
 </CodeGroup>
 
-For a more thorough discussion of form validation and errors, please consult the [validation documentation](/v2/the-basics/validation).
+Để tìm hiểu kỹ hơn về validation và lỗi form, hãy xem [tài liệu validation](/v2/the-basics/validation).
 
-To determine if a form has any errors, you may use the `hasErrors` property. To clear form errors, use the `clearErrors()` method.
+Để xác định form có lỗi hay không, bạn có thể dùng thuộc tính `hasErrors`. Để xóa lỗi form, dùng phương thức `clearErrors()`.
 
 <CodeGroup>
 
@@ -1773,7 +1774,7 @@ $form.clearErrors('field', 'anotherfield')
 
 </CodeGroup>
 
-If you're using client-side input validation libraries or do client-side validation manually, you can set your own errors on the form using the `setErrors()` method.
+Nếu dùng thư viện validation input phía client hoặc tự validation phía client, bạn có thể tự đặt lỗi cho form bằng method `setErrors()`.
 
 <CodeGroup>
 
@@ -1814,15 +1815,15 @@ $form.setError({
 
 </CodeGroup>
 
-Unlike an actual form submission, the page's props remain unchanged when manually setting errors on a form instance.
+Khác với một lần submit form thực tế, props của trang không thay đổi khi bạn tự đặt lỗi trên một instance form.
 
-When a form has been successfully submitted, the `wasSuccessful` property will be `true`. In addition to this, forms have a `recentlySuccessful` property, which will be set to `true` for two seconds after a successful form submission. This property can be utilized to show temporary success messages.
+Khi form được submit thành công, thuộc tính `wasSuccessful` sẽ là `true`. Ngoài ra, form còn có thuộc tính `recentlySuccessful`, được đặt thành `true` trong hai giây sau một lần submit thành công. Bạn có thể dùng thuộc tính này để hiển thị thông báo thành công tạm thời.
 
-You may customize the duration of the `recentlySuccessful` state by setting the `form.recentlySuccessfulDuration` option in your [application defaults](/v2/installation/client-side-setup#configuring-defaults). The default value is `2000` milliseconds.
+Bạn có thể tùy chỉnh thời lượng state `recentlySuccessful` bằng tùy chọn `form.recentlySuccessfulDuration` trong [giá trị mặc định của ứng dụng](/v2/installation/client-side-setup#configuring-defaults). Mặc định là `2000` mili giây.
 
-### Resetting the Form
+### Reset form
 
-To reset the form's values back to their default values, you can use the `reset()` method.
+Để reset các giá trị của form về giá trị mặc định, bạn có thể dùng phương thức `reset()`.
 
 <CodeGroup>
 
@@ -1854,7 +1855,7 @@ $form.reset('field', 'anotherfield')
 
 </CodeGroup>
 
-Sometimes, you may want to restore your form fields to their default values and clear any validation errors at the same time. Instead of calling `reset()` and `clearErrors()` separately, you can use the `resetAndClearErrors()` method, which combines both actions into a single call.
+Đôi khi bạn muốn vừa khôi phục field về giá trị mặc định vừa xóa mọi lỗi validation. Thay vì gọi riêng `reset()` và `clearErrors()`, có thể dùng method `resetAndClearErrors()` để kết hợp cả hai hành động trong một lần gọi.
 
 <CodeGroup>
 
@@ -1886,9 +1887,9 @@ $form.resetAndClearErrors('field', 'anotherfield')
 
 </CodeGroup>
 
-### Setting New Default Values
+### Thiết lập giá trị mặc định mới
 
-If your form's default values become outdated, you can use the `defaults()` method to update them. Then, the form will be reset to the correct values the next time the `reset()` method is invoked.
+Nếu các giá trị mặc định của form không còn phù hợp, bạn có thể dùng phương thức `defaults()` để cập nhật chúng. Sau đó, form sẽ được reset về đúng các giá trị này trong lần tiếp theo phương thức `reset()` được gọi.
 
 <CodeGroup>
 
@@ -1938,9 +1939,9 @@ $form.defaults({
 
 </CodeGroup>
 
-### Form Field Change Tracking
+### Theo dõi thay đổi field của form
 
-To determine if a form has any changes, you may use the `isDirty` property.
+Để xác định form có thay đổi nào hay không, bạn có thể dùng thuộc tính `isDirty`.
 
 <CodeGroup>
 
@@ -1962,9 +1963,9 @@ const { isDirty } = useForm({ ... })
 
 </CodeGroup>
 
-### Canceling Form Submissions
+### Hủy submit form
 
-To cancel a form submission, use the `cancel()` method.
+Để hủy một lần submit form, dùng phương thức `cancel()`.
 
 <CodeGroup>
 
@@ -1984,9 +1985,9 @@ $form.cancel()
 
 </CodeGroup>
 
-### Form Data and History State
+### Dữ liệu form và history state
 
-To instruct Inertia to store a form's data and errors in [history state](/v2/data-props/remembering-state), you can provide a unique form key as the first argument when instantiating your form.
+Để yêu cầu Inertia lưu dữ liệu và lỗi form vào [history state](/v2/data-props/remembering-state), bạn có thể cung cấp một form key duy nhất làm đối số đầu tiên khi khởi tạo form.
 
 <CodeGroup>
 
@@ -2013,9 +2014,9 @@ const form = useForm(`EditUser:${user.id}\
 
 </CodeGroup>
 
-#### Excluding Fields
+#### Loại trừ field
 
-Sometimes you may wish to prevent certain fields from being stored in history state. For example, you may want to exclude password fields for security reasons.
+Đôi khi bạn muốn ngăn một số field được lưu vào history state. Ví dụ, có thể bạn muốn loại password field vì lý do bảo mật.
 
 <CodeGroup>
 
@@ -2048,21 +2049,21 @@ const form = useForm('LoginForm', {
 
 </CodeGroup>
 
-Multiple fields may be excluded by passing additional arguments.
+Có thể loại trừ nhiều field bằng cách truyền thêm đối số.
 
 ```js
 form.dontRemember('password', 'password_confirmation')
 ```
 
 <Note>
-Some browsers trigger a "save password" prompt whenever password field values are written to history state, even without form submission. Excluding password fields avoids this issue.
+Một số trình duyệt kích hoạt prompt "lưu mật khẩu" mỗi khi giá trị password field được ghi vào history state, kể cả khi chưa submit form. Loại trừ password field giúp tránh vấn đề này.
 </Note>
 
 ### Wayfinder
 
 <Badge>v2.0.6+</Badge>
 
-When using [Wayfinder](https://github.com/laravel/wayfinder) in conjunction with the form helper, you can simply pass the resulting object directly to the `form.submit` method. The form helper will infer the HTTP method and URL from the Wayfinder object.
+Khi dùng [Wayfinder](https://github.com/laravel/wayfinder) cùng form helper, bạn chỉ cần truyền object kết quả trực tiếp vào method `form.submit`. Form helper sẽ suy ra HTTP method và URL từ object Wayfinder.
 
 <CodeGroup>
 
@@ -2108,10 +2109,10 @@ form.submit(store())
 
 <Badge>v2.3+</Badge>
 
-Just like the `<Form>` component, the `useForm` helper supports [Precognition](#precognition) for real-time validation. You may enable it by chaining the `withPrecognition()` method with the HTTP method and endpoint for validation requests.
+Tương tự component `<Form>`, helper `useForm` hỗ trợ [Precognition](#precognition) cho validation thời gian thực. Bạn có thể bật bằng cách chain method `withPrecognition()` với HTTP method và endpoint dành cho request validation.
 
 <Note>
-Precognition requires server-side support. Laravel users should see the [Laravel Precognition documentation](https://laravel.com/docs/precognition) for setup instructions. For other frameworks, see the [protocol page](/v2/core-concepts/the-protocol#request-headers) for implementation details.
+Precognition yêu cầu hỗ trợ phía máy chủ. Người dùng Laravel nên xem [tài liệu Laravel Precognition](https://laravel.com/docs/precognition) để biết cách thiết lập. Với framework khác, xem [trang giao thức](/v2/core-concepts/the-protocol#request-headers) để biết chi tiết triển khai.
 </Note>
 
 <CodeGroup>
@@ -2145,7 +2146,7 @@ const form = useForm({
 
 </CodeGroup>
 
-For backwards compatibility with the `laravel-precognition` packages, you may also pass the method and URL as the first arguments to `useForm()`.
+Để tương thích ngược với package `laravel-precognition`, bạn cũng có thể truyền method và URL làm các đối số đầu tiên cho `useForm()`.
 
 ```js
 const form = useForm('post', '/users', {
@@ -2155,10 +2156,10 @@ const form = useForm('post', '/users', {
 ```
 
 <Tip>
-Since Precognition is now built-in, you may remove the `laravel-precognition` package and import `useForm` from your Inertia adapter instead.
+Vì Precognition hiện đã được tích hợp sẵn, bạn có thể gỡ package `laravel-precognition` và import `useForm` trực tiếp từ adapter Inertia.
 </Tip>
 
-You may also use [Wayfinder](https://github.com/laravel/wayfinder) when enabling Precognition.
+Bạn cũng có thể dùng [Wayfinder](https://github.com/laravel/wayfinder) khi bật Precognition.
 
 ```js
 import { store } from 'App/Http/Controllers/UserController'
@@ -2175,7 +2176,7 @@ const form = useForm(store(), {
 })
 ```
 
-Once Precognition is enabled, call `validate()` with a field name to trigger validation for that field. The `invalid()` helper checks if a field has validation errors, while `validating` indicates when a request is in progress.
+Sau khi bật Precognition, gọi `validate()` với tên field để kích hoạt validation cho field đó. Helper `invalid()` kiểm tra field có lỗi validation hay không, còn `validating` cho biết request đang chạy.
 
 <CodeGroup>
 
@@ -2292,15 +2293,15 @@ const form = useForm('post', '/users', {
 
 </CodeGroup>
 
-You may also use the `valid()` helper to check if a field has passed validation.
+Bạn cũng có thể dùng helper `valid()` để kiểm tra field đã pass validation hay chưa.
 
 <Warning>
-A form input will only appear as valid or invalid once it has changed and a validation response has been received. Calling `validate('field')` will not send a validation request until the field's value differs from the initial data.
+Input form chỉ được xem valid hoặc invalid sau khi nó đã thay đổi và response validation được nhận. Gọi `validate('field')` sẽ không gửi request validation cho đến khi giá trị field khác dữ liệu ban đầu.
 </Warning>
 
-#### Touch and Validate
+#### Touch và validate
 
-The `touch()` method marks fields as "touched" without triggering validation. You may then validate all touched fields by calling `validate()` without arguments. The `touched()` helper checks if a field has been touched. The `reset()` method clears the touched state for reset fields.
+Method `touch()` đánh dấu field là "touched" mà không kích hoạt validation. Sau đó bạn có thể validation toàn bộ field touched bằng cách gọi `validate()` không đối số. Helper `touched()` kiểm tra field đã touched hay chưa. Method `reset()` xóa touched state cho các field được reset.
 
 <CodeGroup>
 
@@ -2337,7 +2338,7 @@ The `touch()` method marks fields as "touched" without triggering validation. Yo
 
 #### Options
 
-Validation requests are automatically debounced. The first request fires immediately, then subsequent changes are debounced (1500ms by default). You may customize this timeout using `setValidationTimeout()`.
+Request validation tự động được debounce. Request đầu tiên chạy ngay, các thay đổi tiếp theo được debounce (mặc định 1500ms). Bạn có thể tùy chỉnh timeout bằng `setValidationTimeout()`.
 
 <CodeGroup>
 
@@ -2365,7 +2366,7 @@ $form.setValidationTimeout(500)
 
 </CodeGroup>
 
-By default, files are excluded from validation requests to avoid unnecessary uploads. You may enable file validation using `validateFiles()`.
+Mặc định, file bị loại khỏi request validation để tránh upload không cần thiết. Bạn có thể bật validation file bằng `validateFiles()`.
 
 <CodeGroup>
 
@@ -2393,7 +2394,7 @@ $form.validateFiles()
 
 </CodeGroup>
 
-By default, validation errors are simplified to strings (the first error message). You can indicate you would like all errors as arrays using `withAllErrors()`.
+Mặc định, lỗi validation được đơn giản hóa thành chuỗi (message lỗi đầu tiên). Bạn có thể yêu cầu nhận toàn bộ lỗi dưới dạng array bằng `withAllErrors()`.
 
 <CodeGroup>
 
@@ -2421,11 +2422,11 @@ $form.withAllErrors()
 
 </CodeGroup>
 
-With Precognition enabled, you may call `submit()` without arguments to submit to the configured endpoint.
+Khi Precognition đã bật, bạn có thể gọi `submit()` không đối số để submit đến endpoint đã cấu hình.
 
-## Server-Side Responses
+## Response phía máy chủ
 
-When using Inertia, you don't typically inspect form responses client-side like you would with traditional XHR/fetch requests. Instead, your server-side route or controller issues a [redirect](/v2/the-basics/redirects) response after processing the form, often redirecting to a success page.
+Khi dùng Inertia, thông thường bạn không kiểm tra response form ở phía client như với request XHR/fetch truyền thống. Thay vào đó, route hoặc controller phía máy chủ trả một response [redirect](/v2/the-basics/redirects) sau khi xử lý form, thường redirect đến trang thành công.
 
 ```php
 class UsersController extends Controller
@@ -2450,19 +2451,19 @@ class UsersController extends Controller
 }
 ```
 
-This redirect-based approach works with all form submission methods: the `<Form>` component, `useForm` helper, and manual router submissions. It makes handling Inertia forms feel very similar to classic server-side form submissions.
+Cách tiếp cận dựa trên redirect này hoạt động với mọi phương thức submit form: component `<Form>`, helper `useForm` và submit thủ công bằng router. Nó khiến việc xử lý form Inertia rất giống submit form truyền thống phía máy chủ.
 
-## Server-Side Validation
+## Validation phía máy chủ
 
-Both the `<Form>` component and `useForm` helper automatically handle server-side validation errors. When your server returns validation errors, they're automatically available in the `errors` object without any additional configuration.
+Cả component `<Form>` và helper `useForm` đều tự động xử lý lỗi validation phía máy chủ. Khi máy chủ trả lỗi validation, chúng tự động có trong object `errors` mà không cần cấu hình thêm.
 
-Unlike traditional XHR/fetch requests where you might check for a `422` status code, Inertia handles validation errors as part of its redirect-based flow, just like classic server-side form submissions, but without the full page reload.
+Khác với request XHR/fetch truyền thống nơi bạn có thể kiểm tra status code `422`, Inertia xử lý lỗi validation như một phần của flow dựa trên redirect, giống submit form truyền thống phía máy chủ nhưng không tải lại toàn bộ trang.
 
-For a complete guide on validation error handling, including error bags and advanced scenarios, see the [validation documentation](/v2/the-basics/validation).
+Để xem hướng dẫn đầy đủ về xử lý lỗi validation, bao gồm error bag và tình huống nâng cao, hãy xem [tài liệu validation](/v2/the-basics/validation).
 
-## Manual Form Submissions
+## Submit form thủ công
 
-It's also possible to submit forms manually using Inertia's `router` methods directly, without using the `<Form>` component or `useForm` helper:
+Bạn cũng có thể submit form thủ công bằng trực tiếp các method `router` của Inertia mà không dùng component `<Form>` hoặc helper `useForm`:
 
 <CodeGroup>
 
@@ -2595,12 +2596,12 @@ function submit(e) {
 
 </CodeGroup>
 
-## File Uploads
+## Tải file lên
 
-When making requests or form submissions that include files, Inertia will automatically convert the request data into a `FormData` object. This works with the `<Form>` component, `useForm`helper, and manual router submissions.
+Khi request hoặc submit form có file, Inertia tự động chuyển dữ liệu request thành object `FormData`. Cơ chế này hoạt động với component `<Form>`, helper `useForm` và submit thủ công bằng router.
 
-For more information on file uploads, including progress tracking, see the [file uploads documentation](/v2/the-basics/file-uploads).
+Để biết thêm về tải file, bao gồm theo dõi tiến trình, hãy xem [tài liệu tải file](/v2/the-basics/file-uploads).
 
-## XHR / Fetch Submissions
+## Submit bằng XHR / Fetch
 
-Using Inertia to submit forms works great for the vast majority of situations. However, in the event that you need more control over the form submission, you're free to make plain XHR or `fetch` requests instead, using the library of your choice.
+Dùng Inertia để submit form phù hợp với phần lớn tình huống. Tuy nhiên, nếu cần kiểm soát quá trình submit chi tiết hơn, bạn có thể thực hiện request XHR hoặc `fetch` thuần bằng thư viện mình chọn.

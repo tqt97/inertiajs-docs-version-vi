@@ -1,18 +1,19 @@
 ---
-title: The Protocol
+title: Giao thức
+description: "Trang này chứa đặc tả chi tiết của giao thức Inertia. Trước tiên hãy đọc trang cách Inertia hoạt động để có cái nhìn tổng quan."
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
 
 <V2UpgradeWarning />
 
-This page contains a detailed specification of the Inertia protocol. Be sure to read the [how it works](/v2/core-concepts/how-it-works) page first for a high-level overview.
+Trang này chứa đặc tả chi tiết của giao thức Inertia. Trước tiên hãy đọc trang [cách Inertia hoạt động](/v2/core-concepts/how-it-works) để có cái nhìn tổng quan.
 
-## HTML Responses
+## Response HTML
 
-The very first request to an Inertia app is just a regular, full-page browser request, with no special Inertia headers or data. For these requests, the server returns a full HTML document.
+Request đầu tiên đến một ứng dụng Inertia chỉ là request trình duyệt tải toàn bộ trang thông thường, không có header hoặc dữ liệu đặc biệt nào của Inertia. Với các request này, máy chủ trả về một tài liệu HTML đầy đủ.
 
-This HTML response includes the site assets (CSS, JavaScript) as well as a root `<div>` in the page's body. The root `<div>` serves as a mounting point for the client-side app, and includes a `data-page` attribute with a JSON encoded [page object](#the-page-object) for the initial page. Inertia uses this information to boot your client-side framework and display the initial page component.
+Response HTML này bao gồm các asset của website (CSS, JavaScript) cùng root `<div>` trong body của trang. Root `<div>` đóng vai trò là điểm mount cho ứng dụng phía client và chứa thuộc tính `data-page` với [page object](#the-page-object) được mã hóa JSON cho trang ban đầu. Inertia dùng thông tin này để khởi động framework phía client và hiển thị page component đầu tiên.
 
 ```http
 REQUEST
@@ -35,13 +36,13 @@ Content-Type: text/html; charset=utf-8
 </html>
 ```
 
-While the initial response is HTML, Inertia does not server-side render the JavaScript page components. For information on server-side rendering, see the [SSR documentation](/v2/advanced/server-side-rendering).
+Mặc dù response ban đầu là HTML, Inertia không server-side render các page component JavaScript. Để biết thêm về server-side rendering, xem [tài liệu SSR](/v2/advanced/server-side-rendering).
 
-## Inertia Responses
+## Response Inertia
 
-Once the Inertia app has been booted, all subsequent requests to the site are made via XHR with a `X-Inertia` header set to `true`. This header indicates that the request is being made by Inertia and isn't a standard full-page visit.
+Sau khi ứng dụng Inertia được khởi động, mọi request tiếp theo đến website đều được thực hiện qua XHR với header `X-Inertia` đặt thành `true`. Header này cho biết request được thực hiện bởi Inertia và không phải một lần tải toàn bộ trang thông thường.
 
-When the server detects the `X-Inertia` header, instead of responding with a full HTML document, it returns a JSON response with an encoded [page object](#the-page-object).
+Khi máy chủ phát hiện header `X-Inertia`, thay vì trả tài liệu HTML đầy đủ, nó trả response JSON chứa [page object](#the-page-object) đã được mã hóa.
 
 ```http
 REQUEST
@@ -75,9 +76,9 @@ X-Inertia: true
 }
 ```
 
-## Request Lifecycle Diagram
+## Sơ đồ lifecycle của request
 
-The diagram below illustrates the request lifecycle within an Inertia application. The initial visit generates a standard request to the server, which returns an HTML application skeleton containing a root element with hydrated data. For subsequent user interactions and navigation, Inertia sends XHR requests that return JSON data. Inertia uses this response to dynamically hydrate and swap the page component without a full page reload.
+Sơ đồ bên dưới minh họa lifecycle của request trong một ứng dụng Inertia. Lần truy cập đầu tiên tạo một request tiêu chuẩn đến máy chủ, máy chủ trả về bộ khung ứng dụng HTML chứa root element với dữ liệu đã hydrate. Với các tương tác và điều hướng tiếp theo của người dùng, Inertia gửi request XHR nhận dữ liệu JSON. Inertia dùng response này để hydrate và thay đổi page component một cách động mà không cần tải lại toàn bộ trang.
 
 ```mermaid
 sequenceDiagram
@@ -95,163 +96,163 @@ sequenceDiagram
     Note over Client: Inertia.js swaps components
 ```
 
-## Request Headers
+## Request header
 
-The following headers are automatically sent by Inertia when making requests. You don't need to set these manually, they're handled by the Inertia client-side adapter.
+Các header sau được Inertia tự động gửi khi thực hiện request. Bạn không cần tự đặt chúng vì adapter phía client của Inertia đã xử lý.
 
 <ParamField header="X-Inertia" type="boolean">
-  Set to `true` to indicate this is an Inertia request.
+  Đặt thành `true` để chỉ ra đây là request Inertia.
 </ParamField>
 
 <ParamField header="X-Requested-With" type="string">
-  Set to `XMLHttpRequest` on all Inertia requests.
+  Được đặt thành `XMLHttpRequest` trong mọi request Inertia.
 </ParamField>
 
 <ParamField header="Accept" type="string">
-  Set to `text/html, application/xhtml+xml` to indicate acceptable response types.
+  Được đặt thành `text/html, application/xhtml+xml` để chỉ ra các loại response được chấp nhận.
 </ParamField>
 
 <ParamField header="X-Inertia-Version" type="string">
-  The current asset version to check for asset mismatches.
+  Phiên bản asset hiện tại dùng để kiểm tra asset mismatch.
 </ParamField>
 
 <ParamField header="Purpose" type="string">
-  Set to `prefetch` when making [prefetch](/v2/data-props/prefetching) requests.
+  Được đặt thành `prefetch` khi thực hiện request [prefetch](/v2/data-props/prefetching).
 </ParamField>
 
 <ParamField header="X-Inertia-Partial-Component" type="string">
-  The component name for [partial reloads](/v2/data-props/partial-reloads).
+  Tên component dành cho [partial reload](/v2/data-props/partial-reloads).
 </ParamField>
 
 <ParamField header="X-Inertia-Partial-Data" type="string">
-  Comma-separated list of props to include in partial reloads.
+  Danh sách props cần đưa vào partial reload, phân tách bằng dấu phẩy.
 </ParamField>
 
 <ParamField header="X-Inertia-Partial-Except" type="string">
-  Comma-separated list of props to exclude from partial reloads.
+  Danh sách props cần loại khỏi partial reload, phân tách bằng dấu phẩy.
 </ParamField>
 
 <ParamField header="X-Inertia-Reset" type="string">
-  Comma-separated list of props to reset on navigation.
+  Danh sách props cần reset khi điều hướng, phân tách bằng dấu phẩy.
 </ParamField>
 
 <ParamField header="Cache-Control" type="string">
-  Set to `no-cache` for reload requests to prevent serving stale content.
+  Đặt thành `no-cache` cho request reload để tránh phục vụ nội dung đã cũ.
 </ParamField>
 
 <ParamField header="X-Inertia-Error-Bag" type="string">
-  Specifies which error bag to use for [validation errors](/v2/the-basics/validation).
+  Chỉ định error bag dùng cho [lỗi validation](/v2/the-basics/validation).
 </ParamField>
 
 <ParamField header="X-Inertia-Infinite-Scroll-Merge-Intent" type="string">
-  Indicates whether the requested data should be appended or prepended when using [Infinite scroll](/v2/data-props/infinite-scroll).
+  Cho biết dữ liệu được yêu cầu cần được nối vào cuối hay thêm vào đầu khi sử dụng [Infinite scroll](/v2/data-props/infinite-scroll).
 </ParamField>
 
 <ParamField header="X-Inertia-Except-Once-Props" type="string">
-  Comma-separated list of non-expired [once prop](/v2/data-props/once-props) keys already loaded on the client. The server will skip resolving these props unless explicitly requested via a partial reload or force refreshed server-side.
+  Danh sách key [once prop](/v2/data-props/once-props) chưa hết hạn đã được tải ở client, phân tách bằng dấu phẩy. Máy chủ sẽ bỏ qua việc resolve các prop này trừ khi chúng được yêu cầu rõ ràng qua partial reload hoặc bị force refresh ở phía máy chủ.
 </ParamField>
 
-The following headers are used for [Precognition](/v2/the-basics/forms#precognition) validation requests.
+Các header sau được dùng cho request validation [Precognition](/v2/the-basics/forms#precognition).
 
 <ParamField header="Precognition" type="boolean">
-  Set to `true` to indicate this is a Precognition validation request.
+  Đặt thành `true` để cho biết đây là request validation Precognition.
 </ParamField>
 
 <ParamField header="Precognition-Validate-Only" type="string">
-  Comma-separated list of field names to validate.
+  Danh sách tên field cần validation, phân tách bằng dấu phẩy.
 </ParamField>
 
-## Response Headers
+## Response header
 
-The following headers should be sent by your server-side adapter in Inertia responses. If you're using an official server-side adapter, these are handled automatically.
+Các header sau cần được adapter phía máy chủ gửi trong response Inertia. Nếu dùng adapter chính thức, chúng được xử lý tự động.
 
 <ParamField header="X-Inertia" type="boolean">
-  Set to `true` to indicate this is an Inertia response.
+  Đặt thành `true` để cho biết đây là response Inertia.
 </ParamField>
 
 <ParamField header="X-Inertia-Location" type="string">
-  Used for external redirects when a `409 Conflict` response is returned due to asset version mismatches.
+  Được dùng cho redirect bên ngoài khi response `409 Conflict` được trả về do asset version không khớp.
 </ParamField>
 
 <ParamField header="Vary" type="string">
-  Set to `X-Inertia` to help browsers correctly differentiate between HTML and JSON responses.
+  Đặt thành `X-Inertia` để giúp trình duyệt phân biệt chính xác response HTML và JSON.
 </ParamField>
 
-The following headers are used for [Precognition](/v2/the-basics/forms#precognition) validation responses.
+Các header sau được dùng cho response validation [Precognition](/v2/the-basics/forms#precognition).
 
 <ParamField header="Precognition" type="string">
-  Set to `true` to indicate this is a Precognition validation response.
+  Đặt thành `true` để cho biết đây là response validation Precognition.
 </ParamField>
 
 <ParamField header="Precognition-Success" type="string">
-  Set to `true` when validation passes with no errors, combined with a `204 No Content` status code.
+  Đặt thành `true` khi validation thành công và không có lỗi, kết hợp với status code `204 No Content`.
 </ParamField>
 
 <ParamField header="Vary" type="string">
-  Set to `Precognition` on all responses when the Precognition middleware is applied.
+  Đặt thành `Precognition` trong mọi response khi middleware Precognition được áp dụng.
 </ParamField>
 
-## The Page Object
+## Page object
 
-Inertia shares data between the server and client via a page object. This object includes the necessary information required to render the page component, update the browser's history state, and track the site's asset version. The page object can include the following properties:
+Inertia chia sẻ dữ liệu giữa máy chủ và client thông qua page object. Object này chứa thông tin cần thiết để render page component, cập nhật history state của trình duyệt và theo dõi asset version của website. Page object có thể bao gồm các property sau:
 
 <ParamField body="component" type="string">
-  The name of the JavaScript page component.
+  Tên của page component JavaScript.
 </ParamField>
 
 <ParamField body="props" type="object">
-  The page props. Contains all of the page data along with an `errors` object (defaults to `{}` if there are no errors).
+  Props của trang. Chứa toàn bộ dữ liệu trang cùng object `errors` (mặc định là `{}` nếu không có lỗi).
 </ParamField>
 
 <ParamField body="url" type="string">
-  The page URL.
+  URL của trang.
 </ParamField>
 
 <ParamField body="version" type="string|number">
-  The current [asset version](/v2/advanced/asset-versioning).
+  [Asset version](/v2/advanced/asset-versioning) hiện tại.
 </ParamField>
 
 <ParamField body="encryptHistory" type="boolean">
-  Whether or not to [encrypt the current page's history state](/v2/security/history-encryption).
+  Có [mã hóa history state của trang hiện tại](/v2/security/history-encryption) hay không.
 </ParamField>
 
 <ParamField body="clearHistory" type="boolean">
-  Whether or not to clear any [encrypted history state](/v2/security/history-encryption#clearing-history).
+  Có xóa [history state đã mã hóa](/v2/security/history-encryption#clearing-history) hay không.
 </ParamField>
 
 <ParamField body="mergeProps" type="array">
-  Array of prop keys that should be [merged](/v2/data-props/merging-props) (appended) during navigation.
+  Mảng key prop cần được [merge](/v2/data-props/merging-props) (nối vào cuối) trong quá trình điều hướng.
 </ParamField>
 
 <ParamField body="prependProps" type="array">
-  Array of prop keys that should be [prepended](/v2/data-props/merging-props) during navigation.
+  Mảng key prop cần được [thêm vào đầu](/v2/data-props/merging-props) trong quá trình điều hướng.
 </ParamField>
 
 <ParamField body="deepMergeProps" type="array">
-  Array of prop keys that should be [deep merged](/v2/data-props/merging-props#deep-merge) during navigation.
+  Mảng key prop cần được [deep merge](/v2/data-props/merging-props#deep-merge) trong quá trình điều hướng.
 </ParamField>
 
 <ParamField body="matchPropsOn" type="array">
-  Array of prop keys to use for [matching when merging props](/v2/data-props/merging-props#matching-items).
+  Mảng key prop dùng để [đối sánh khi merge props](/v2/data-props/merging-props#matching-items).
 </ParamField>
 
 <ParamField body="scrollProps" type="object">
-  Configuration for [infinite scroll](/v2/data-props/infinite-scroll) prop merging behavior.
+  Cấu hình hành vi merge prop cho [infinite scroll](/v2/data-props/infinite-scroll).
 </ParamField>
 
 <ParamField body="deferredProps" type="object">
-  Configuration for client-side [lazy loading of props](/v2/data-props/deferred-props).
+  Cấu hình [lazy loading props](/v2/data-props/deferred-props) phía client.
 </ParamField>
 
 <ParamField body="onceProps" type="object">
-  Configuration for [once props](/v2/data-props/once-props) that should only be resolved once and reused on subsequent pages. Each entry maps a key to an object containing the `prop` name and optional `expiresAt` timestamp (in milliseconds).
+  Cấu hình cho [once props](/v2/data-props/once-props), là các prop chỉ cần resolve một lần rồi tái sử dụng trên các trang tiếp theo. Mỗi entry ánh xạ một key đến object chứa tên `prop` và timestamp `expiresAt` tùy chọn (đơn vị mili giây).
 </ParamField>
 
-On standard full page visits, the page object is JSON encoded into the `data-page` attribute in the root `<div>`. On Inertia visits (as indicated by the presence of the `X-Inertia` header), the page object is returned as the JSON payload.
+Trong các lần tải toàn bộ trang thông thường, page object được mã hóa JSON vào thuộc tính `data-page` của root `<div>`. Trong Inertia visit (được nhận biết bởi header `X-Inertia`), page object được trả về dưới dạng payload JSON.
 
-### Basic Page Object
+### Page object cơ bản
 
-A minimal page object contains the core properties.
+Một page object tối thiểu chứa các property cốt lõi.
 
 ```json
 {
@@ -269,9 +270,9 @@ A minimal page object contains the core properties.
 }
 ```
 
-### Page Object with Deferred Props
+### Page object với deferred props
 
-When using deferred props, the page object includes a `deferredProps` configuration. Note that deferred props are not included in the initial props since they are loaded in a subsequent request.
+Khi dùng deferred props, page object chứa cấu hình `deferredProps`. Lưu ý deferred props không có trong props ban đầu vì chúng được tải bằng request tiếp theo.
 
 ```json
 {
@@ -298,9 +299,9 @@ When using deferred props, the page object includes a `deferredProps` configurat
 }
 ```
 
-### Page Object with Merge Props
+### Page object với merge props
 
-When using merge props, additional configuration is included.
+Khi dùng merge props, cấu hình bổ sung sẽ được đưa vào.
 
 ```json
 {
@@ -356,9 +357,9 @@ When using merge props, additional configuration is included.
 }
 ```
 
-### Page Object with Scroll Props
+### Page object với scroll props
 
-When using [Infinite scroll](/v2/data-props/infinite-scroll), the page object includes a `scrollProps` configuration.
+Khi dùng [Infinite scroll](/v2/data-props/infinite-scroll), page object chứa cấu hình `scrollProps`.
 
 ```json
 {
@@ -396,9 +397,9 @@ When using [Infinite scroll](/v2/data-props/infinite-scroll), the page object in
 }
 ```
 
-### Page Object with Once Props
+### Page object với once props
 
-When using [once props](/v2/data-props/once-props), the page object includes an `onceProps` configuration. Each entry maps a key to the prop name and an optional expiration timestamp.
+Khi dùng [once props](/v2/data-props/once-props), page object chứa cấu hình `onceProps`. Mỗi entry ánh xạ một key đến tên prop và timestamp hết hạn tùy chọn.
 
 ```json
 {
@@ -429,7 +430,7 @@ When using [once props](/v2/data-props/once-props), the page object includes an 
 }
 ```
 
-When navigating to a subsequent page that includes the same once prop, the client sends the loaded keys in the `X-Inertia-Except-Once-Props` header. The server skips resolving these props and excludes them from the response. The client reuses the previously loaded values.
+Khi điều hướng đến trang tiếp theo có cùng once prop, client gửi các key đã tải trong header `X-Inertia-Except-Once-Props`. Máy chủ bỏ qua việc resolve các prop này và không đưa chúng vào response. Client tái sử dụng các giá trị đã tải trước đó.
 
 ```http
 REQUEST
@@ -466,25 +467,25 @@ Content-Type: application/json
 }
 ```
 
-Note that `plans` is included in `onceProps` but not in `props` since it was already loaded on the client. The `onceProps` key identifies the once prop across pages, while `prop` specifies the actual prop name. These may differ when using [custom keys](/v2/data-props/once-props#custom-keys).
+Lưu ý `plans` có trong `onceProps` nhưng không có trong `props` vì nó đã được tải ở client. Key `onceProps` dùng để nhận diện once prop xuyên suốt các trang, còn `prop` chỉ định tên prop thực tế. Hai giá trị có thể khác nhau khi dùng [custom key](/v2/data-props/once-props#custom-keys).
 
-## Asset Versioning
+## Quản lý phiên bản asset
 
-One common challenge with single-page apps is refreshing site assets when they've been changed. Inertia makes this easy by optionally tracking the current version of the site's assets. In the event that an asset changes, Inertia will automatically make a full-page visit instead of an XHR visit.
+Một thách thức phổ biến của ứng dụng một trang là làm mới asset của website khi chúng thay đổi. Inertia giúp việc này dễ dàng bằng cách tùy chọn theo dõi phiên bản hiện tại của asset. Khi asset thay đổi, Inertia sẽ tự động thực hiện một lần tải toàn bộ trang thay vì visit XHR.
 
-The Inertia [page object](#the-page-object) includes a `version` identifier. This version identifier is set server-side and can be a number, string, file hash, or any other value that represents the current "version" of your site's assets, as long as the value changes when the site's assets have been updated.
+[Page object](#the-page-object) của Inertia chứa định danh `version`. Định danh này được thiết lập ở phía máy chủ và có thể là số, chuỗi, file hash hoặc bất kỳ giá trị nào đại diện cho "phiên bản" hiện tại của asset, miễn là giá trị thay đổi khi asset được cập nhật.
 
-Whenever an Inertia request is made, Inertia will include the current asset version in the `X-Inertia-Version` header. When the server receives the request, it compares the asset version provided in the `X-Inertia-Version` header with the current asset version. This is typically handled in the middleware layer of your server-side framework.
+Mỗi khi request Inertia được thực hiện, Inertia gửi asset version hiện tại trong header `X-Inertia-Version`. Khi máy chủ nhận request, nó so sánh asset version được cung cấp trong header này với asset version hiện tại. Việc này thường được xử lý ở tầng middleware của framework phía máy chủ.
 
-If the asset versions are the same, the request simply continues as expected. However, if the asset versions are different, the server immediately returns a `409 Conflict` response, and includes the URL in a `X-Inertia-Location` header. This header is necessary, since server-side redirects may have occurred. This tells Inertia what the final intended destination URL is.
+Nếu hai asset version giống nhau, request tiếp tục như bình thường. Nếu khác nhau, máy chủ lập tức trả response `409 Conflict` và đưa URL vào header `X-Inertia-Location`. Header này cần thiết vì có thể đã xảy ra redirect phía máy chủ. Nó cho Inertia biết URL đích cuối cùng dự kiến.
 
 <Tip>
-Note, `409 Conflict` responses are only sent for `GET` requests, and not for `POST/PUT/PATCH/DELETE` requests. That said, they will be sent in the event that a `GET` redirect occurs after one of these requests.
+Lưu ý, response `409 Conflict` chỉ được gửi cho request `GET`, không gửi cho `POST/PUT/PATCH/DELETE`. Tuy nhiên, nó vẫn được gửi nếu một redirect `GET` xảy ra sau một trong các request này.
 </Tip>
 
-When the Inertia client receives a `409 Conflict` response, it checks for the presence of the `X-Inertia-Location` header. If this header exists, Inertia performs a full-page visit to the URL specified in the header. This ensures that the user always has the latest assets loaded.
+Khi client Inertia nhận response `409 Conflict`, nó kiểm tra header `X-Inertia-Location`. Nếu header tồn tại, Inertia thực hiện một lần tải toàn bộ trang đến URL được chỉ định. Điều này đảm bảo người dùng luôn tải asset mới nhất.
 
-If "flash" session data exists when a `409 Conflict` response occurs, Inertia's server-side framework adapters will automatically reflash this data.
+Nếu tồn tại dữ liệu session dạng "flash" khi response `409 Conflict` xảy ra, adapter framework phía máy chủ của Inertia sẽ tự động reflash dữ liệu này.
 
 ```http
 REQUEST
@@ -499,19 +500,19 @@ RESPONSE
 X-Inertia-Location: https://example.com/events/80
 ```
 
-You can read more about this on the [asset versioning](/v2/advanced/asset-versioning) page.
+Bạn có thể đọc thêm tại trang [quản lý phiên bản asset](/v2/advanced/asset-versioning).
 
-## Partial Reloads
+## Tải lại một phần
 
-When making Inertia requests, the partial reload option allows you to request a subset of the props (data) from the server on subsequent visits to the *same* page component. This can be a helpful performance optimization if it's acceptable that some page data becomes stale. See the [partial reloads](/v2/data-props/partial-reloads) documentation for details.
+Khi thực hiện request Inertia, tùy chọn partial reload cho phép chỉ yêu cầu một tập con props (dữ liệu) từ máy chủ trong các lần truy cập tiếp theo đến *cùng* page component. Đây có thể là cách tối ưu hiệu năng hữu ích nếu chấp nhận một phần dữ liệu trang trở nên cũ. Xem tài liệu [partial reload](/v2/data-props/partial-reloads) để biết chi tiết.
 
-When a partial reload request is made, Inertia includes the `X-Inertia-Partial-Component` header and may include `X-Inertia-Partial-Data` and/or `X-Inertia-Partial-Except` headers with the request.
+Khi request partial reload được thực hiện, Inertia gửi header `X-Inertia-Partial-Component` và có thể gửi thêm `X-Inertia-Partial-Data` và/hoặc `X-Inertia-Partial-Except`.
 
-The `X-Inertia-Partial-Data` header is a comma separated list of the desired props (data) keys that should be returned.
+Header `X-Inertia-Partial-Data` là danh sách key props (dữ liệu) mong muốn được trả về, phân tách bằng dấu phẩy.
 
-The `X-Inertia-Partial-Except` header is a comma separated list of the props (data) keys that should not be returned. When only the `X-Inertia-Partial-Except` header is included, all props (data) except those listed will be sent. If both `X-Inertia-Partial-Data` and `X-Inertia-Partial-Except` headers are included, the `X-Inertia-Partial-Except` header will take precedence.
+Header `X-Inertia-Partial-Except` là danh sách key props (dữ liệu) không được trả về, phân tách bằng dấu phẩy. Khi chỉ có header `X-Inertia-Partial-Except`, tất cả props trừ các prop được liệt kê sẽ được gửi. Nếu có cả `X-Inertia-Partial-Data` và `X-Inertia-Partial-Except`, header `X-Inertia-Partial-Except` được ưu tiên.
 
-The `X-Inertia-Partial-Component` header includes the name of the component that is being partially reloaded. This is necessary, since partial reloads only work for requests made to the same page component. If the final destination is different for some reason (eg. the user was logged out and is now on the login page), then no partial reloading will occur.
+Header `X-Inertia-Partial-Component` chứa tên component đang được partial reload. Điều này cần thiết vì partial reload chỉ hoạt động với request đến cùng page component. Nếu đích cuối khác đi vì lý do nào đó (ví dụ người dùng đã đăng xuất và hiện ở trang đăng nhập), partial reload sẽ không diễn ra.
 
 ```http
 REQUEST
@@ -540,20 +541,20 @@ Content-Type: application/json
 }
 ```
 
-## HTTP Status Codes
+## HTTP status code
 
-Inertia uses specific HTTP status codes to handle different scenarios.
+Inertia sử dụng các HTTP status code cụ thể để xử lý những tình huống khác nhau.
 
-| Status Code         | Description                                                                                                                                                                                                 |
+| Status Code         | Mô tả                                                                                                                                                                                                 |
 |:--------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **200 OK**          | Standard successful response for both HTML and Inertia JSON responses.                                                                                                                                   |
-| **302 Found**       | Standard redirect response. Inertia's server-side adapters automatically convert this to `303 See Other` when returned after `PUT`, `PATCH`, or `DELETE` requests.                                        |
-| **303 See Other**   | Used for redirects after non-GET requests. This status code tells the browser to make a `GET` request to the redirect URL, preventing duplicate form submissions that could occur if the browser repeated the original request method. |
-| **409 Conflict**    | Returned when there's an asset version mismatch or for external redirects. For asset mismatches, this prompts a full page reload. For external redirects, the response includes an `X-Inertia-Location` header and triggers a `window.location` redirect client-side. |
+| **200 OK**          | Response thành công tiêu chuẩn cho cả HTML và response JSON Inertia.                                                                                                                                   |
+| **302 Found**       | Response redirect tiêu chuẩn. Adapter phía máy chủ của Inertia tự động chuyển thành `303 See Other` khi được trả sau request `PUT`, `PATCH` hoặc `DELETE`.                                        |
+| **303 See Other**   | Dùng cho redirect sau request không phải GET. Status code này yêu cầu trình duyệt gửi request `GET` đến URL redirect, ngăn việc submit form trùng lặp có thể xảy ra nếu trình duyệt lặp lại HTTP method ban đầu. |
+| **409 Conflict**    | Được trả về khi asset version không khớp hoặc khi redirect ra bên ngoài. Với asset mismatch, nó kích hoạt tải lại toàn bộ trang. Với external redirect, response chứa header `X-Inertia-Location` và kích hoạt redirect `window.location` ở client. |
 
-The following status codes are used for [Precognition](/v2/the-basics/forms#precognition) validation requests.
+Các status code sau được dùng cho request validation [Precognition](/v2/the-basics/forms#precognition).
 
-| Status Code                   | Description                                                                                     |
+| Status Code                   | Mô tả                                                                                     |
 |:------------------------------|:------------------------------------------------------------------------------------------------|
-| **204 No Content**            | Successful Precognition validation request with no validation errors.                           |
-| **422 Unprocessable Entity**  | Precognition validation request with validation errors. The response body contains the errors.  |
+| **204 No Content**            | Request validation Precognition thành công và không có lỗi validation.                           |
+| **422 Unprocessable Entity**  | Request validation Precognition có lỗi validation. Response body chứa các lỗi.  |

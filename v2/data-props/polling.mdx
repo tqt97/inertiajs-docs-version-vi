@@ -1,16 +1,17 @@
 ---
 title: Polling
+description: "Việc poll máy chủ để lấy thông tin mới cho trang hiện tại là nhu cầu phổ biến, vì vậy Inertia cung cấp poll helper nhằm giảm boilerplate code. Ngoài ra…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
 
 <V2UpgradeWarning />
 
-## Poll Helper
+## Poll helper
 
-Polling your server for new information on the current page is common, so Inertia provides a poll helper designed to help reduce the amount of boilerplate code. In addition, the poll helper will automatically stop polling when the page is unmounted.
+Việc poll máy chủ để lấy thông tin mới cho trang hiện tại là nhu cầu phổ biến, vì vậy Inertia cung cấp poll helper nhằm giảm boilerplate code. Ngoài ra, helper sẽ tự động dừng polling khi trang unmount.
 
-The only required argument is the polling interval in milliseconds.
+Đối số bắt buộc duy nhất là khoảng thời gian polling tính bằng mili giây.
 
 <CodeGroup>
 
@@ -34,7 +35,7 @@ usePoll(2000)
 
 </CodeGroup>
 
-If you need to pass additional request options to the poll helper, you can pass any of the `router.reload` options as the second parameter.
+Nếu cần truyền thêm request option cho poll helper, bạn có thể truyền bất kỳ option nào của `router.reload` làm tham số thứ hai.
 
 <CodeGroup>
 
@@ -79,7 +80,7 @@ usePoll(2000, {
 
 </CodeGroup>
 
-If you'd like more control over the polling behavior, the poll helper provides `stop` and `start` methods that allow you to manually start and stop polling. You can pass the `autoStart: false` option to the poll helper to prevent it from automatically starting polling when the component is mounted.
+Nếu muốn kiểm soát hành vi polling chi tiết hơn, poll helper cung cấp các method `stop` và `start` để bạn chủ động bắt đầu hoặc dừng. Có thể truyền option `autoStart: false` để ngăn helper tự bắt đầu polling khi component mount.
 
 <CodeGroup>
 
@@ -127,7 +128,7 @@ const { start, stop } = usePoll(2000, {}, {
 
 ## Throttling
 
-By default, the poll helper will throttle requests by 90% when the browser tab is in the background. If you'd like to disable this behavior, you can pass the `keepAlive` option to the poll helper.
+Mặc định, poll helper sẽ giảm 90% tần suất request khi tab trình duyệt ở background. Nếu muốn tắt hành vi này, truyền option `keepAlive`.
 
 <CodeGroup>
 

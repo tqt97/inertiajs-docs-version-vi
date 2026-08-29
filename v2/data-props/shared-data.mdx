@@ -1,18 +1,19 @@
 ---
-title: Shared Data
+title: Dữ liệu dùng chung
+description: "Đôi khi bạn cần truy cập một số dữ liệu cụ thể trên nhiều trang trong ứng dụng. Ví dụ, bạn có thể cần hiển thị người dùng hiện tại trong header của website…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
 
 <V2UpgradeWarning />
 
-Sometimes you need to access specific pieces of data on numerous pages within your application. For example, you may need to display the current user in the site header. Passing this data manually in each response across your entire application is cumbersome. Thankfully, there is a better option: shared data.
+Đôi khi bạn cần truy cập một số dữ liệu cụ thể trên nhiều trang trong ứng dụng. Ví dụ, bạn có thể cần hiển thị người dùng hiện tại trong header của website. Việc truyền thủ công dữ liệu này trong từng response trên toàn ứng dụng khá bất tiện. May mắn là có một lựa chọn tốt hơn: dữ liệu dùng chung.
 
-## Sharing Data
+## Chia sẻ dữ liệu
 
-Inertia's server-side adapters all provide a method of making shared data available for every request. This is typically done outside of your controllers. Shared data will be automatically merged with the page props provided in your controller.
+Tất cả adapter phía máy chủ của Inertia đều cung cấp một cách để đưa dữ liệu dùng chung vào mọi request. Việc này thường được thực hiện bên ngoài controller. Dữ liệu dùng chung sẽ tự động được merge với page props mà controller cung cấp.
 
-In Laravel applications, this is typically handled by the `HandleInertiaRequests` middleware that is automatically installed when installing the [server-side adapter](/v2/installation/server-side-setup#middleware).
+Trong ứng dụng Laravel, việc này thường được xử lý bởi middleware `HandleInertiaRequests`, được tự động cài đặt khi cài [server-side adapter](/v2/installation/server-side-setup#middleware).
 
 ```php
 class HandleInertiaRequests extends Middleware
@@ -32,7 +33,7 @@ class HandleInertiaRequests extends Middleware
 }
 ```
 
-Alternatively, you can manually share data using the `Inertia::share` method.
+Ngoài ra, bạn có thể chia sẻ dữ liệu thủ công bằng phương thức `Inertia::share`.
 
 ```php
 use Inertia\Inertia;
@@ -47,13 +48,13 @@ Inertia::share('user', fn (Request $request) => $request->user()
 );
 ```
 
-Shared data should be used sparingly as all shared data is included with every response.
+Nên sử dụng dữ liệu dùng chung một cách tiết chế vì toàn bộ dữ liệu dùng chung được gửi kèm trong mọi response.
 
-Page props and shared data are merged together, so be sure to namespace your shared data appropriately to avoid collisions.
+Page props và dữ liệu dùng chung được merge với nhau, vì vậy hãy namespace dữ liệu dùng chung phù hợp để tránh xung đột.
 
-## Sharing Once Props
+## Chia sẻ once props
 
-You may share data that is resolved only once and remembered by the client across subsequent navigations using [once props](/v2/data-props/once-props).
+Bạn có thể chia sẻ dữ liệu chỉ được resolve một lần và được phía client ghi nhớ qua các lần điều hướng tiếp theo bằng [once props](/v2/data-props/once-props).
 
 ```php
 class HandleInertiaRequests extends Middleware
@@ -67,7 +68,7 @@ class HandleInertiaRequests extends Middleware
 }
 ```
 
-Alternatively, you may define a dedicated `shareOnce()` method in the middleware. The middleware will evaluate both `share()` and `shareOnce()`, merging the results.
+Ngoài ra, bạn có thể định nghĩa riêng phương thức `shareOnce()` trong middleware. Middleware sẽ đánh giá cả `share()` và `shareOnce()`, sau đó gộp kết quả.
 
 ```php
 class HandleInertiaRequests extends Middleware
@@ -81,15 +82,15 @@ class HandleInertiaRequests extends Middleware
 }
 ```
 
-You may also share once props manually using the `Inertia::shareOnce()` method.
+Bạn cũng có thể chia sẻ once props thủ công bằng phương thức `Inertia::shareOnce()`.
 
 ```php
 Inertia::shareOnce('countries', fn () => Country::all());
 ```
 
-## Accessing Shared Data
+## Truy cập dữ liệu dùng chung
 
-Once you have shared the data server-side, you will be able to access it within any of your pages or components. Here's an example of how to access shared data in a layout component.
+Sau khi chia sẻ dữ liệu ở phía máy chủ, bạn có thể truy cập dữ liệu đó trong bất kỳ trang hoặc component nào. Sau đây là ví dụ cách truy cập dữ liệu dùng chung trong một layout component.
 
 <CodeGroup>
 
@@ -147,8 +148,8 @@ export default function Layout({ children }) {
 
 ## TypeScript
 
-You may configure the shared props type globally using [TypeScript's declaration merging](/v2/advanced/typescript#shared-page-props).
+Bạn có thể cấu hình kiểu của shared props trên toàn cục bằng [declaration merging của TypeScript](/v2/advanced/typescript#shared-page-props).
 
-## Flash Data
+## Flash data
 
-For one-time notifications like toast messages or success alerts, you may use [flash data](/v2/data-props/flash-data). Unlike shared data, flash data is not persisted in the browser's history state, so it won't reappear when navigating through history.
+Với các thông báo chỉ xuất hiện một lần như toast hoặc thông báo thành công, bạn có thể dùng [flash data](/v2/data-props/flash-data). Khác với shared data, flash data không được lưu trong history state của trình duyệt, vì vậy chúng sẽ không xuất hiện lại khi người dùng điều hướng qua lịch sử.

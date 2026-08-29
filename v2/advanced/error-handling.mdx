@@ -1,24 +1,25 @@
 ---
-title: Error Handling
+title: Xử lý lỗi
+description: "Một lợi thế khi làm việc với server-side framework mạnh là bạn được hưởng sẵn cơ chế xử lý exception. Ví dụ, Laravel đi kèm công cụ báo lỗi trực quan, hiển…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
 
 <V2UpgradeWarning />
 
-## Development
+## Môi trường phát triển
 
-One of the advantages to working with a robust server-side framework is the built-in exception handling you get for free. For example, Laravel ships with a beautiful error reporting tool which displays a nicely formatted stack trace in local development.
+Một lợi thế khi làm việc với server-side framework mạnh là bạn được hưởng sẵn cơ chế xử lý exception. Ví dụ, Laravel đi kèm công cụ báo lỗi trực quan, hiển thị stack trace được định dạng rõ ràng trong môi trường phát triển local.
 
-The challenge is, if you're making an XHR request (which Inertia does) and you hit a server-side error, you're typically left digging through the network tab in your browser's devtools to diagnose the problem.
+Khó khăn nằm ở chỗ khi bạn thực hiện request XHR (như Inertia vẫn làm) và gặp lỗi phía máy chủ, thông thường bạn phải mở tab Network trong devtools của trình duyệt để lần tìm và chẩn đoán vấn đề.
 
-Inertia solves this issue by showing all non-Inertia responses in a modal. This means you get the same beautiful error-reporting you're accustomed to, even though you've made that request over XHR.
+Inertia giải quyết vấn đề này bằng cách hiển thị mọi response không phải Inertia trong một modal. Nhờ vậy, bạn vẫn có trải nghiệm báo lỗi trực quan quen thuộc dù request được thực hiện qua XHR.
 
-## Dialog Element
+## Phần tử Dialog
 
-By default, Inertia displays error modals using a custom `<div>` overlay. However, you can opt-in to using the native HTML `<dialog>` element instead, which provides built-in modal functionality including backdrop handling.
+Mặc định, Inertia hiển thị error modal bằng một overlay `<div>` tùy chỉnh. Tuy nhiên, bạn có thể chọn dùng phần tử HTML `<dialog>` nguyên bản, vốn cung cấp chức năng modal tích hợp sẵn bao gồm cả xử lý backdrop.
 
-To enable this, configure the `future.useDialogForErrorModal` option in your [application defaults](/v2/installation/client-side-setup#configuring-defaults).
+Để bật tính năng này, hãy cấu hình tùy chọn `future.useDialogForErrorModal` trong [cấu hình mặc định của ứng dụng](/v2/installation/client-side-setup#configuring-defaults).
 
 ```js
 createInertiaApp({
@@ -33,9 +34,9 @@ createInertiaApp({
 
 ## Production
 
-In production you will want to return a proper Inertia error response instead of relying on the modal-driven error reporting that is present during development. To accomplish this, you'll need to update your framework's default exception handler to return a custom error page.
+Trong production, bạn nên trả về response lỗi Inertia phù hợp thay vì dựa vào cơ chế báo lỗi qua modal dành cho môi trường phát triển. Để làm vậy, bạn cần cập nhật exception handler mặc định của framework để trả về một trang lỗi tùy chỉnh.
 
-When building Laravel applications, you can accomplish this by using the `respond` exception method in your application's `bootstrap/app.php` file.
+Khi xây dựng ứng dụng Laravel, bạn có thể thực hiện việc này bằng phương thức exception `respond` trong file `bootstrap/app.php` của ứng dụng.
 
 ```php
 use Illuminate\Http\Request;
@@ -61,7 +62,7 @@ use Inertia\Inertia;
 })
 ```
 
-You may have noticed we're returning an `ErrorPage` page component in the example above. You'll need to actually create this component, which will serve as the generic error page for your application. Here's an example error component you can use as a starting point.
+Có thể bạn nhận thấy ví dụ trên trả về page component `ErrorPage`. Bạn cần thực sự tạo component này; nó sẽ đóng vai trò trang lỗi dùng chung cho ứng dụng. Dưới đây là một component lỗi mẫu để bạn dùng làm điểm khởi đầu.
 
 <CodeGroup>
 

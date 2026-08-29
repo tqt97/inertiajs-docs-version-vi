@@ -1,20 +1,21 @@
 ---
-title: Remembering State
+title: Ghi nhớ state
+description: "Khi điều hướng lịch sử trình duyệt, Inertia khôi phục các trang bằng dữ liệu props được cache trong history state. Tuy nhiên, Inertia không khôi phục state…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
 
 <V2UpgradeWarning />
 
-When navigating browser history, Inertia restores pages using prop data cached in history state. However, Inertia does not restore local page component state since this is beyond its reach. This can lead to outdated pages in your browser history.
+Khi điều hướng lịch sử trình duyệt, Inertia khôi phục các trang bằng dữ liệu props được cache trong history state. Tuy nhiên, Inertia không khôi phục state cục bộ của page component vì phần này nằm ngoài phạm vi quản lý của nó. Điều này có thể khiến các trang trong lịch sử trình duyệt trở nên lỗi thời.
 
-For example, if a user partially completes a form, then navigates away, and then returns back, the form will be reset and their work will be lost.
+Ví dụ, nếu người dùng mới điền một phần form rồi điều hướng sang nơi khác và sau đó quay lại, form sẽ bị reset và phần dữ liệu họ đã nhập sẽ mất.
 
-To mitigate this issue, you can tell Inertia which local component state to save in the browser history.
+Để giảm thiểu vấn đề này, bạn có thể cho Inertia biết state cục bộ nào của component cần được lưu vào lịch sử trình duyệt.
 
-## Saving Local State
+## Lưu state cục bộ
 
-To save local component state to the history state, use the `useRemember` feature to tell Inertia which data it should remember.
+Để lưu state cục bộ của component vào history state, hãy dùng `useRemember` để cho Inertia biết dữ liệu cần ghi nhớ.
 
 <CodeGroup>
 
@@ -54,11 +55,11 @@ const form = useRemember({
 
 </CodeGroup>
 
-Now, whenever your local `form` state changes, Inertia will automatically save this data to the history state and will also restore it on history navigation.
+Từ đó, mỗi khi state `form` cục bộ thay đổi, Inertia sẽ tự động lưu dữ liệu này vào history state và cũng tự động khôi phục khi điều hướng lịch sử.
 
-## Multiple Components
+## Nhiều component
 
-If your page contains multiple components that use the remember functionality provided by Inertia, you need to provide a unique key for each component so that Inertia knows which data to restore to each component.
+Nếu trang có nhiều component cùng sử dụng chức năng remember của Inertia, bạn cần cung cấp một key duy nhất cho từng component để Inertia biết dữ liệu nào cần khôi phục vào component nào.
 
 <CodeGroup>
 
@@ -93,7 +94,7 @@ const form = useRemember({
 
 </CodeGroup>
 
-If you have multiple instances of the same component on the page using the remember functionality, be sure to also include a unique key for each component instance, such as a model identifier.
+Nếu có nhiều instance của cùng một component trên trang sử dụng remember, hãy đảm bảo mỗi instance cũng có một key duy nhất, chẳng hạn định danh model.
 
 <CodeGroup>
 
@@ -130,9 +131,9 @@ const form = useRemember({
 
 </CodeGroup>
 
-## Form Helper
+## Form helper
 
-If you're using the [Inertia form helper](/v2/the-basics/forms#form-helper), you can pass a unique form key as the first argument when instantiating your form. This will cause the form data and errors to automatically be remembered.
+Nếu dùng [form helper của Inertia](/v2/the-basics/forms#form-helper), bạn có thể truyền một form key duy nhất làm đối số đầu khi khởi tạo form. Dữ liệu và lỗi form khi đó tự động được ghi nhớ.
 
 <CodeGroup>
 
@@ -159,13 +160,13 @@ const form = useForm(`EditUser:${user.id}`, data)
 
 </CodeGroup>
 
-You may [exclude specific fields](/v2/the-basics/forms#excluding-fields) from being remembered using the `dontRemember()` method. This is useful for sensitive fields like passwords that should not be stored in history state.
+Bạn có thể [loại trừ field cụ thể](/v2/the-basics/forms#excluding-fields) khỏi việc ghi nhớ bằng method `dontRemember()`. Điều này hữu ích với field nhạy cảm như password không nên lưu trong history state.
 
-## Manually Saving State
+## Lưu state thủ công
 
-The `useRemember` hook watches for data changes and automatically saves those changes to the history state. Then, Inertia will restore the data on page load.
+Hook `useRemember` theo dõi thay đổi dữ liệu và tự động lưu các thay đổi vào history state. Sau đó Inertia khôi phục dữ liệu khi trang được tải.
 
-However, it's also possible to manage this manually using the underlying `remember()` and `restore()` methods exposed by Inertia.
+Tuy nhiên, bạn cũng có thể tự quản lý bằng các method nền tảng `remember()` và `restore()` mà Inertia expose.
 
 <CodeGroup>
 
@@ -202,5 +203,5 @@ let data = router.restore('my-key')
 </CodeGroup>
 
 <Warning>
-Some browsers limit the number of `history.replaceState()` calls allowed within a short time period. Inertia catches this error and logs it to the console, but the state update will be lost. Avoid calling `router.remember()` too frequently, and consider debouncing or batching state updates in high-frequency scenarios.
+Một số trình duyệt giới hạn số lần gọi `history.replaceState()` trong thời gian ngắn. Inertia bắt lỗi và log ra console, nhưng cập nhật state sẽ bị mất. Tránh gọi `router.remember()` quá thường xuyên và cân nhắc debounce hoặc batch update state trong tình huống tần suất cao.
 </Warning>

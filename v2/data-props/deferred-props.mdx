@@ -1,16 +1,17 @@
 ---
 title: Deferred Props
+description: "Tính năng deferred props của Inertia cho phép trì hoãn việc tải một số dữ liệu trang cho đến sau khi lần render ban đầu hoàn tất. Điều này giúp cải thiện…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
 
 <V2UpgradeWarning />
 
-Inertia's deferred props feature allows you to defer the loading of certain page data until after the initial page render. This can be useful for improving the perceived performance of your app by allowing the initial page render to happen as quickly as possible.
+Tính năng deferred props của Inertia cho phép trì hoãn việc tải một số dữ liệu trang cho đến sau khi lần render ban đầu hoàn tất. Điều này giúp cải thiện hiệu năng cảm nhận bằng cách cho phép trang ban đầu render nhanh nhất có thể.
 
-## Server Side
+## Phía máy chủ
 
-To defer a prop, you can use the `Inertia::defer()` method when returning your response. This method receives a callback that returns the prop data. The callback will be executed in a separate request after the initial page render.
+Để defer một prop, bạn có thể dùng method `Inertia::defer()` khi trả response. Method nhận callback trả dữ liệu prop. Callback sẽ được thực thi trong một request riêng sau lần render trang ban đầu.
 
 ```php
 Route::get('/users', function () {
@@ -22,9 +23,9 @@ Route::get('/users', function () {
 });
 ```
 
-### Grouping Requests
+### Nhóm request
 
-By default, all deferred props get fetched in one request after the initial page is rendered, but you can choose to fetch data in parallel by grouping props together.
+Mặc định, tất cả deferred props được fetch trong một request sau khi trang ban đầu đã render, nhưng bạn có thể fetch song song bằng cách nhóm các prop.
 
 ```php
 Route::get('/users', function () {
@@ -39,11 +40,11 @@ Route::get('/users', function () {
 });
 ```
 
-In the example above, the `teams`, `projects`, and `tasks` props will be fetched in one request, while the `permissions` prop will be fetched in a separate request in parallel. Group names are arbitrary strings and can be anything you choose.
+Trong ví dụ trên, props `teams`, `projects` và `tasks` được fetch trong một request, còn prop `permissions` được fetch song song trong request riêng. Tên group là chuỗi tùy ý và có thể đặt theo ý bạn.
 
-## Client Side
+## Phía client
 
-On the client side, Inertia provides the `Deferred` component to help you manage deferred props. This component will automatically wait for the specified deferred props to be available before rendering its children.
+Ở phía client, Inertia cung cấp component `Deferred` để quản lý deferred props. Component tự động chờ các deferred prop được chỉ định có sẵn trước khi render children.
 
 <CodeGroup>
 
@@ -113,9 +114,9 @@ export default () => (
 
 </CodeGroup>
 
-## Multiple Deferred Props
+## Nhiều deferred prop
 
-If you need to wait for multiple deferred props to become available, you can specify an array to the `data` prop.
+Nếu cần chờ nhiều deferred prop cùng có sẵn, bạn có thể truyền một array vào prop `data`.
 
 <CodeGroup>
 
@@ -180,9 +181,9 @@ export default () => (
 
 </CodeGroup>
 
-## Combining with Once Props
+## Kết hợp với Once Props
 
-You may chain the `once()` modifier onto a deferred prop to ensure the data is resolved only once and remembered by the client across subsequent navigations.
+Bạn có thể nối modifier `once()` vào deferred prop để đảm bảo dữ liệu chỉ được resolve một lần và được phía client ghi nhớ qua các lần điều hướng tiếp theo.
 
 ```php
 return Inertia::render('Dashboard', [
@@ -190,4 +191,4 @@ return Inertia::render('Dashboard', [
 ]);
 ```
 
-For more information on once props, see the [once props](/v2/data-props/once-props) documentation.
+Để biết thêm về once props, xem tài liệu [once props](/v2/data-props/once-props).

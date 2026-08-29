@@ -1,28 +1,29 @@
 ---
 title: Validation
+description: "Việc xử lý lỗi validation phía máy chủ trong Inertia khác với form truyền thống điều khiển bằng XHR, nơi bạn phải bắt lỗi validation từ response 422 và tự…"
 ---
 
 import V2UpgradeWarning from "/snippets/v2-upgrade-warning.mdx";
 
 <V2UpgradeWarning />
 
-## How It Works
+## Cách hoạt động
 
-Handling server-side validation errors in Inertia works differently than a classic XHR-driven form that requires you to catch the validation errors from `422` responses and manually update the form's error state - because Inertia never receives `422` responses. Instead, Inertia operates much more like a standard full page form submission. Here's how:
+Việc xử lý lỗi validation phía máy chủ trong Inertia khác với form truyền thống điều khiển bằng XHR, nơi bạn phải bắt lỗi validation từ response `422` và tự cập nhật trạng thái lỗi của form — bởi Inertia không bao giờ nhận response `422`. Thay vào đó, Inertia hoạt động gần giống việc submit form tải toàn bộ trang thông thường. Cách thức như sau:
 
-First, you [submit your form using Inertia](/v2/the-basics/forms). If there are server-side validation errors, you don't return those errors as a `422` JSON response. Instead, you redirect (server-side) the user back to the form page they were previously on, flashing the validation errors in the session. Some frameworks, such as Laravel, do this automatically.
+Trước tiên, bạn [submit form bằng Inertia](/v2/the-basics/forms). Nếu có lỗi validation phía máy chủ, bạn không trả các lỗi đó dưới dạng response JSON `422`. Thay vào đó, bạn redirect người dùng ở phía máy chủ về trang form trước đó và flash lỗi validation vào session. Một số framework như Laravel thực hiện tự động.
 
-Next, any time these validation errors are present in the session, they automatically get shared with Inertia, making them available client-side as page props which you can display in your form. Since props are reactive, they are automatically shown when the form submission completes.
+Tiếp theo, bất cứ khi nào các lỗi validation này tồn tại trong session, chúng sẽ tự động được chia sẻ với Inertia và trở thành page props ở phía client để bạn hiển thị trong form. Vì props có tính reactive, lỗi sẽ tự động được hiển thị khi quá trình submit form hoàn tất.
 
-Finally, since Inertia apps never generate `422` responses, Inertia needs another way to determine if a response includes validation errors. To do this, Inertia checks the `page.props.errors` object for the existence of any errors. In the event that errors are present, the request's `onError()` callback will be called instead of the `onSuccess()` callback.
+Cuối cùng, vì ứng dụng Inertia không bao giờ tạo response `422`, Inertia cần một cách khác để xác định response có chứa lỗi validation hay không. Inertia thực hiện việc này bằng cách kiểm tra object `page.props.errors` xem có lỗi nào tồn tại không. Nếu có lỗi, callback `onError()` của request sẽ được gọi thay cho callback `onSuccess()`.
 
-## Sharing Errors
+## Chia sẻ lỗi
 
-In order for your server-side validation errors to be available client-side, your server-side framework must share them via the `errors` prop. Inertia's first-party adapters, such as the Laravel adapter, do this automatically. For other frameworks, you may need to do this manually. Please refer to your specific server-side adapter documentation for more information.
+Để lỗi validation phía máy chủ có thể sử dụng ở phía client, framework phía máy chủ phải chia sẻ chúng thông qua prop `errors`. Các adapter chính thức của Inertia, chẳng hạn adapter Laravel, tự động thực hiện việc này. Với framework khác, bạn có thể phải tự cấu hình. Hãy tham khảo tài liệu của adapter phía máy chủ tương ứng để biết thêm thông tin.
 
-## Displaying Errors
+## Hiển thị lỗi
 
-Since validation errors are made available client-side as page component props, you can conditionally display them based on their existence. Remember, when using our first-party server adapters (such as the Laravel adapter), the `errors` prop will automatically be available to your page.
+Vì lỗi validation được cung cấp cho phía client dưới dạng props của page component, bạn có thể hiển thị có điều kiện dựa trên việc chúng có tồn tại hay không. Hãy nhớ rằng khi sử dụng các server adapter chính thức của Inertia (chẳng hạn adapter Laravel), prop `errors` sẽ tự động có sẵn trên trang.
 
 <CodeGroup>
 
@@ -138,11 +139,11 @@ export default function Edit() {
 
 </CodeGroup>
 
-When using the Vue adapters, you may also access the errors via the `$page.props.errors` object.
+Khi sử dụng adapter Vue, bạn cũng có thể truy cập lỗi thông qua object `$page.props.errors`.
 
-### Multiple Errors Per Field
+### Nhiều lỗi cho mỗi field
 
-By default, Inertia's Laravel adapter returns only the first validation error for each field. You may opt-in to receiving all errors by setting the `$withAllErrors` property to `true` in your middleware.
+Mặc định, adapter Laravel của Inertia chỉ trả lỗi validation đầu tiên cho mỗi field. Bạn có thể chọn nhận toàn bộ lỗi bằng cách đặt property `$withAllErrors` thành `true` trong middleware.
 
 ```php
 class HandleInertiaRequests extends Middleware
@@ -153,7 +154,7 @@ class HandleInertiaRequests extends Middleware
 }
 ```
 
-When enabled, each field will contain an array of error strings instead of a single string.
+Khi bật, mỗi field chứa một mảng chuỗi lỗi thay vì một chuỗi duy nhất.
 
 <CodeGroup>
 
@@ -173,23 +174,23 @@ When enabled, each field will contain an array of error strings instead of a sin
 
 </CodeGroup>
 
-You may [configure TypeScript](/v2/advanced/typescript#error-values) to expect arrays instead of strings.
+Bạn có thể [cấu hình TypeScript](/v2/advanced/typescript#error-values) để kỳ vọng mảng thay vì chuỗi.
 
-## Repopulating Input
+## Khôi phục dữ liệu input
 
-While handling errors in Inertia is similar to full page form submissions, Inertia offers even more benefits. In fact, you don't even need to manually repopulate old form input data.
+Mặc dù cách xử lý lỗi trong Inertia tương tự submit form tải toàn bộ trang, Inertia còn mang lại nhiều lợi ích hơn. Thực tế, bạn thậm chí không cần tự điền lại dữ liệu input cũ của form.
 
-When validation errors occur, the user is typically redirected back to the form page they were previously on. And, by default, Inertia automatically preserves the [component state](/v2/the-basics/manual-visits#state-preservation) for `post`, `put`, `patch`, and `delete` requests. Therefore, all the old form input data remains exactly as it was when the user submitted the form.
+Khi xảy ra lỗi validation, người dùng thường được redirect về trang form trước đó. Mặc định, Inertia tự động giữ [state của component](/v2/the-basics/manual-visits#state-preservation) cho request `post`, `put`, `patch` và `delete`. Vì vậy, toàn bộ dữ liệu input cũ của form vẫn giữ nguyên như lúc người dùng submit.
 
-So, the only work remaining is to display any validation errors using the `errors` prop.
+Do đó, công việc còn lại duy nhất là hiển thị các lỗi validation bằng prop `errors`.
 
-## Error Bags
+## Error bag
 
-If you're using the [form helper](/v2/the-basics/forms#form-helper), it's not necessary to use error bags since validation errors are automatically scoped to the form object making the request.
+Nếu đang dùng [form helper](/v2/the-basics/forms#form-helper), không cần dùng error bag vì lỗi validation tự động được scope vào object form tạo request.
 
-For pages that have more than one form, it's possible to encounter conflicts when displaying validation errors if two forms share the same field names. For example, imagine a "create company" form and a "create user" form that both have a `name` field. Since both forms will be displaying the `page.props.errors.name` validation error, generating a validation error for the `name`field in either form will cause the error to appear in both forms.
+Với các trang có nhiều hơn một form, xung đột có thể xảy ra khi hiển thị lỗi validation nếu hai form dùng chung tên field. Ví dụ, hãy hình dung một form "tạo công ty" và một form "tạo người dùng" đều có field `name`. Vì cả hai form đều hiển thị lỗi validation `page.props.errors.name`, việc phát sinh lỗi validation cho field `name` ở bất kỳ form nào cũng khiến lỗi xuất hiện ở cả hai form.
 
-To solve this issue, you can use "error bags". Error bags scope the validation errors returned from the server within a unique key specific to that form. Continuing with our example above, you might have a `createCompany` error bag for the first form and a `createUser` error bag for the second form.
+Để giải quyết vấn đề này, bạn có thể sử dụng "error bag". Error bag giới hạn phạm vi các lỗi validation được máy chủ trả về bên trong một key duy nhất dành riêng cho form đó. Tiếp tục ví dụ trên, bạn có thể dùng error bag `createCompany` cho form thứ nhất và `createUser` cho form thứ hai.
 
 <CodeGroup>
 
@@ -231,4 +232,4 @@ router.post('/users', data, {
 
 </CodeGroup>
 
-Specifying an error bag will cause the validation errors to come back from the server within `page.props.errors.createCompany` and `page.props.errors.createUser`.
+Khi chỉ định error bag, các lỗi validation từ máy chủ sẽ được trả về tương ứng trong `page.props.errors.createCompany` và `page.props.errors.createUser`.
