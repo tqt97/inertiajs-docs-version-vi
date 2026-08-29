@@ -1,0 +1,304 @@
+---
+title: "Product CRUD: upload ảnh, preview và progress"
+description: "Nâng Product CRUD với ảnh sản phẩm: preview tức thì, FormData, upload progress, validation server-side, replace/remove image, method spoofing và cleanup an toàn."
+---
+
+# Product CRUD: upload ảnh, preview và progress
+
+Ảnh sản phẩm là một ví dụ rất tốt để nhìn rõ cách Inertia kết nối **state UI ở React** với **validation và storage ở Laravel** mà không cần tự xây một REST upload API riêng.
+
+<img src="/images/samples/product-crud/product-screen-map.svg" alt="Bản đồ UI Product CRUD có thumbnail ở Index và preview/progress ở Edit" />
+
+## Ta đang muốn đạt UX gì?
+
+Ở màn hình Create/Edit:
+
+- người dùng chọn ảnh và thấy preview ngay, chưa cần upload;
+- chọn ảnh mới sẽ thay preview hiện tại;
+- có thể xóa ảnh hiện tại ở Edit;
+- submit khóa field để tránh double-submit;
+- hiển thị phần trăm upload từ `form.progress`;
+- có thể `cancel()` request dài;
+- lỗi `image` từ Laravel quay lại đúng field;
+- nếu update ảnh, request dùng multipart + method spoofing;
+- redirect thành công trả về page props mới và thumbnail mới.
+
+<img src="/images/samples/product-crud/product-image-flow.svg" alt="Luồng upload ảnh Product từ React useForm qua FormData đến Laravel và redirect Inertia" />
+
+## 1. Schema chỉ lưu path, không lưu binary
+
+```php
+$table->string('image_path')->nullable();
+```
+
+Database chỉ cần giữ đường dẫn tương đối. File thực tế nằm ở `public` disk.
+
+Sau khi copy sample vào Laravel project, chạy:
+
+```bash
+php artisan storage:link
+```
+
+## 2. Form data có cả file và intent xóa ảnh
+
+```ts
+export type ProductFormData = {
+  name: string
+  sku: string
+  price: string
+  is_active: boolean
+  image: File | null
+  remove_image: boolean
+}
+```
+
+`image` là state tạm ở browser. `remove_image` là intent rõ ràng để backend phân biệt:
+
+```text
+image = null + remove_image = false
+→ giữ ảnh cũ
+
+image = File
+→ replace ảnh cũ
+
+image = null + remove_image = true
+→ xóa ảnh cũ
+```
+
+Đây là cách tránh semantics mơ hồ của `null`.
+
+## 3. Preview phải là local UI state
+
+Khi user chọn file, không cần upload ngay chỉ để preview:
+
+```tsx
+const objectUrl = URL.createObjectURL(form.data.image)
+setPreviewUrl(objectUrl)
+
+return () => URL.revokeObjectURL(objectUrl)
+```
+
+Điểm quan trọng là `URL.revokeObjectURL()`. Nếu người dùng chọn ảnh nhiều lần mà không cleanup, tab có thể giữ các blob URL cũ lâu hơn cần thiết.
+
+<Note>
+Browser không thể khôi phục giá trị của `<input type="file">` khi back/forward vì lý do bảo mật. Keyed `useForm` vẫn hữu ích cho các field text/error state, nhưng người dùng phải chọn lại file nếu rời trang trước khi submit.
+</Note>
+
+## 4. File input cập nhật trực tiếp `useForm`
+
+```tsx
+<input
+  type="file"
+  accept="image/jpeg,image/png,image/webp"
+  onChange={(event) => {
+    form.setData('image', event.target.files?.[0] ?? null)
+    form.setData('remove_image', false)
+    form.clearErrors('image')
+  }}
+/>
+```
+
+Không cần tự tạo `FormData` cho happy path. Inertia có thể chuyển data có file sang multipart request.
+
+Sample vẫn đặt `forceFormData: true` để intent rõ và để Edit luôn dùng cùng request shape.
+
+## 5. Upload progress là form lifecycle state
+
+```tsx
+{form.progress && (
+  <div>
+    <span>{form.progress.percentage}%</span>
+    <progress value={form.progress.percentage} max={100} />
+  </div>
+)}
+```
+
+Không cần tự subscribe XHR upload event cho use case này.
+
+Mental model:
+
+```text
+idle
+ ↓ choose file
+local preview
+ ↓ submit
+processing = true
+progress = 0 → 100
+ ↓
+server validate/store
+ ↓
+redirect
+ ↓
+processing = false
+```
+
+## 6. Validation vẫn ở Laravel
+
+```php
+'image' => [
+    'nullable',
+    'image',
+    'mimes:jpg,jpeg,png,webp',
+    'max:2048',
+],
+```
+
+Frontend `accept=` chỉ là UX hint. Nó **không thay thế server validation**.
+
+Nếu Laravel reject file:
+
+```text
+validation fails
+  ↓ redirect back
+Inertia receives errors
+  ↓
+form.errors.image
+```
+
+React không cần tự parse response `422` để map error bag.
+
+## 7. Create: POST multipart bình thường
+
+```tsx
+form
+  .transform((data) => ({
+    ...data,
+    price: Number(data.price),
+  }))
+  .post('/products', {
+    forceFormData: true,
+    preserveScroll: 'errors',
+  })
+```
+
+## 8. Edit: dùng POST + method spoofing
+
+Multipart với `PUT/PATCH` có thể gây giới hạn ở một số server/framework stack. Pattern an toàn là gửi `POST` nhưng thêm `_method`:
+
+```tsx
+form
+  .transform((data) => ({
+    ...data,
+    _method: 'put',
+    price: Number(data.price),
+  }))
+  .post(`/products/${product.id}`, {
+    forceFormData: true,
+    preserveScroll: 'errors',
+  })
+```
+
+Laravel vẫn route request như `PUT`.
+
+## 9. Replace ảnh mà không xóa ảnh cũ quá sớm
+
+Backend sample làm theo thứ tự:
+
+```text
+store ảnh mới
+  ↓
+update database
+  ↓ success
+xóa ảnh cũ
+```
+
+Nếu DB update fail sau khi đã store ảnh mới, sample xóa file mới trong `catch` để giảm orphan file.
+
+Không nên:
+
+```text
+xóa ảnh cũ
+  ↓
+DB update fail
+  ↓
+product mất luôn ảnh cũ
+```
+
+## 10. Delete Product cũng cleanup file
+
+```php
+$imagePath = $product->image_path;
+$product->delete();
+
+if ($imagePath) {
+    Storage::disk('public')->delete($imagePath);
+}
+```
+
+Ở production lớn hơn, bạn có thể chuyển cleanup sang job/event nếu storage chậm, nhưng sample giữ flow đồng bộ để dễ học.
+
+## 11. Index chỉ nhận `image_url`, không biết storage path
+
+Server tạo presentation prop:
+
+```php
+'image_url' => $product->image_path
+    ? Storage::disk('public')->url($product->image_path)
+    : null,
+```
+
+Frontend nhận đúng thứ nó cần:
+
+```ts
+image_url: string | null
+```
+
+Điều này tốt hơn gửi `image_path` rồi để React tự đoán public URL/storage convention.
+
+## 12. Thumbnail ở table
+
+```tsx
+{product.image_url ? (
+  <img
+    src={product.image_url}
+    alt=""
+    className="h-full w-full object-cover"
+  />
+) : (
+  <div>No image</div>
+)}
+```
+
+Thumbnail trong bảng là decoration vì tên sản phẩm đã nằm ngay cạnh, nên `alt=""` tránh screen reader đọc lặp.
+
+## 13. Vì sao ví dụ ảnh giúp hiểu Inertia rõ hơn?
+
+CRUD text-only có thể khiến Inertia trông giống một router + form helper. File upload cho thấy nhiều lớp runtime hoạt động cùng nhau:
+
+```text
+React local state
++ useForm state machine
++ FormData serialization
++ upload progress
++ server validation
++ Laravel filesystem
++ redirect protocol
++ new page props
+```
+
+Mà bạn vẫn không phải tự dựng:
+
+```text
+/api/upload
+client API service
+422 error mapper
+upload progress store
+manual cache invalidation
+manual navigation sync
+```
+
+## Full source
+
+```text
+examples/product-crud/frontend/components/ProductImageField.tsx
+examples/product-crud/frontend/components/ProductForm.tsx
+examples/product-crud/frontend/pages/Products/Create.tsx
+examples/product-crud/frontend/pages/Products/Edit.tsx
+examples/product-crud/backend/ProductController.php
+examples/product-crud/backend/StoreProductRequest.php
+examples/product-crud/backend/UpdateProductRequest.php
+```
+
+<Warning>
+Sample dùng local `public` disk để dễ copy và học. Production có thể dùng S3/object storage; khi đó vẫn giữ nguyên mental model Inertia, chỉ thay storage implementation và cách sinh `image_url`.
+</Warning>

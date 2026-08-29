@@ -1,0 +1,174 @@
+---
+title: "Form UX: loading, validation, success & cancel"
+description: "Thiết kế form Inertia.js production-ready với processing, validation errors, recentlySuccessful, dirty state, request cancellation và chống double submit."
+---
+
+# Form UX: loading, validation, success & cancel
+
+Một form tốt không chỉ “submit được”. Người dùng cần biết request đang chạy, field nào sai, dữ liệu đã lưu chưa và chuyện gì xảy ra nếu đóng modal giữa chừng.
+
+## Mẫu `useForm`
+
+```tsx
+import { useForm } from '@inertiajs/react'
+
+export default function ProfileForm() {
+  const form = useForm({
+    name: '',
+    bio: '',
+  })
+
+  const submit = (event: React.FormEvent) => {
+    event.preventDefault()
+
+    form.put('/profile', {
+      preserveScroll: true,
+      onSuccess: () => form.defaults(),
+    })
+  }
+
+  return (
+    <form onSubmit={submit} className="space-y-4">
+      <div>
+        <label htmlFor="name">Tên</label>
+        <input
+          id="name"
+          value={form.data.name}
+          onChange={(e) => form.setData('name', e.target.value)}
+          aria-invalid={Boolean(form.errors.name)}
+          aria-describedby={form.errors.name ? 'name-error' : undefined}
+        />
+        {form.errors.name && (
+          <p id="name-error" role="alert">{form.errors.name}</p>
+        )}
+      </div>
+
+      <textarea
+        value={form.data.bio}
+        onChange={(e) => form.setData('bio', e.target.value)}
+      />
+
+      <button type="submit" disabled={form.processing || !form.isDirty}>
+        {form.processing ? 'Đang lưu…' : 'Lưu thay đổi'}
+      </button>
+
+      {form.processing && (
+        <button type="button" onClick={() => form.cancel()}>
+          Hủy request
+        </button>
+      )}
+
+      {form.recentlySuccessful && (
+        <span role="status">Đã lưu.</span>
+      )}
+    </form>
+  )
+}
+```
+
+## Phân biệt các state
+
+| State | Ý nghĩa | UI nên làm |
+| --- | --- | --- |
+| `processing` | Request đang chạy | Disable submit, có thể hiển thị spinner |
+| `errors` | Backend validation fail | Gắn error sát field |
+| `isDirty` | Data khác defaults | Enable Save hoặc cảnh báo unsaved changes |
+| `wasSuccessful` | Form đã từng submit thành công | Hữu ích cho logic sau success |
+| `recentlySuccessful` | Thành công trong một khoảng ngắn | Hiển thị “Đã lưu” tạm thời |
+| `progress` | Upload đang gửi | Progress bar |
+
+## Không dùng client validation để thay backend validation
+
+Client validation có thể cải thiện UX, nhưng policy/rule cuối cùng vẫn phải ở server. Nếu browser bị bypass, request trực tiếp vẫn phải bị chặn.
+
+## Error flow trong Inertia
+
+Với Laravel, validation thường redirect back cùng session errors. Inertia adapter nhận errors ở request kế tiếp và đưa chúng vào form/page props. Vì state của mutation request được preserve phù hợp, input người dùng không cần tự repopulate bằng một REST-style `422 JSON` flow.
+
+## Modal form và request đang chạy
+
+Nếu modal đóng nhưng component chưa điều hướng đi đâu, request có thể vẫn tiếp tục. Nếu business case yêu cầu đóng modal là hủy upload/mutation, gọi `form.cancel()` khi đóng hoặc dùng Form component với `cancelOnUnmount` ở nơi phù hợp.
+
+## Một form production hoàn chỉnh
+
+```tsx
+const form = useForm(`EditProduct:${product.id}`, {
+    name: product.name,
+    sku: product.sku,
+    price: product.price,
+})
+
+function submit(e: FormEvent) {
+    e.preventDefault()
+
+    form.put(route('products.update', product.id), {
+        preserveScroll: 'errors',
+        onError: (errors) => {
+            if (errors.name) nameRef.current?.focus()
+        },
+    })
+}
+```
+
+```tsx
+<form onSubmit={submit} aria-busy={form.processing}>
+    <input
+        ref={nameRef}
+        value={form.data.name}
+        onChange={(e) => form.setData('name', e.target.value)}
+        aria-invalid={Boolean(form.errors.name)}
+        aria-describedby={form.errors.name ? 'name-error' : undefined}
+    />
+
+    {form.errors.name && (
+        <p id="name-error" role="alert">
+            {form.errors.name}
+        </p>
+    )}
+
+    <button disabled={form.processing || !form.isDirty}>
+        {form.processing ? 'Đang lưu…' : 'Lưu thay đổi'}
+    </button>
+
+    {form.recentlySuccessful && (
+        <span role="status">Đã lưu</span>
+    )}
+</form>
+```
+
+## Unsaved-change guard
+
+Đừng chặn navigation vô điều kiện; chỉ cảnh báo khi form dirty:
+
+```tsx
+const shouldWarn = form.isDirty && !form.processing
+```
+
+Nếu triển khai browser `beforeunload`, nhớ cleanup listener và đừng biến nó thành modal khó thoát sau success/reset.
+
+## Multi-form page
+
+Mỗi form nên có instance/key riêng:
+
+```tsx
+const profile = useForm('Settings:Profile', { name: user.name })
+const password = useForm('Settings:Password', {
+    current_password: '',
+    password: '',
+    password_confirmation: '',
+})
+```
+
+Không dùng một object `errors` global rồi tự đoán error thuộc form nào.
+
+## Accessibility checklist
+
+```text
+[ ] button disabled khi processing phù hợp
+[ ] aria-busy trên region/form
+[ ] field error nối bằng aria-describedby
+[ ] error quan trọng có role=alert
+[ ] success nhẹ có role=status
+[ ] focus field lỗi đầu tiên khi hữu ích
+[ ] loading text không chỉ dựa vào spinner
+```

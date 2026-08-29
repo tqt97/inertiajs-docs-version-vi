@@ -1,0 +1,174 @@
+---
+title: "Tối ưu đúng chỗ: partial reload, deferred & prefetch"
+description: "Field guide tối ưu Inertia.js với partial reload, lazy evaluation, deferred props và prefetch dựa trên critical path thay vì tối ưu cảm tính."
+---
+
+# Tối ưu đúng chỗ: partial reload, deferred & prefetch
+
+Ba kỹ thuật này giải ba bài toán khác nhau:
+
+| Kỹ thuật | Câu hỏi nó giải quyết |
+| --- | --- |
+| Partial reload | “Request tiếp theo có cần lấy lại mọi prop không?” |
+| Deferred props | “Initial render có phải chờ prop tốn nhiều thời gian xử lý này không?” |
+| Prefetch | “Có thể lấy data trước khi user thực sự navigate không?” |
+
+## Partial reload
+
+```tsx
+import { router } from '@inertiajs/react'
+
+router.reload({
+  only: ['users'],
+  preserveScroll: true,
+})
+```
+
+Server nên lazy-evaluate prop:
+
+```php
+return Inertia::render('Users/Index', [
+    'users' => fn () => User::query()->paginate(),
+    'roles' => fn () => Role::query()->orderBy('name')->get(),
+]);
+```
+
+Nếu `roles` là eager expression thay vì closure, DB query vẫn có thể chạy dù client chỉ yêu cầu `users`.
+
+## Deferred prop
+
+```php
+return Inertia::render('Dashboard', [
+    'recentOrders' => Order::query()->latest()->limit(10)->get(),
+    'analytics' => Inertia::defer(
+        fn () => app(AnalyticsService::class)->summary(),
+        rescue: true,
+    ),
+]);
+```
+
+```tsx
+import { Deferred } from '@inertiajs/react'
+
+export default function Dashboard({ recentOrders, analytics }) {
+  return (
+    <>
+      <OrderList orders={recentOrders} />
+
+      <Deferred data="analytics" fallback={<AnalyticsSkeleton />}>
+        <AnalyticsPanel data={analytics} />
+      </Deferred>
+    </>
+  )
+}
+```
+
+`analytics` ra khỏi critical path của initial render. `rescue: true` hữu ích nếu panel phụ được phép fail mà không phá toàn page; đừng dùng nó để che lỗi của dữ liệu cốt lõi.
+
+## Prefetch
+
+```tsx
+import { Link } from '@inertiajs/react'
+
+<Link href="/users" prefetch cacheFor="30s">
+  Người dùng
+</Link>
+```
+
+Prefetch phù hợp với destination có xác suất click cao và response không quá nhạy với freshness. Không nên prefetch hàng chục link có response tốn nhiều tài nguyên hoặc dữ liệu chỉ vì API cho phép.
+
+## Quy tắc chọn
+
+```text
+Prop có cần cho above-the-fold không?
+  yes -> trả ngay
+  no  -> deferred nếu dữ liệu tốn nhiều thời gian xử lý
+
+Same page reload chỉ đổi một phần data?
+  yes -> partial reload + lazy server prop
+
+User gần như chắc sẽ vào page kế tiếp?
+  yes -> cân nhắc prefetch + TTL ngắn
+```
+
+## Đo trước và sau
+
+Theo dõi tối thiểu:
+
+- TTFB của Inertia request.
+- Query count và query time.
+- Payload JSON size.
+- Thời gian từ navigation đến content usable.
+- Số request do prefetch nhưng user không bao giờ dùng.
+
+Tối ưu đúng nghĩa là giảm critical-path work, không phải bật mọi feature performance cùng lúc.
+
+## Đừng trộn ba capability thành một khái niệm “cache”
+
+```text
+Partial reload -> cùng page component, chỉ xin subset props
+Deferred props -> secondary data đến sau initial render
+Prefetch       -> lấy trước response có khả năng dùng sắp tới
+```
+
+Ba thứ tối ưu ba điểm khác nhau.
+
+## Thiết kế prop boundary trước khi tối ưu
+
+Khó tối ưu:
+
+```php
+'pageData' => fn () => [
+    'products' => $this->products(),
+    'stats' => $this->stats(),
+    'categories' => $this->categories(),
+]
+```
+
+Dễ tối ưu hơn:
+
+```php
+'products' => fn () => $this->products(),
+'categories' => fn () => $this->categories(),
+'stats' => Inertia::defer(fn () => $this->stats()),
+```
+
+Prop boundary là performance architecture.
+
+## Measure query count và payload
+
+Trước/sau optimization nên đo:
+
+```text
+initial HTML/JSON bytes
+partial response bytes
+SQL query count
+server duration
+deferred completion duration
+prefetch hit/waste ratio
+```
+
+Nếu partial reload giảm payload 80% nhưng server vẫn chạy tất cả query tốn nhiều tài nguyên thì tối ưu vẫn chưa hoàn chỉnh.
+
+## Freshness budget cho prefetch
+
+Ví dụ Edit Product:
+
+```tsx
+<Link href={editUrl} prefetch cacheFor="20s">
+    Sửa
+</Link>
+```
+
+20 giây có thể hợp admin CRUD; nhưng permission/inventory cực nhạy cần TTL khác hoặc không prefetch.
+
+## Deferred failure phải degrade gracefully
+
+Primary list vẫn nên usable nếu analytics panel fail:
+
+```text
+Products list: critical
+Stats chart: secondary/deferred
+```
+
+Đừng để secondary data biến thành single point of failure của page.

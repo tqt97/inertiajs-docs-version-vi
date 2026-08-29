@@ -1,0 +1,228 @@
+---
+title: "8 scenario tổng hợp: chọn đúng sức mạnh Inertia"
+description: "Tám scenario thực chiến giúp ghép các capability Inertia.js v3 thành pattern hoàn chỉnh: search, dashboard, modal form, optimistic toggle, upload, polling, infinite list và external API."
+---
+
+# 8 scenario tổng hợp: chọn đúng sức mạnh Inertia
+
+Trang này không dạy API theo từng feature. Mỗi scenario bắt đầu từ **vấn đề sản phẩm** rồi mới chọn capability Inertia.
+
+## Decision map nhanh
+
+| Scenario | Nên nghĩ tới |
+| --- | --- |
+| Filter table | URL state + partial reload + preserve state |
+| Dashboard query nặng | deferred props |
+| Navigation có khả năng click cao | prefetch |
+| Toggle nhỏ, reversible | optimistic update |
+| Form modal | keyed `useForm` + preserve state |
+| Upload | form progress + cancel |
+| Job đang xử lý | polling |
+| Feed/list dài | infinite scrolling / merge props |
+| API ngoài Inertia | `useHttp` |
+
+## Scenario 1 — Admin table có search/filter/sort
+
+Requirement:
+
+```text
+- URL share được
+- Back/Forward đúng
+- không reload toàn page
+- không query lại sidebar/stats
+```
+
+Pattern:
+
+```tsx
+router.get('/orders', filters, {
+  only: ['orders', 'filters'],
+  preserveState: true,
+  preserveScroll: true,
+  replace: true,
+})
+```
+
+Server dùng closure cho prop có chi phí xử lý cao:
+
+```php
+'orders' => fn () => $this->queryOrders($filters),
+```
+
+Đây là default pattern rất mạnh cho admin/business app.
+
+## Scenario 2 — Dashboard có KPI query chậm
+
+Requirement:
+
+```text
+page shell phải interactive sớm
+KPI có thể xuất hiện sau
+KPI fail không được phá page
+```
+
+Pattern:
+
+```php
+'kpis' => Inertia::defer(
+    fn () => $analytics->kpis(),
+    rescue: true,
+),
+```
+
+```tsx
+<Deferred data="kpis" fallback={<KpiSkeleton />}>
+  <Kpis />
+</Deferred>
+```
+
+Mental model: **prioritize first paint**, không phải “defer để query biến mất”. Query vẫn chạy, chỉ đổi critical path.
+
+## Scenario 3 — Edit drawer/modal
+
+Requirement:
+
+```text
+mở form
+nhập dở
+đóng/mở hoặc back/forward
+không mất data
+validation server-side
+```
+
+Pattern:
+
+```tsx
+const form = useForm(`EditCustomer:${customer.id}`, initialData)
+```
+
+Kết hợp `isDirty`, `errors`, `processing` và key theo entity identity.
+
+Nếu modal unmount khi đóng và request dài, cần quyết định rõ request nên tiếp tục hay bị cancel.
+
+## Scenario 4 — Toggle bookmark/favorite/status
+
+Requirement:
+
+```text
+user phải thấy phản hồi ngay
+mutation nhỏ
+rollback dễ
+```
+
+Pattern:
+
+```tsx
+router
+  .optimistic((props) => ({
+    item: { ...props.item, bookmarked: !props.item.bookmarked },
+  }))
+  .post(`/items/${item.id}/bookmark`)
+```
+
+Đây là optimistic UX đúng chỗ. Không copy pattern này sang payment.
+
+## Scenario 5 — Upload avatar/file
+
+Requirement:
+
+```text
+progress
+cancel
+validation error
+không double submit
+```
+
+Pattern tư duy:
+
+```text
+useForm
+  + File
+  + progress
+  + processing
+  + cancel()
+```
+
+UI cần hiển thị progress từ form thay vì tự xây XMLHttpRequest layer riêng nếu request vẫn thuộc Inertia form lifecycle.
+
+## Scenario 6 — Export report chạy background
+
+Requirement:
+
+```text
+POST bắt đầu export
+server trả job ID/state page
+UI cập nhật tới khi ready
+```
+
+Pattern:
+
+```text
+submit mutation
+→ redirect status page
+→ polling partial prop
+→ ready
+→ download link
+```
+
+Không cần WebSocket nếu business requirement chấp nhận vài giây latency.
+
+## Scenario 7 — Activity feed rất dài
+
+Requirement:
+
+```text
+load thêm page
+không replace list cũ
+URL/history vẫn hợp lý
+```
+
+Pattern:
+
+```text
+server paginated prop
++ merge/infinite scroll semantics
++ scroll management
+```
+
+Đây là lúc merge props / infinite scrolling hữu ích hơn tự dựng Redux list cache.
+
+## Scenario 8 — Gọi API thứ ba không phải page visit
+
+Ví dụ search postcode từ external service hoặc preview một API endpoint.
+
+Không phải request nào cũng nên trở thành Inertia navigation. Với v3, `useHttp` phù hợp cho HTTP request độc lập nhưng vẫn muốn lifecycle state tương tự form.
+
+Mental model:
+
+```text
+changes current page/navigation?
+  yes → Inertia visit / form
+  no, independent HTTP call → useHttp
+```
+
+## Anti-pattern map
+
+| Anti-pattern | Thay bằng |
+| --- | --- |
+| Fetch JSON rồi tự map validation errors | `useForm` + server validation |
+| Global store cho filter URL | server props + query string |
+| Full reload table khi filter | partial reload |
+| Block first paint vì sidebar analytics | deferred props |
+| Prefetch mọi link trong table | prefetch theo interaction/probability |
+| Optimistic mọi mutation | chỉ mutation nhỏ/reversible |
+| Spinner trắng toàn page | preserve UI + targeted pending state |
+| REST API chỉ để CRUD cùng monolith | server routes + Inertia protocol |
+
+## Câu hỏi tự kiểm tra trước khi code
+
+1. State này thuộc URL, server, form hay interaction local?
+2. Request này là page visit hay HTTP call độc lập?
+3. Prop nào thật sự cần cho first paint?
+4. Khi filter, prop nào cần refresh?
+5. Có thể prefetch vì user nhiều khả năng click không?
+6. Mutation có đủ nhỏ và reversible để optimistic không?
+7. Failure sẽ rollback UI thế nào?
+8. Back/Forward có restore đúng mental model không?
+
+Trả lời được tám câu này thường quan trọng hơn nhớ tên từng option.

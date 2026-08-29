@@ -1,0 +1,158 @@
+---
+title: "Testing CRUD Inertia từ backend"
+description: "Feature tests cho CRUD Inertia.js với Laravel: assert component/props, validation, authorization, redirect và database mutation."
+---
+
+# Testing CRUD Inertia từ backend
+
+UI test có giá trị, nhưng phần lớn invariant của Inertia app nằm ở backend: route, auth, validation, query và response props. Feature test nên là lớp bảo vệ đầu tiên.
+
+## Index response
+
+```php
+use App\Models\User;
+use Inertia\Testing\AssertableInertia as Assert;
+
+it('shows the user index', function () {
+    $actor = User::factory()->create();
+    User::factory()->count(3)->create();
+
+    $this->actingAs($actor)
+        ->get('/users')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Users/Index')
+            ->has('users.data')
+        );
+});
+```
+
+## Validation
+
+```php
+it('validates user creation', function () {
+    $actor = User::factory()->create();
+
+    $this->actingAs($actor)
+        ->post('/users', [
+            'name' => '',
+            'email' => 'not-an-email',
+        ])
+        ->assertSessionHasErrors(['name', 'email']);
+});
+```
+
+## Mutation + redirect
+
+```php
+it('creates a user and redirects to index', function () {
+    $actor = User::factory()->create();
+
+    $response = $this->actingAs($actor)->post('/users', [
+        'name' => 'Nguyen Van A',
+        'email' => 'a@example.test',
+    ]);
+
+    $response
+        ->assertRedirect('/users')
+        ->assertSessionHas('success');
+
+    $this->assertDatabaseHas('users', [
+        'email' => 'a@example.test',
+    ]);
+});
+```
+
+## Authorization
+
+```php
+it('forbids deleting a user without permission', function () {
+    $actor = User::factory()->create();
+    $target = User::factory()->create();
+
+    $this->actingAs($actor)
+        ->delete("/users/{$target->id}")
+        ->assertForbidden();
+});
+```
+
+## Nên test gì ở frontend
+
+Frontend test nên tập trung behavior riêng của UI:
+
+- nút submit disabled khi processing;
+- error field hiển thị đúng;
+- confirm delete chặn action khi cancel;
+- filter giữ giá trị nhập;
+- progress bar xuất hiện khi có upload progress.
+
+Đừng duplicate toàn bộ backend validation rules thành test frontend nếu browser không sở hữu rule đó.
+
+## Test partial reload contract
+
+Backend test không chỉ assert status 200; assert prop boundary quan trọng:
+
+```php
+$this->get('/products?search=key')
+    ->assertInertia(fn (Assert $page) => $page
+        ->component('Products/Index')
+        ->has('products.data')
+        ->where('filters.search', 'key')
+    );
+```
+
+## Query-count regression
+
+List page dễ phát sinh N+1 sau khi thêm thumbnail/category/permission:
+
+```php
+DB::enableQueryLog();
+
+$this->actingAs($user)->get('/products');
+
+$this->assertLessThanOrEqual(8, count(DB::getQueryLog()));
+```
+
+Con số budget phải phù hợp project; mục tiêu là phát hiện regression, không phải chọn số đẹp.
+
+## Frontend interaction tests nên cover semantics
+
+Ví dụ Product form:
+
+```text
+- submit disable trong processing
+- server field error render đúng field
+- recently successful feedback xuất hiện
+- image preview đổi khi chọn file
+- clear replacement quay lại persisted image
+- filter navigation preserve input/scroll như design
+- optimistic toggle rollback khi request fail
+```
+
+## E2E cho browser semantics
+
+Playwright đáng dùng cho những thứ unit test khó chứng minh:
+
+```text
+Back/Forward restores expected state
+URL query sync đúng
+scroll restoration
+prefetched navigation vẫn đúng data
+upload progress/validation flow
+redirect + flash after mutation
+```
+
+## Failure-first test matrix
+
+Mỗi CRUD quan trọng nên có:
+
+```text
+happy path
+validation reject
+permission reject
+entity missing/stale tab
+duplicate constraint
+upload failure nếu có file
+server exception presentation
+optimistic rollback nếu feature dùng optimistic
+```

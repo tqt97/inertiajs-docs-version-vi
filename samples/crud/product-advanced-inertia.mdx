@@ -1,0 +1,232 @@
+---
+title: "Product CRUD: Advanced UX & failure modes"
+description: "Phân tích chuyên sâu cách phối hợp partial reload, deferred, prefetch, optimistic update, preserve state/scroll, flash và request lifecycle trong CRUD Inertia production."
+---
+
+# Product CRUD: Advanced UX & failure modes
+
+Một CRUD “nhanh” không chỉ là thêm spinner. Bạn cần hiểu state nào đang stale, request nào có thể overlap và response nào là canonical.
+
+## 1. Partial reload không phải client cache tùy ý
+
+Khi filter bảng:
+
+```tsx
+router.get('/products', params, {
+  only: ['products', 'filters'],
+})
+```
+
+Inertia merge prop mới vào page hiện tại. Các prop không request như `stats` vẫn giữ giá trị hiện có.
+
+Điều này tạo một câu hỏi quan trọng:
+
+> Stats có cần phản ánh filter hiện tại không?
+
+Trong sample: **không**. Stats là global totals nên giữ nguyên được.
+
+Nếu stats phụ thuộc filter thì phải:
+
+```tsx
+only: ['products', 'filters', 'stats']
+```
+
+hoặc thiết kế lại semantics.
+
+## 2. Deferred phải có fallback semantics
+
+```tsx
+<Deferred data="stats" fallback={<StatsSkeleton />}>
+  <Stats />
+</Deferred>
+```
+
+Có ba trạng thái phải nghĩ tới:
+
+```text
+not loaded
+loading/reloading
+resolved
+```
+
+Nếu dùng `rescue: true`, thêm trạng thái logic thứ tư:
+
+```text
+failed but page still usable
+```
+
+UI không nên giả định deferred data luôn tồn tại.
+
+## 3. Prefetch có freshness trade-off
+
+```tsx
+<Link href={`/products/${id}/edit`} prefetch cacheFor="30s">
+  Sửa
+</Link>
+```
+
+30 giây không có nghĩa dữ liệu chắc chắn mới 100%. Nó là trade-off giữa latency và freshness.
+
+Prefetch hợp với:
+
+- create page tĩnh;
+- edit page ít biến động;
+- navigation có probability cao.
+
+Không hợp với:
+
+- dữ liệu cực nhạy thời gian;
+- hàng trăm link trên table được prefetch đồng loạt;
+- page cần nhiều truy vấn hoặc thời gian xử lý nhưng người dùng hiếm khi mở.
+
+## 4. Optimistic update cần invariant nhỏ
+
+Sample toggle:
+
+```text
+is_active = !is_active
+```
+
+Đây là invariant nhỏ và rollback được.
+
+Không nên dùng optimistic UI mặc định cho:
+
+```text
+checkout
+payment
+inventory allocation
+complex approval workflow
+multi-record destructive mutation
+```
+
+Trong các case đó, waiting state rõ ràng thường an toàn hơn.
+
+## 5. `preserveState` không sửa được state ownership sai
+
+Nếu URL là:
+
+```text
+/products?status=active&search=phone
+```
+
+nhưng component local state lại là:
+
+```text
+status = inactive
+search = laptop
+```
+
+thì `preserveState: true` chỉ giữ inconsistency lâu hơn.
+
+Rule:
+
+```text
+URL/server state → props
+transient interaction → local state
+form lifecycle → useForm
+```
+
+## 6. Search request overlap
+
+Debounce giảm overlap nhưng không loại bỏ hoàn toàn. User có thể:
+
+```text
+type "iphone"
+request A
+↓
+đổi status active
+request B
+```
+
+Inertia quản lý visit lifecycle, nhưng UI design vẫn nên tránh tạo nhiều nguồn phát request không phối hợp.
+
+Một pattern tốt là mọi filter đi qua cùng một function canonical:
+
+```tsx
+function visitFilters(next: ProductFilters) {
+  router.get('/products', next, {
+    only: ['products', 'filters'],
+    preserveState: true,
+    preserveScroll: true,
+    replace: true,
+  })
+}
+```
+
+## 7. Flash và `recentlySuccessful` phục vụ hai scope khác nhau
+
+```text
+recentlySuccessful
+→ local form lifecycle
+
+flash.success
+→ cross-page redirect lifecycle
+```
+
+Create redirect index nên dùng flash. Inline autosave ở edit page có thể dùng `recentlySuccessful`.
+
+## 8. Loading không nên blank toàn page
+
+Sai:
+
+```text
+filter thay đổi
+→ hide table
+→ full page spinner
+→ table xuất hiện lại
+```
+
+Tốt hơn:
+
+```text
+filter thay đổi
+→ giữ table hiện tại
+→ request partial reload
+→ swap data khi response về
+```
+
+Nếu cần feedback, dùng subtle pending indicator thay vì phá layout.
+
+## 9. Error boundary theo phạm vi
+
+Phân biệt:
+
+```text
+validation error
+→ field errors
+
+authorization error
+→ server response / error page
+
+deferred stats error
+→ stats unavailable, CRUD vẫn dùng được
+
+network failure
+→ global toast / retry UX
+```
+
+Không gom tất cả thành `Something went wrong`.
+
+## 10. Khi CRUD lớn lên
+
+Khi Product index có thêm:
+
+- bulk actions;
+- export;
+- column preferences;
+- inline editing;
+- background job status;
+
+đừng lập tức chuyển thành SPA + REST API. Trước hết kiểm tra capability Inertia hiện có:
+
+```text
+bulk mutation       → Form/router visit
+export async         → normal route + polling
+preferences          → local/remembered state or persisted server state
+inline edit          → useForm / optimistic
+job progress         → polling
+large list           → pagination / infinite scroll
+sidebar query nặng  → deferred props
+```
+
+Chỉ tách API/client state layer khi requirement thực sự cần, không phải vì CRUD đã “nhiều JavaScript”.

@@ -1,0 +1,213 @@
+---
+title: "Product CRUD: Form Frontend đầy đủ state"
+description: "Xây create/edit form React với keyed useForm của Inertia v3: errors, processing, isDirty, recentlySuccessful, cancel, transform, remember state và UX validation."
+---
+
+# Product CRUD: Form Frontend đầy đủ state
+
+CRUD form thường bị viết như một `useState()` lớn + fetch + tự map lỗi. Inertia `useForm` đã cung cấp hầu hết lifecycle state cần thiết.
+
+## Form data nên phù hợp với input trước
+
+```ts
+export type ProductFormData = {
+  name: string
+  sku: string
+  price: string
+  is_active: boolean
+  image: File | null
+  remove_image: boolean
+}
+```
+
+`price` để `string` ở UI vì `<input>` thực tế làm việc với text. Chuyển sang number ở boundary submit bằng `transform()`.
+
+## Keyed `useForm`
+
+Create:
+
+```tsx
+const form = useForm<ProductFormData>('CreateProduct', {
+  name: '',
+  sku: '',
+  price: '',
+  is_active: true,
+  image: null,
+  remove_image: false,
+})
+```
+
+Edit:
+
+```tsx
+const form = useForm<ProductFormData>(`EditProduct:${product.id}`, {
+  name: product.name,
+  sku: product.sku,
+  price: String(product.price),
+  is_active: product.is_active,
+  image: null,
+  remove_image: false,
+})
+```
+
+Key giúp Inertia nhớ form data/errors trong history state. Flow thực tế:
+
+```text
+edit Product #42
+  ↓ nhập dở
+click sang page khác
+  ↓
+browser Back
+  ↓
+EditProduct:42 được restore
+```
+
+Key phải mang identity. `EditProduct` dùng chung cho mọi record sẽ tạo collision state.
+
+## Clear field error khi người dùng sửa lại
+
+```tsx
+function update<K extends keyof ProductFormData>(
+  key: K,
+  value: ProductFormData[K],
+) {
+  form.setData(key, value)
+  form.clearErrors(key)
+}
+```
+
+Server vẫn là authority; clear error chỉ là UX để lỗi cũ không bám trên field sau khi user đã thay input.
+
+## Submit có transform
+
+```tsx
+function submit() {
+  form
+    .transform((data) => ({
+      ...data,
+      price: Number(data.price),
+    }))
+    .post('/products', {
+      preserveScroll: 'errors',
+    })
+}
+```
+
+Không cần tự `fetch()` và parse 422 JSON. Khi Laravel redirect validation errors, Inertia đưa lỗi về `form.errors`.
+
+## Loading state
+
+```tsx
+<button
+  type="submit"
+  disabled={form.processing || !form.isDirty}
+>
+  {form.processing ? 'Đang lưu…' : 'Lưu thay đổi'}
+</button>
+```
+
+Và disable cả fieldset:
+
+```tsx
+<fieldset disabled={form.processing}>
+  ...
+</fieldset>
+```
+
+Điều này ngăn double-submit và ngăn data thay đổi giữa lúc request đang chạy.
+
+## Error state
+
+```tsx
+<input
+  id="sku"
+  value={form.data.sku}
+  aria-invalid={Boolean(form.errors.sku)}
+  onChange={(event) => update('sku', event.target.value)}
+/>
+
+{form.errors.sku && (
+  <p role="alert" className="text-sm text-red-600">
+    {form.errors.sku}
+  </p>
+)}
+```
+
+Đừng chỉ đổi border đỏ. Error cần readable text và nên có semantic accessibility.
+
+## Dirty state
+
+```tsx
+{form.isDirty && (
+  <span className="text-sm text-amber-700">
+    Có thay đổi chưa lưu
+  </span>
+)}
+```
+
+Ứng dụng thật có thể dùng `isDirty` để:
+
+- disable submit khi chưa thay đổi;
+- cảnh báo trước khi đóng modal;
+- hiển thị unsaved badge;
+- quyết định có reset form hay không.
+
+## Cancel request
+
+```tsx
+{form.processing && (
+  <button type="button" onClick={() => form.cancel()}>
+    Hủy request
+  </button>
+)}
+```
+
+Cancel hữu ích cho upload/request dài. Với request lưu rất nhanh, nút cancel không phải lúc nào cũng cần hiển thị; sample giữ nó để minh họa lifecycle.
+
+## Success state cục bộ
+
+```tsx
+{form.recentlySuccessful && (
+  <span className="text-sm text-green-700">Đã lưu</span>
+)}
+```
+
+Nếu submit redirect về index, flash message thường hữu ích hơn. Nếu save tại chỗ, `recentlySuccessful` cho feedback rất tự nhiên.
+
+## Create và Edit dùng cùng component
+
+```tsx
+<ProductForm
+  form={form}
+  submitLabel="Tạo sản phẩm"
+  onSubmit={submit}
+/>
+```
+
+`ProductForm` chỉ sở hữu presentation/interaction. Page create/edit sở hữu endpoint và intent submit.
+
+Đây là separation tốt hơn việc component form tự đoán đang create hay edit qua nullable ID.
+
+## Upload ảnh và progress
+
+Phần image lifecycle được tách riêng để không làm form cơ bản quá tải. Đọc tiếp **[Product CRUD: upload ảnh, preview và progress](/samples/crud/product-image-upload)**.
+
+## Full source
+
+```text
+examples/product-crud/frontend/components/ProductForm.tsx
+examples/product-crud/frontend/pages/Products/Create.tsx
+examples/product-crud/frontend/pages/Products/Edit.tsx
+```
+
+## Khi nào dùng `<Form>` thay `useForm`?
+
+Dùng `<Form>` khi bạn muốn declarative form gần với HTML form và ít imperative logic. Dùng `useForm` khi:
+
+- form có derived interaction;
+- cần programmatic `setData`;
+- cần nhiều button/intent;
+- cần `transform` theo state runtime;
+- cần truy cập lifecycle state ở nhiều component.
+
+Reference CRUD chọn `useForm` vì mục tiêu là trình diễn đầy đủ state machine của form.

@@ -1,0 +1,200 @@
+---
+title: "Product CRUD: backend contract mỏng"
+description: "Thiết kế backend Laravel tối giản cho reference Product CRUD để Frontend khai thác partial reload, deferred props, validation và redirect flow của Inertia.js v3."
+---
+
+# Product CRUD: backend contract mỏng
+
+Backend sample không cố trình diễn architecture pattern. Nó chỉ tạo một contract đủ tốt để Frontend có thể dùng Inertia đúng cách.
+
+## Routes
+
+```php routes/web.php
+use App\Http\Controllers\ProductController;
+use Illuminate\Support\Facades\Route;
+
+Route::middleware('auth')->group(function () {
+    Route::resource('products', ProductController::class)->except('show');
+
+    Route::patch('products/{product}/toggle', [ProductController::class, 'toggle'])
+        ->name('products.toggle');
+});
+```
+
+## Migration
+
+```php database/migrations/xxxx_xx_xx_create_products_table.php
+Schema::create('products', function (Blueprint $table) {
+    $table->id();
+    $table->string('name');
+    $table->string('sku')->unique();
+    $table->unsignedInteger('price');
+    $table->boolean('is_active')->default(true)->index();
+    $table->timestamps();
+});
+```
+
+`price` dùng integer để sample không mang thêm vấn đề floating-point vào phần Frontend.
+
+## Index: thiết kế prop theo cost
+
+```php app/Http/Controllers/ProductController.php
+public function index(Request $request): Response
+{
+    $filters = $request->validate([
+        'search' => ['nullable', 'string', 'max:100'],
+        'status' => ['nullable', 'in:all,active,inactive'],
+        'sort' => ['nullable', 'in:name,price,created_at'],
+        'direction' => ['nullable', 'in:asc,desc'],
+    ]);
+
+    $search = trim((string) ($filters['search'] ?? ''));
+    $status = $filters['status'] ?? 'all';
+    $sort = $filters['sort'] ?? 'created_at';
+    $direction = $filters['direction'] ?? 'desc';
+
+    return Inertia::render('Products/Index', [
+        'products' => fn () => Product::query()
+            ->select(['id', 'name', 'sku', 'price', 'is_active', 'created_at'])
+            ->when($search !== '', fn ($query) => $query->where(function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%");
+            }))
+            ->when($status === 'active', fn ($query) => $query->where('is_active', true))
+            ->when($status === 'inactive', fn ($query) => $query->where('is_active', false))
+            ->orderBy($sort, $direction)
+            ->paginate(10)
+            ->withQueryString(),
+
+        'filters' => [
+            'search' => $search,
+            'status' => $status,
+            'sort' => $sort,
+            'direction' => $direction,
+        ],
+
+        'stats' => Inertia::defer(fn () => [
+            'total' => Product::count(),
+            'active' => Product::where('is_active', true)->count(),
+            'inactive' => Product::where('is_active', false)->count(),
+        ], rescue: true),
+    ]);
+}
+```
+
+Ba quyết định quan trọng:
+
+### `products` dùng closure
+
+Closure giúp server trì hoãn evaluate prop tới khi Inertia biết request hiện tại có cần key đó hay không. Khi Frontend dùng partial reload, query không cần thiết có thể được bỏ qua.
+
+### `filters` được canonicalize ở server
+
+Frontend không tự suy luận default. Server trả đúng state cuối cùng:
+
+```json
+{
+  "search": "",
+  "status": "all",
+  "sort": "created_at",
+  "direction": "desc"
+}
+```
+
+Nhờ vậy URL, pagination và UI không drift.
+
+### `stats` là deferred
+
+Stats hữu ích nhưng không cần để người dùng bắt đầu thao tác với bảng. Vì vậy nó không nên block first paint.
+
+`rescue: true` phù hợp khi stats hỏng không được phép làm cả trang CRUD thất bại.
+
+## Store / update: validation vẫn thuộc server
+
+```php app/Http/Requests/StoreProductRequest.php
+public function rules(): array
+{
+    return [
+        'name' => ['required', 'string', 'max:120'],
+        'sku' => ['required', 'string', 'max:50', 'unique:products,sku'],
+        'price' => ['required', 'integer', 'min:0', 'max:1000000000'],
+        'is_active' => ['required', 'boolean'],
+    ];
+}
+```
+
+Frontend có thể thêm constraint UX nhưng không được biến client thành source of truth cho business validation.
+
+## Mutation và redirect
+
+```php
+public function store(StoreProductRequest $request): RedirectResponse
+{
+    Product::create($request->validated());
+
+    return to_route('products.index')
+        ->with('success', 'Đã tạo sản phẩm.');
+}
+
+public function update(UpdateProductRequest $request, Product $product): RedirectResponse
+{
+    $product->update($request->validated());
+
+    return to_route('products.index')
+        ->with('success', 'Đã cập nhật sản phẩm.');
+}
+```
+
+Đây là pattern quan trọng của Inertia:
+
+```text
+POST /products
+  ↓
+server mutate
+  ↓
+redirect GET /products
+  ↓
+page props mới
+```
+
+Bạn không cần `setProducts([...products, response.data])` sau create. Server response sau redirect mới là canonical state.
+
+## Toggle cho optimistic UX
+
+```php
+public function toggle(Product $product): RedirectResponse
+{
+    $product->update(['is_active' => ! $product->is_active]);
+
+    return back();
+}
+```
+
+Frontend sẽ đổi UI trước. Backend vẫn là authority. Nếu request fail, Inertia rollback optimistic page props.
+
+## Shared flash
+
+```php app/Http/Middleware/HandleInertiaRequests.php
+public function share(Request $request): array
+{
+    return [
+        ...parent::share($request),
+        'flash' => [
+            'success' => fn () => $request->session()->get('success'),
+            'error' => fn () => $request->session()->get('error'),
+        ],
+    ];
+}
+```
+
+Flash phù hợp cho feedback “mutation đã hoàn tất”. `recentlySuccessful` phù hợp hơn với feedback cục bộ của một form vẫn còn ở cùng page.
+
+## Không gửi quá nhiều dữ liệu
+
+Index chỉ select field cần render:
+
+```php
+->select(['id', 'name', 'sku', 'price', 'is_active', 'created_at'])
+```
+
+Đừng biến page props thành API dump toàn model. Prop càng lớn, serialization + network + history state càng nặng.

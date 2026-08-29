@@ -1,0 +1,436 @@
+---
+title: "CRUD hoàn chỉnh: Laravel + React"
+description: "Xây dựng full flow CRUD User bằng Laravel, React, TypeScript và Inertia.js v3 với validation, loading, flash message, delete confirmation và code có thể copy."
+---
+
+# CRUD hoàn chỉnh: Laravel + React
+
+Bài này xây một CRUD `User` tối giản nhưng đủ các trạng thái quan trọng khi đi làm: list, create, edit, validation, loading, success feedback và delete confirmation.
+
+## 1. Routes
+
+```php routes/web.php
+<?php
+
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('users', UserController::class)->except('show');
+});
+```
+
+Dùng resource route giúp backend vẫn giữ routing convention của Laravel. Inertia không yêu cầu client-side router riêng.
+
+## 2. Form Request
+
+```php app/Http/Requests/StoreUserRequest.php
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreUserRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return $this->user()->can('create', \App\Models\User::class);
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+        ];
+    }
+}
+```
+
+```php app/Http/Requests/UpdateUserRequest.php
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class UpdateUserRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return $this->user()->can('update', $this->route('user'));
+    }
+
+    public function rules(): array
+    {
+        $user = $this->route('user');
+
+        return [
+            'name' => ['required', 'string', 'max:100'],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+        ];
+    }
+}
+```
+
+## 3. Controller
+
+```php app/Http/Controllers/UserController.php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class UserController extends Controller
+{
+    public function index(): Response
+    {
+        $this->authorize('viewAny', User::class);
+
+        return Inertia::render('Users/Index', [
+            'users' => User::query()
+                ->select(['id', 'name', 'email', 'created_at'])
+                ->latest('id')
+                ->paginate(15)
+                ->withQueryString(),
+        ]);
+    }
+
+    public function create(): Response
+    {
+        $this->authorize('create', User::class);
+
+        return Inertia::render('Users/Create');
+    }
+
+    public function store(StoreUserRequest $request): RedirectResponse
+    {
+        User::create($request->validated());
+
+        return to_route('users.index')
+            ->with('success', 'Đã tạo người dùng.');
+    }
+
+    public function edit(User $user): Response
+    {
+        $this->authorize('update', $user);
+
+        return Inertia::render('Users/Edit', [
+            'user' => $user->only(['id', 'name', 'email']),
+        ]);
+    }
+
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
+    {
+        $user->update($request->validated());
+
+        return to_route('users.index')
+            ->with('success', 'Đã cập nhật người dùng.');
+    }
+
+    public function destroy(User $user): RedirectResponse
+    {
+        $this->authorize('delete', $user);
+
+        $user->delete();
+
+        return to_route('users.index')
+            ->with('success', 'Đã xóa người dùng.');
+    }
+}
+```
+
+Điểm đáng chú ý: controller không trả JSON. Sau mutation, backend redirect về route đích. Đây là flow tự nhiên của Inertia và giúp validation/authorization tiếp tục nằm ở server.
+
+## 4. Share flash message
+
+```php app/Http/Middleware/HandleInertiaRequests.php
+public function share(\Illuminate\Http\Request $request): array
+{
+    return [
+        ...parent::share($request),
+        'flash' => [
+            'success' => fn () => $request->session()->get('success'),
+        ],
+    ];
+}
+```
+
+## 5. Type dùng chung
+
+```ts resources/js/types/user.ts
+export type User = {
+  id: number
+  name: string
+  email: string
+  created_at?: string
+}
+
+export type PaginationLink = {
+  url: string | null
+  label: string
+  active: boolean
+}
+
+export type Paginated<T> = {
+  data: T[]
+  links: PaginationLink[]
+  current_page: number
+  last_page: number
+}
+```
+
+## 6. Index page
+
+```tsx resources/js/pages/Users/Index.tsx
+import { Head, Link, router, usePage } from '@inertiajs/react'
+import type { Paginated, User } from '@/types/user'
+
+type Props = {
+  users: Paginated<User>
+}
+
+type SharedProps = {
+  flash?: { success?: string }
+}
+
+export default function Index({ users }: Props) {
+  const { flash } = usePage<SharedProps>().props
+
+  const destroy = (user: User) => {
+    if (!window.confirm(`Xóa ${user.name}?`)) return
+
+    router.delete(`/users/${user.id}`, {
+      preserveScroll: true,
+    })
+  }
+
+  return (
+    <>
+      <Head title="Người dùng" />
+
+      <div className="mx-auto max-w-5xl space-y-6 p-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-semibold">Người dùng</h1>
+          <Link href="/users/create" className="rounded bg-black px-4 py-2 text-white">
+            Tạo người dùng
+          </Link>
+        </div>
+
+        {flash?.success && (
+          <div role="status" className="rounded border p-3">
+            {flash.success}
+          </div>
+        )}
+
+        <div className="overflow-x-auto rounded border">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b">
+                <th className="p-3">Tên</th>
+                <th className="p-3">Email</th>
+                <th className="p-3 text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.data.map((user) => (
+                <tr key={user.id} className="border-b last:border-0">
+                  <td className="p-3">{user.name}</td>
+                  <td className="p-3">{user.email}</td>
+                  <td className="space-x-3 p-3 text-right">
+                    <Link href={`/users/${user.id}/edit`}>Sửa</Link>
+                    <button type="button" onClick={() => destroy(user)}>
+                      Xóa
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <nav className="flex flex-wrap gap-2" aria-label="Pagination">
+          {users.links.map((link, index) =>
+            link.url ? (
+              <Link
+                key={index}
+                href={link.url}
+                preserveScroll
+                className={link.active ? 'font-semibold underline' : ''}
+                dangerouslySetInnerHTML={{ __html: link.label }}
+              />
+            ) : (
+              <span key={index} className="opacity-40" dangerouslySetInnerHTML={{ __html: link.label }} />
+            ),
+          )}
+        </nav>
+      </div>
+    </>
+  )
+}
+```
+
+## 7. Form component dùng lại
+
+```tsx resources/js/components/users/UserForm.tsx
+import type { InertiaFormProps } from '@inertiajs/react'
+
+type UserFormData = {
+  name: string
+  email: string
+}
+
+type Props = {
+  form: InertiaFormProps<UserFormData>
+  submitLabel: string
+  onSubmit: () => void
+}
+
+export default function UserForm({ form, submitLabel, onSubmit }: Props) {
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault()
+        onSubmit()
+      }}
+      className="space-y-5"
+    >
+      <div>
+        <label htmlFor="name">Tên</label>
+        <input
+          id="name"
+          value={form.data.name}
+          onChange={(event) => form.setData('name', event.target.value)}
+          className="block w-full rounded border p-2"
+        />
+        {form.errors.name && <p className="text-sm text-red-600">{form.errors.name}</p>}
+      </div>
+
+      <div>
+        <label htmlFor="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          value={form.data.email}
+          onChange={(event) => form.setData('email', event.target.value)}
+          className="block w-full rounded border p-2"
+        />
+        {form.errors.email && <p className="text-sm text-red-600">{form.errors.email}</p>}
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={form.processing}
+          className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+        >
+          {form.processing ? 'Đang lưu…' : submitLabel}
+        </button>
+
+        {form.processing && (
+          <button type="button" onClick={() => form.cancel()}>
+            Hủy request
+          </button>
+        )}
+
+        {form.recentlySuccessful && <span role="status">Đã lưu.</span>}
+      </div>
+    </form>
+  )
+}
+```
+
+<Note>
+Nếu TypeScript version của adapter không export `InertiaFormProps` theo đúng path bạn đang dùng, hãy để type form ở local project bằng `ReturnType<typeof useForm<UserFormData>>`. Ý chính của sample là lifecycle, không phụ thuộc vào alias type.
+</Note>
+
+## 8. Create page
+
+```tsx resources/js/pages/Users/Create.tsx
+import { Head, Link, useForm } from '@inertiajs/react'
+import UserForm from '@/components/users/UserForm'
+
+export default function Create() {
+  const form = useForm({ name: '', email: '' })
+
+  return (
+    <>
+      <Head title="Tạo người dùng" />
+      <div className="mx-auto max-w-xl space-y-6 p-6">
+        <Link href="/users">← Danh sách</Link>
+        <h1 className="text-2xl font-semibold">Tạo người dùng</h1>
+        <UserForm
+          form={form}
+          submitLabel="Tạo"
+          onSubmit={() => form.post('/users')}
+        />
+      </div>
+    </>
+  )
+}
+```
+
+## 9. Edit page
+
+```tsx resources/js/pages/Users/Edit.tsx
+import { Head, Link, useForm } from '@inertiajs/react'
+import UserForm from '@/components/users/UserForm'
+import type { User } from '@/types/user'
+
+export default function Edit({ user }: { user: User }) {
+  const form = useForm({ name: user.name, email: user.email })
+
+  return (
+    <>
+      <Head title={`Sửa ${user.name}`} />
+      <div className="mx-auto max-w-xl space-y-6 p-6">
+        <Link href="/users">← Danh sách</Link>
+        <h1 className="text-2xl font-semibold">Sửa người dùng</h1>
+        <UserForm
+          form={form}
+          submitLabel="Cập nhật"
+          onSubmit={() => form.put(`/users/${user.id}`)}
+        />
+      </div>
+    </>
+  )
+}
+```
+
+## Runtime flow cần hiểu
+
+```text
+User bấm Submit
+  -> useForm đặt processing=true
+  -> POST/PUT Inertia request
+  -> Form Request authorize + validate
+  -> nếu fail: Laravel redirect back + errors
+  -> Inertia giữ form state và map errors vào form
+  -> nếu success: mutate DB
+  -> redirect users.index + flash
+  -> Inertia nhận page mới
+  -> React render list mới
+```
+
+## Checklist production
+
+- Có Policy/Form Request thay vì chỉ disable button phía client.
+- Disable submit trong `processing` để tránh double submit.
+- Delete phải có confirm hoặc undo pattern.
+- List chỉ select các cột cần dùng.
+- Pagination giữ query string.
+- Flash là feedback ngắn; dữ liệu thật vẫn phải đến từ props mới.
+- Không tự `setUsers([...])` sau create/update nếu server redirect đã trả state chuẩn.

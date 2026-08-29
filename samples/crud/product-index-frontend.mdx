@@ -1,0 +1,257 @@
+---
+title: "Product CRUD: Index Frontend chuyên sâu"
+description: "Xây Product Index React/TypeScript với Inertia v3: URL-driven filters, debounce search, partial reload, deferred stats, prefetch navigation, optimistic toggle và pagination."
+---
+
+# Product CRUD: Index Frontend chuyên sâu
+
+Đây là page thể hiện nhiều sức mạnh Inertia nhất trong sample.
+
+## Types
+
+```ts resources/js/types/product.ts
+export type Product = {
+  id: number
+  name: string
+  sku: string
+  price: number
+  is_active: boolean
+  created_at?: string
+}
+
+export type ProductFilters = {
+  search: string
+  status: 'all' | 'active' | 'inactive'
+  sort: 'name' | 'price' | 'created_at'
+  direction: 'asc' | 'desc'
+}
+
+export type Paginated<T> = {
+  data: T[]
+  current_page: number
+  last_page: number
+  total: number
+  links: { url: string | null; label: string; active: boolean }[]
+}
+```
+
+## Search: local typing state, server owns canonical filter
+
+Đây là chỗ nhiều app làm sai. Nếu mỗi ký tự gọi request ngay thì request density quá cao; nếu chỉ giữ search local thì URL không share/bookmark được.
+
+Giải pháp:
+
+```tsx
+const [search, setSearch] = useState(filters.search)
+
+useEffect(() => {
+  const timeout = window.setTimeout(() => {
+    if (search === filters.search) return
+
+    router.get('/products', { ...filters, search, page: 1 }, {
+      only: ['products', 'filters'],
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
+    })
+  }, 300)
+
+  return () => window.clearTimeout(timeout)
+}, [search, filters])
+```
+
+Ý nghĩa từng option:
+
+- `only`: không request lại prop không liên quan như `stats`.
+- `preserveState`: input đang focus và local interaction không bị reset.
+- `preserveScroll`: bảng không nhảy lên đầu trang.
+- `replace`: gõ `i → ip → iph → iphone` không tạo bốn history entry.
+- `page: 1`: filter mới luôn quay về page hợp lệ.
+
+<Warning>
+`preserveState` không có nghĩa filter nên nằm local. URL/server vẫn là source of truth; local `search` chỉ là buffer trong khoảng debounce.
+</Warning>
+
+## Filter/sort dùng cùng một visit function
+
+```tsx
+function changeFilter(patch: Partial<ProductFilters>) {
+  router.get('/products', { ...filters, ...patch, page: 1 }, {
+    only: ['products', 'filters'],
+    preserveState: true,
+    preserveScroll: true,
+    replace: true,
+  })
+}
+```
+
+Điều này giữ contract nhất quán giữa search/status/sort.
+
+## Deferred stats
+
+Backend:
+
+```php
+'stats' => Inertia::defer(fn () => [
+    'total' => Product::count(),
+    'active' => Product::where('is_active', true)->count(),
+    'inactive' => Product::where('is_active', false)->count(),
+], rescue: true),
+```
+
+React:
+
+```tsx
+<Deferred
+  data="stats"
+  fallback={<div className="h-20 animate-pulse rounded-md bg-neutral-100" />}
+  rescue={({ reloading }) => (
+    <div>
+      Không tải được thống kê.
+      <button
+        disabled={reloading}
+        onClick={() => router.reload({ only: ['stats'] })}
+      >
+        Thử lại
+      </button>
+    </div>
+  )}
+>
+  {stats && (
+    <section className="grid grid-cols-3 gap-3">
+      <Stat label="Tổng" value={stats.total} />
+      <Stat label="Hoạt động" value={stats.active} />
+      <Stat label="Tạm ẩn" value={stats.inactive} />
+    </section>
+  )}
+</Deferred>
+```
+
+Mental model:
+
+```text
+critical data        non-critical data
+products             stats
+filters              ↓
+↓                    deferred request
+first render         ↓
+interactive UI       fill stats later
+```
+
+Deferred không phải “lazy load mọi thứ”. Nếu dữ liệu quyết định layout chính hoặc quyền truy cập, đừng defer tùy tiện.
+
+## Prefetch create/edit
+
+```tsx
+<Link href="/products/create" prefetch cacheFor="1m">
+  Tạo sản phẩm
+</Link>
+
+<Link
+  href={`/products/${product.id}/edit`}
+  prefetch
+  cacheFor="30s"
+>
+  Sửa
+</Link>
+```
+
+Prefetch phù hợp vì hover vào nút edit/create có xác suất cao dẫn tới click thật. Không nên prefetch hàng trăm row ngay khi mount.
+
+## Optimistic toggle
+
+Toggle active/inactive là use case optimistic tốt vì:
+
+- thay đổi nhỏ;
+- deterministic;
+- dễ rollback;
+- user mong phản hồi tức thì.
+
+```tsx
+function toggle(product: Product) {
+  router
+    .optimistic((pageProps) => {
+      const current = pageProps.products as Paginated<Product>
+
+      const currentStats = pageProps.stats as ProductStats | undefined
+      const delta = product.is_active ? -1 : 1
+
+      return {
+        products: {
+          ...current,
+          data: current.data.map((item) =>
+            item.id === product.id
+              ? { ...item, is_active: !item.is_active }
+              : item,
+          ),
+        },
+        ...(currentStats
+          ? {
+              stats: {
+                ...currentStats,
+                active: currentStats.active + delta,
+                inactive: currentStats.inactive - delta,
+              },
+            }
+          : {}),
+      }
+    })
+    .patch(`/products/${product.id}/toggle`, {}, {
+      preserveScroll: true,
+      only: ['products'],
+      onSuccess: () => router.reload({ only: ['stats'] }),
+    })
+}
+```
+
+Runtime:
+
+```text
+T0 click
+T1 UI đổi ngay
+T2 request PATCH bắt đầu
+T3a success → server response reconcile → partial reload `stats`
+T3b validation/server error → rollback snapshot
+```
+
+Đừng optimistic một thao tác mà user không thể hiểu trạng thái rollback, ví dụ payment hoặc mutation nhiều aggregate.
+
+## Delete: cố tình không optimistic
+
+```tsx
+function destroy(product: Product) {
+  if (!window.confirm(`Xóa “${product.name}”?`)) return
+
+  router.delete(`/products/${product.id}`, {
+    preserveScroll: true,
+    only: ['products'],
+  })
+}
+```
+
+Lý do: delete có tính phá hủy. Feedback hơi chậm nhưng predictable thường tốt hơn “biến mất rồi xuất hiện lại” khi server reject.
+
+## Pagination vẫn là Inertia navigation
+
+```tsx
+<Link
+  href={link.url}
+  only={['products', 'filters']}
+  preserveScroll
+  preserveState
+>
+  ...
+</Link>
+```
+
+`withQueryString()` phía Laravel giữ filter trong pagination URL, nên reload/share URL vẫn đúng.
+
+## Full Index source
+
+File hoàn chỉnh nằm tại:
+
+```text
+examples/product-crud/frontend/pages/Products/Index.tsx
+```
+
+Nên đọc source đó sau khi hiểu từng khối trên. Giá trị của sample nằm ở cách các capability **phối hợp**, không phải ở một option riêng lẻ.

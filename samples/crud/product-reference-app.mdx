@@ -1,0 +1,240 @@
+---
+title: "Product CRUD: full sức mạnh Inertia.js"
+description: "Reference CRUD tập trung Frontend với Laravel, React, TypeScript và Inertia.js v3: filter URL, partial reload, deferred props, prefetch, optimistic update, form state, validation và UX production-ready."
+---
+
+# Product CRUD: full sức mạnh Inertia.js
+
+Đây là sample trung tâm của phần **Samples & Thực chiến**. Ta chỉ dùng một model `Product` rất đơn giản để phần lớn sự chú ý nằm ở Frontend và runtime model của Inertia.
+
+<Info>
+Sample này target **Inertia.js v3 + Laravel + React + TypeScript**. Toàn bộ source companion nằm trong `examples/product-crud/` để bạn copy từng file vào project thật.
+</Info>
+
+## Mục tiêu cuối cùng
+
+Sau khi hoàn thành, một màn hình CRUD duy nhất sẽ minh họa gần như toàn bộ nhóm capability Inertia thường dùng trong ứng dụng business:
+
+| Bài toán | Capability Inertia |
+| --- | --- |
+| Navigation SPA-like nhưng route vẫn ở Laravel | `<Link>`, server routing |
+| Form create/edit | `useForm` |
+| Upload ảnh + preview | `File`, FormData, `form.progress` |
+| Validation server-side | `form.errors` |
+| Loading / disable submit | `form.processing` |
+| Dirty state | `form.isDirty` |
+| Success state | `form.recentlySuccessful` + flash |
+| Hủy request | `form.cancel()` |
+| Giữ form khi back/forward | keyed `useForm` |
+| Search/filter/sort | `router.get()` |
+| Không tải lại mọi prop | `only` / partial reload |
+| Giữ UI trong lúc filter | `preserveState`, `preserveScroll` |
+| Không spam browser history | `replace` |
+| Stats không block first paint | `Inertia::defer()` + `<Deferred>` |
+| Navigation edit/create nhanh hơn | `prefetch`, `cacheFor` |
+| Toggle trạng thái tức thì | `router.optimistic()` |
+| Reconcile lại với server | response Inertia bình thường |
+| Mutation success | redirect + shared flash |
+| Pagination | `<Link only={...}>` |
+
+## Model cố tình đơn giản
+
+```text
+Product
+├── id
+├── name
+├── sku
+├── price        integer
+├── image_path   nullable string
+├── is_active    boolean
+└── timestamps
+```
+
+Không cần Repository, Service, DTO hay API layer chỉ để làm sample. Mục tiêu là nhìn rõ mental model:
+
+```text
+React UI
+  ↓ Inertia visit
+Laravel route
+  ↓
+Validation / Controller
+  ↓
+Database
+  ↓
+Redirect / Inertia response
+  ↓
+Inertia reconcile page props
+  ↓
+React render state mới
+```
+
+## Điều quan trọng nhất: Inertia không biến app thành REST API
+
+CRUD này **không cần** viết:
+
+```text
+GET /api/products
+POST /api/products
+PUT /api/products/1
+DELETE /api/products/1
+```
+
+rồi tự dựng client-side store, router, API error mapper và cache layer riêng.
+
+Thay vào đó:
+
+```text
+GET    /products
+GET    /products/create
+POST   /products
+GET    /products/{product}/edit
+PUT    /products/{product}
+DELETE /products/{product}
+PATCH  /products/{product}/toggle
+```
+
+Laravel vẫn sở hữu routing, validation, authorization và redirect. React sở hữu interaction/UI state. Inertia là protocol nối hai phía.
+
+## Kiến trúc state
+
+Đây là rule quan trọng nhất của sample:
+
+```text
+URL/server owns:
+- search
+- status
+- sort
+- direction
+- page
+
+React local state owns:
+- text đang gõ trước debounce
+- modal/confirm state
+- focus/hover
+
+useForm owns:
+- form data
+- validation errors
+- processing
+- dirty/success state
+
+Inertia page props owns:
+- products
+- filters đã canonicalize
+- stats
+- flash
+```
+
+Nếu bạn đưa toàn bộ filter vào một global client store, bạn đang chống lại lợi thế lớn nhất của Inertia: server state và URL có thể tiếp tục là source of truth.
+
+## Cấu trúc source companion
+
+```text
+examples/product-crud/
+├── backend/
+│   ├── create_products_table.php
+│   ├── Product.php
+│   ├── ProductController.php
+│   ├── StoreProductRequest.php
+│   ├── UpdateProductRequest.php
+│   ├── HandleInertiaRequests.php
+│   └── routes.php
+└── frontend/
+    ├── types/product.ts
+    ├── components/ProductImageField.tsx
+    ├── components/ProductForm.tsx
+    └── pages/Products/
+        ├── Index.tsx
+        ├── Create.tsx
+        └── Edit.tsx
+```
+
+## Luồng Index
+
+```text
+User mở /products
+    ↓
+Laravel render Products/Index
+    ├── products: closure → cần cho first paint
+    ├── filters: canonical server state
+    └── stats: deferred → không block page
+    ↓
+React render bảng ngay
+    ↓
+Deferred request lấy stats
+    ↓
+User nhập search
+    ↓ 300 ms debounce
+router.get(... only: ['products', 'filters'])
+    ↓
+Laravel chỉ evaluate props cần thiết
+    ↓
+Bảng update, UI state/scroll được giữ
+```
+
+## Luồng Create/Edit
+
+```text
+User hover "Tạo" / "Sửa"
+    ↓
+prefetch page
+    ↓
+click
+    ↓
+page có thể lấy từ prefetch cache
+    ↓
+useForm keyed state
+    ↓
+submit
+    ├── processing = true
+    ├── server validation
+    ├── errors nếu fail
+    └── redirect + flash nếu success
+```
+
+## Luồng Optimistic toggle
+
+```text
+click "Hoạt động"
+    ↓
+UI đổi trạng thái ngay
+    ↓
+PATCH /products/{id}/toggle
+    ├── success → response server reconcile
+    └── fail → Inertia rollback optimistic props
+```
+
+Đây là nơi optimistic update phù hợp: thay đổi nhỏ, reversible và dễ xác định expected state. Không nên mặc định optimistic cho mọi mutation.
+
+## Nên đọc theo thứ tự
+
+<CardGroup cols={2}>
+  <Card title="1. Backend contract" href="/samples/crud/product-backend-contract" icon="server">
+    Backend mỏng, props có chủ đích và redirect flow đúng kiểu Inertia.
+  </Card>
+  <Card title="2. Index frontend" href="/samples/crud/product-index-frontend" icon="table">
+    Search, filter, sort, pagination, partial reload, deferred, prefetch và optimistic update.
+  </Card>
+  <Card title="3. Form frontend" href="/samples/crud/product-form-frontend" icon="pen-to-square">
+    `useForm` đầy đủ: validation, dirty, loading, cancel, remember và transform.
+  </Card>
+  <Card title="4. Upload ảnh" href="/samples/crud/product-image-upload" icon="image">
+    Preview, progress, validation, replace/remove ảnh và multipart method spoofing.
+  </Card>
+  <Card title="5. Advanced UX" href="/samples/crud/product-advanced-inertia" icon="bolt">
+    Tại sao từng capability được chọn và các failure mode production.
+  </Card>
+</CardGroup>
+
+## Definition of Done
+
+CRUD chỉ được xem là “đủ để học Inertia” khi người đọc giải thích được **vì sao**:
+
+- filter phải ở URL thay vì local-only state;
+- partial reload chỉ nên request prop cần đổi;
+- deferred prop không nên chứa dữ liệu bắt buộc cho first paint;
+- prefetch chỉ hữu ích cho navigation có xác suất xảy ra cao;
+- optimistic update cần rollback semantics rõ;
+- validation vẫn nên ở server;
+- mutation thành công nên redirect thay vì client tự vá mọi state;
+- `preserveState` không phải lý do để giữ state sai ownership.

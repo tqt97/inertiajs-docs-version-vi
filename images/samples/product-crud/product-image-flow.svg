@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Luồng upload ảnh Product qua Inertia</title>
+  <desc id="desc">Từ chọn file và preview ở React, qua useForm, FormData, Laravel validation, storage, redirect và page props mới.</desc>
+  <rect width="1200" height="520" fill="#fafafa"/>
+  <style>
+    .box{fill:#fff;stroke:#d4d4d4;stroke-width:2;rx:18}.t{font:600 22px system-ui,-apple-system,"Segoe UI",sans-serif;fill:#171717}.s{font:400 16px system-ui,-apple-system,"Segoe UI",sans-serif;fill:#525252}.a{stroke:#737373;stroke-width:3;fill:none;marker-end:url(#m)}
+  </style>
+  <defs><marker id="m" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#737373"/></marker></defs>
+  <rect class="box" x="45" y="90" width="190" height="120"/><text class="t" x="70" y="130">1. Chọn ảnh</text><text class="s" x="70" y="162">File input</text><text class="s" x="70" y="188">Preview object URL</text>
+  <rect class="box" x="285" y="90" width="190" height="120"/><text class="t" x="310" y="130">2. useForm</text><text class="s" x="310" y="162">image: File</text><text class="s" x="310" y="188">progress / errors</text>
+  <rect class="box" x="525" y="90" width="190" height="120"/><text class="t" x="550" y="130">3. FormData</text><text class="s" x="550" y="162">Inertia tự chuyển</text><text class="s" x="550" y="188">multipart request</text>
+  <rect class="box" x="765" y="90" width="190" height="120"/><text class="t" x="790" y="130">4. Laravel</text><text class="s" x="790" y="162">validate image</text><text class="s" x="790" y="188">store public disk</text>
+  <rect class="box" x="1005" y="90" width="150" height="120"/><text class="t" x="1025" y="130">5. Redirect</text><text class="s" x="1025" y="162">flash</text><text class="s" x="1025" y="188">props mới</text>
+  <path class="a" d="M235 150 H275"/><path class="a" d="M475 150 H515"/><path class="a" d="M715 150 H755"/><path class="a" d="M955 150 H995"/>
+  <rect class="box" x="180" y="320" width="840" height="120"/><text class="t" x="215" y="360">Điểm mạnh Inertia trong ví dụ này</text><text class="s" x="215" y="394">Không cần tự dựng REST upload API + client cache + 422 mapper. Server validation vẫn là source of truth,</text><text class="s" x="215" y="420">trong khi frontend vẫn có preview tức thì, progress, cancel, dirty state và SPA-like navigation.</text>
+</svg>

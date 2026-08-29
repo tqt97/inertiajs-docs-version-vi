@@ -1,0 +1,140 @@
+---
+title: "Request lifecycle, debounce và race condition"
+description: "Kinh nghiệm xử lý request lifecycle trong Inertia.js: debounce search, cancel request, tránh stale response và tách state UI khỏi server state."
+---
+
+# Request lifecycle, debounce và race condition
+
+Search-as-you-type là nơi dễ phát sinh request chồng nhau nhất. Mục tiêu không phải “không bao giờ có request song song”, mà là UI cuối cùng phải phản ánh intent mới nhất của user.
+
+## Pattern an toàn
+
+```tsx
+useEffect(() => {
+  const timer = window.setTimeout(() => {
+    router.get('/users', { search }, {
+      replace: true,
+      preserveState: true,
+      only: ['users', 'filters'],
+    })
+  }, 300)
+
+  return () => window.clearTimeout(timer)
+}, [search])
+```
+
+Debounce chặn phần lớn request không cần thiết trước khi chúng được tạo.
+
+## Mutation khác search
+
+Với mutation, ưu tiên disable action trong `processing`. Double-click hai lần vào “Thanh toán”, “Đặt chỗ” hoặc “Tạo đơn” không nên dựa vào frontend để đảm bảo uniqueness; backend vẫn cần idempotency/unique constraint/transaction phù hợp với domain.
+
+## Cancel không đồng nghĩa rollback
+
+Nếu client cancel request sau khi server đã commit DB, cancel chỉ có thể ngừng phía client chờ response; nó không tự hoàn tác side effect ở server. Vì vậy những action có side effect quan trọng phải có transaction/business invariant ở backend.
+
+## Tách state
+
+- `searchDraft`: local state, thay đổi từng keypress.
+- `filters`: server props/URL, state đã commit vào navigation.
+- `users`: server state.
+- `isFilterPanelOpen`: local UI state.
+
+Khi phân lớp như vậy, bạn ít phải “sync state” thủ công hơn.
+
+## Request lifecycle đầy đủ để debug
+
+Một visit thực tế nên được nhìn như state machine:
+
+```text
+idle
+ -> intent
+ -> before
+ -> start
+ -> progress? (upload)
+ -> server
+ -> success | error(validation) | exception/network failure
+ -> finish
+ -> idle
+```
+
+Bạn có thể dùng lifecycle callback cho loading cục bộ:
+
+```tsx
+const [refreshing, setRefreshing] = useState(false)
+
+function refreshProducts() {
+    router.reload({
+        only: ['products'],
+        onStart: () => setRefreshing(true),
+        onFinish: () => setRefreshing(false),
+    })
+}
+```
+
+`onFinish` phải là nơi cleanup vì nó chạy cho cả success và failure path.
+
+## Search race: debounce chưa phải toàn bộ câu chuyện
+
+```tsx
+useEffect(() => {
+    const timer = window.setTimeout(() => {
+        router.get(
+            route('products.index'),
+            { search },
+            {
+                only: ['products', 'filters'],
+                preserveState: true,
+                replace: true,
+            },
+        )
+    }, 250)
+
+    return () => window.clearTimeout(timer)
+}, [search])
+```
+
+Trong DevTools hãy kiểm tra request chronology, URL và response timing. Nếu feature có nhiều async/prefetch request đồng thời, cân nhắc cancellation semantics của router thay vì tự ghép nhiều `fetch` không có owner.
+
+## Instrument duration ở một nơi
+
+```tsx
+useEffect(() => {
+    const durations = new Map<string, number>()
+
+    const offStart = router.on('start', (event) => {
+        durations.set(String(event.detail.visit.url), performance.now())
+    })
+
+    const offFinish = router.on('finish', (event) => {
+        const key = String(event.detail.visit.url)
+        const startedAt = durations.get(key)
+
+        if (startedAt) {
+            console.debug('inertia.visit', {
+                url: key,
+                durationMs: Math.round(performance.now() - startedAt),
+            })
+            durations.delete(key)
+        }
+    })
+
+    return () => {
+        offStart()
+        offFinish()
+    }
+}, [])
+```
+
+Production logger không nên ghi form payload/token/password.
+
+## Review checklist
+
+```text
+[ ] Operation nào sở hữu loading state?
+[ ] Có cleanup ở onFinish không?
+[ ] Request cũ có thể overwrite interaction mới không?
+[ ] Cancel có được hiểu nhầm thành server rollback không?
+[ ] Mutation success có reconcile server state không?
+[ ] Global instrumentation có loại dữ liệu nhạy cảm không?
+```

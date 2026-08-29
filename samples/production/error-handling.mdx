@@ -1,0 +1,139 @@
+---
+title: "Error handling & observability ở production"
+description: "Phân biệt validation, authorization, not found và exception trong ứng dụng Inertia.js; xây error page, correlation ID và logging đủ để debug production."
+---
+
+# Error handling & observability ở production
+
+Không nên có một `catch(error) => toast('Có lỗi')` cho mọi trường hợp. Với Inertia, phần lớn error semantics vẫn đến từ backend framework.
+
+## 4 nhóm cần tách
+
+| Loại | Ví dụ | UX |
+| --- | --- | --- |
+| Validation | Email đã tồn tại | Error sát field, giữ input |
+| Authorization | User không có quyền | 403 page/message rõ ràng |
+| Not found | Record đã bị xóa | 404 page + đường quay lại |
+| Unexpected exception | DB/network/service fail | 500 page + correlation ID |
+
+## Laravel exception rendering
+
+Tùy version Laravel, hãy cấu hình exception response theo cơ chế framework đang dùng. Ý tưởng là với status production như 403/404/500/503, trả một Inertia error page thay vì HTML debug response.
+
+```php
+return Inertia::render('Error', [
+    'status' => $response->getStatusCode(),
+    'requestId' => request()->header('X-Request-Id'),
+])
+    ->toResponse($request)
+    ->setStatusCode($response->getStatusCode());
+```
+
+## React error page
+
+```tsx
+import { Head, Link } from '@inertiajs/react'
+
+const messages: Record<number, string> = {
+  403: 'Bạn không có quyền thực hiện thao tác này.',
+  404: 'Không tìm thấy nội dung yêu cầu.',
+  500: 'Hệ thống gặp lỗi ngoài dự kiến.',
+  503: 'Hệ thống đang tạm thời không khả dụng.',
+}
+
+export default function ErrorPage({ status, requestId }: { status: number; requestId?: string }) {
+  return (
+    <main className="mx-auto max-w-xl space-y-4 p-8">
+      <Head title={`Lỗi ${status}`} />
+      <h1 className="text-3xl font-semibold">{status}</h1>
+      <p>{messages[status] ?? 'Yêu cầu không thể hoàn tất.'}</p>
+      {requestId && <p className="text-sm">Mã tra cứu: {requestId}</p>}
+      <Link href="/">Về trang chủ</Link>
+    </main>
+  )
+}
+```
+
+## Log tối thiểu nên có
+
+- request/correlation ID;
+- authenticated user ID nếu có;
+- route + method;
+- exception class/message;
+- DB/service context không chứa secret;
+- timing của dependency quan trọng;
+- deployment/version identifier.
+
+Không log password, token, session cookie hoặc toàn bộ request body vô điều kiện.
+
+## Debug development
+
+Inertia có cơ chế hiển thị non-Inertia response trong modal để developer vẫn thấy error page của backend khi request chạy qua XHR. Production thì cần error response thân thiện và observability thật sự, không dựa vào dev modal.
+
+## Validation error khác exception
+
+Validation là expected business/input flow:
+
+```tsx
+form.post(route('products.store'), {
+    onError: (errors) => {
+        if (errors.name) nameRef.current?.focus()
+    },
+})
+```
+
+Không gửi validation failure vào Sentry như một exception server.
+
+Ngược lại, 500/network failure cần telemetry khác:
+
+```text
+validation -> inline field UX
+403        -> permission UX
+404        -> not-found page
+419        -> session expired / retry guidance
+500/503    -> generic error page + correlation id
+network    -> retry/offline message
+```
+
+## 419/session expiry
+
+Một UX production tốt nên trả message người dùng hiểu được thay vì raw exception:
+
+```php
+if ($response->getStatusCode() === 419) {
+    return back()->with('error', 'Phiên làm việc đã hết hạn. Vui lòng thử lại.');
+}
+```
+
+Với form dài, cân nhắc history-restorable draft để user không mất toàn bộ dữ liệu.
+
+## Correlation ID
+
+Middleware có thể gắn request id:
+
+```php
+$requestId = (string) Str::uuid();
+Log::withContext(['request_id' => $requestId]);
+```
+
+Shared flash/error page chỉ nên expose ID hỗ trợ nếu cần:
+
+```tsx
+<p>Mã hỗ trợ: {requestId}</p>
+```
+
+Như vậy screenshot của user có thể map về server log mà không expose stack trace.
+
+## Failure test matrix
+
+```text
+[ ] 403 policy denial
+[ ] 404 entity đã bị xóa ở tab khác
+[ ] validation field errors
+[ ] upload quá lớn / sai MIME
+[ ] session 419
+[ ] 500 exception
+[ ] network offline/timeout
+[ ] optimistic mutation bị reject và rollback
+[ ] deferred prop fail nhưng primary page vẫn usable
+```

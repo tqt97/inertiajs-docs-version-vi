@@ -1,0 +1,164 @@
+---
+title: "Search, filter & pagination không rối state"
+description: "Mẫu search, filter và pagination với Inertia.js: URL làm source of truth, debounce, preserveState, replace và partial reload để giảm query thừa."
+---
+
+# Search, filter & pagination không rối state
+
+Sai lầm phổ biến là giữ `search`, `status`, `page` ở nhiều nơi cùng lúc: React state, URL và backend request. Khi đó Back/Forward, refresh hoặc copy URL rất dễ cho ra state khác nhau.
+
+## Backend
+
+```php
+public function index(\Illuminate\Http\Request $request): \Inertia\Response
+{
+    $filters = $request->validate([
+        'search' => ['nullable', 'string', 'max:100'],
+        'status' => ['nullable', 'in:active,inactive'],
+    ]);
+
+    return \Inertia\Inertia::render('Users/Index', [
+        'filters' => $filters,
+        'users' => fn () => \App\Models\User::query()
+            ->when($filters['search'] ?? null, function ($query, $search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->when(($filters['status'] ?? null) === 'active', fn ($q) => $q->where('active', true))
+            ->when(($filters['status'] ?? null) === 'inactive', fn ($q) => $q->where('active', false))
+            ->latest('id')
+            ->paginate(15)
+            ->withQueryString(),
+        'roles' => fn () => \App\Models\Role::query()->orderBy('name')->get(['id', 'name']),
+    ]);
+}
+```
+
+Closure ở `users` và `roles` cho phép Inertia tránh evaluate prop không được yêu cầu trong partial reload.
+
+## React với debounce
+
+```tsx
+import { router } from '@inertiajs/react'
+import { useEffect, useState } from 'react'
+
+type Filters = { search?: string; status?: string }
+
+export function UserFilters({ filters }: { filters: Filters }) {
+  const [search, setSearch] = useState(filters.search ?? '')
+  const [status, setStatus] = useState(filters.status ?? '')
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      router.get(
+        '/users',
+        { search: search || undefined, status: status || undefined },
+        {
+          preserveState: true,
+          preserveScroll: true,
+          replace: true,
+          only: ['users', 'filters'],
+        },
+      )
+    }, 300)
+
+    return () => window.clearTimeout(timeout)
+  }, [search, status])
+
+  return (
+    <div className="flex gap-3">
+      <input
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Tìm tên hoặc email"
+      />
+
+      <select value={status} onChange={(e) => setStatus(e.target.value)}>
+        <option value="">Tất cả</option>
+        <option value="active">Đang hoạt động</option>
+        <option value="inactive">Ngừng hoạt động</option>
+      </select>
+    </div>
+  )
+}
+```
+
+## Vì sao dùng `replace`
+
+Nếu mỗi ký tự search tạo một browser-history entry, nút Back sẽ đi qua `t`, `tu`, `tua`, `tuan` trước khi về trang trước. `replace: true` tránh biến search typing thành lịch sử điều hướng.
+
+## Khi nào dùng `only`
+
+Nếu filter chỉ làm thay đổi `users`, không cần query lại danh mục vai trò, thống kê sidebar hoặc dữ liệu tham chiếu tốn nhiều tài nguyên để truy vấn. `only: ['users', 'filters']` giúp request nhỏ hơn, nhưng chỉ hiệu quả khi server cũng lazy-evaluate prop.
+
+## Reset page khi đổi filter
+
+Đừng gửi `page` cũ khi filter thay đổi. Hãy để request mới bắt đầu từ page 1. Pagination links do Laravel trả về đã mang query string hiện tại nên người dùng có thể tiếp tục sang page 2 mà không mất filter.
+
+## Checklist
+
+- URL giữ search/filter để refresh và share link vẫn đúng.
+- Local state chỉ giữ text tức thời trước debounce.
+- Debounce 250–400ms thường đủ cho search backend thông thường.
+- `replace` cho typing-driven navigation.
+- `preserveState` để input không mất focus/state.
+- `only` + server closure phải đi cùng nhau mới có lợi rõ ràng.
+
+## Normalize query để URL sạch
+
+Không cần giữ giá trị default trên URL:
+
+```tsx
+const params = {
+    search: search || undefined,
+    status: status === 'all' ? undefined : status,
+    sort: sort === 'latest' ? undefined : sort,
+}
+```
+
+URL sạch giúp share link và cache/debug dễ hơn.
+
+## Server whitelist sort, không đưa column trực tiếp từ request vào SQL
+
+```php
+$sorts = [
+    'name' => ['name', 'asc'],
+    '-name' => ['name', 'desc'],
+    'price' => ['price', 'asc'],
+    '-price' => ['price', 'desc'],
+];
+
+[$column, $direction] = $sorts[$filters['sort'] ?? '-created_at']
+    ?? ['created_at', 'desc'];
+
+$query->orderBy($column, $direction);
+```
+
+Đây vừa là correctness vừa tránh dynamic SQL không kiểm soát.
+
+## Empty state phải biết filter context
+
+```tsx
+if (products.data.length === 0) {
+    return filters.search || filters.status
+        ? <FilteredEmptyState onClear={clearFilters} />
+        : <FirstProductEmptyState />
+}
+```
+
+“Chưa có dữ liệu” và “filter không tìm thấy” là hai UX khác nhau.
+
+## Pagination + filter regression
+
+Khi filter đổi phải reset `page`:
+
+```tsx
+router.get(route('products.index'), {
+    ...nextFilters,
+    page: undefined,
+})
+```
+
+Nếu không, user đang page 8 có thể filter xuống dataset chỉ còn 2 page rồi tưởng app lỗi vì list rỗng.

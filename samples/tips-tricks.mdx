@@ -1,0 +1,773 @@
+---
+title: "Tips & tricks Inertia.js khi đi làm"
+description: "Field guide Inertia.js chuyên sâu với code Laravel + React: state ownership, partial reload, forms, validation, prefetch, deferred props, race condition, history, scroll, error handling và production debugging."
+---
+
+# Tips & tricks Inertia.js khi đi làm
+
+Bài này không phải danh sách API. Mục tiêu là trả lời câu hỏi khó hơn: **khi nào nên dùng capability nào của Inertia, vì sao, và lỗi production thường xuất hiện ở đâu**.
+
+> Baseline của các sample: Inertia.js v3 + Laravel + React + TypeScript. Tên API nên luôn đối chiếu lại tài liệu v3 trước khi áp dụng vào project đang dùng version khác.
+
+## 1. Giữ tư duy server-driven trước khi thêm client architecture
+
+Anti-pattern phổ biến nhất là dùng Inertia nhưng vẫn dựng lại REST SPA đầy đủ:
+
+```text
+Laravel controller
+  -> JSON API
+  -> axios service
+  -> React Query/global store
+  -> client router
+  -> duplicated validation/auth rules
+```
+
+Với CRUD nội bộ, hãy bắt đầu đơn giản hơn:
+
+```php
+// routes/web.php
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+```
+
+```php
+public function index(Request $request)
+{
+    return Inertia::render('Products/Index', [
+        'products' => Product::query()->latest()->paginate(20),
+    ]);
+}
+
+public function store(StoreProductRequest $request)
+{
+    Product::create($request->validated());
+
+    return to_route('products.index')
+        ->with('success', 'Đã tạo sản phẩm.');
+}
+```
+
+```tsx
+const form = useForm({ name: '', sku: '' })
+
+form.post(route('products.store'))
+```
+
+**Rule:** chỉ tách JSON/API khi có consumer thực sự như mobile app, third-party integration, widget độc lập hoặc interaction không nên thay đổi page lifecycle.
+
+## 2. Server props là snapshot, không phải store bất tử
+
+Một prop nhận từ server mô tả **state tại thời điểm page response được tạo**. Đừng mirror vô điều kiện:
+
+```tsx
+// Sai nếu local list không có lifecycle riêng.
+const [products, setProducts] = useState(props.products)
+```
+
+Sau partial reload/navigation, `props.products` có thể mới nhưng local copy vẫn cũ.
+
+Tốt hơn:
+
+```tsx
+export default function Index({ products }: Props) {
+    return products.data.map((product) => (
+        <ProductRow key={product.id} product={product} />
+    ))
+}
+```
+
+Chỉ tạo local copy khi UI thực sự sở hữu state tạm thời, ví dụ drag reorder chưa commit hoặc optimistic draft.
+
+## 3. Search/filter: tách draft state và committed URL state
+
+Đây là pattern rất hữu ích:
+
+```text
+input keystroke
+  -> local draft
+  -> debounce
+  -> URL query
+  -> Laravel query
+  -> page props
+```
+
+```tsx
+const { filters } = usePage<PageProps>().props
+const [search, setSearch] = useState(filters.search ?? '')
+
+useEffect(() => {
+    const timer = window.setTimeout(() => {
+        router.get(
+            route('products.index'),
+            { ...filters, search: search || undefined, page: undefined },
+            {
+                only: ['products', 'filters'],
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        )
+    }, 300)
+
+    return () => window.clearTimeout(timer)
+}, [search])
+```
+
+Tại sao `replace: true`? Nếu mỗi ký tự tạo một history entry thì Back button trở thành chuỗi `t -> tu -> tua -> tuan`.
+
+## 4. Partial reload chỉ nhanh khi server prop cũng lazy
+
+Client:
+
+```tsx
+router.reload({
+    only: ['products'],
+    preserveScroll: true,
+})
+```
+
+Server nên tránh evaluate data không cần:
+
+```php
+return Inertia::render('Products/Index', [
+    'products' => fn () => $this->queryProducts($request),
+    'categories' => fn () => Category::orderBy('name')->get(['id', 'name']),
+    'stats' => Inertia::defer(fn () => $this->buildStats()),
+]);
+```
+
+**Sai kỳ vọng:** `only: ['products']` không tự động làm một query đã chạy trước khi `Inertia::render()` biến mất.
+
+## 5. Đừng gửi shared props như một global state dump
+
+Tốt:
+
+```php
+public function share(Request $request): array
+{
+    return [
+        ...parent::share($request),
+        'auth' => [
+            'user' => fn () => $request->user()?->only('id', 'name'),
+        ],
+        'flash' => [
+            'success' => fn () => $request->session()->get('success'),
+        ],
+    ];
+}
+```
+
+Không tốt:
+
+```php
+'auth' => [
+    'user' => $request->user(),
+    'allPermissions' => Permission::all(),
+    'notifications' => Notification::latest()->limit(100)->get(),
+    'settings' => Setting::all(),
+]
+```
+
+Shared props đi cùng rất nhiều response. Payload nhỏ và namespace rõ ràng sẽ giảm coupling đáng kể.
+
+## 6. Form state: dùng `useForm` thay vì tự dựng loading/error plumbing
+
+```tsx
+const form = useForm('CreateProduct', {
+    name: '',
+    sku: '',
+    price: '',
+})
+
+function submit(event: FormEvent) {
+    event.preventDefault()
+
+    form.post(route('products.store'), {
+        preserveScroll: 'errors',
+        onSuccess: () => form.reset(),
+    })
+}
+```
+
+```tsx
+<button disabled={form.processing}>
+    {form.processing ? 'Đang lưu…' : 'Lưu'}
+</button>
+
+{form.errors.name && (
+    <p role="alert">{form.errors.name}</p>
+)}
+```
+
+Key `CreateProduct` giúp form có history identity rõ hơn. Với edit:
+
+```tsx
+const form = useForm(`EditProduct:${product.id}`, {
+    name: product.name,
+    sku: product.sku,
+})
+```
+
+## 7. Nhiều form cùng page: tránh validation collision
+
+Nếu không dùng form helper hoặc có manual visit, hai form có cùng field `name` dễ đụng errors.
+
+```tsx
+router.post(route('companies.store'), company, {
+    errorBag: 'createCompany',
+})
+
+router.post(route('users.store'), user, {
+    errorBag: 'createUser',
+})
+```
+
+Đừng để component A hiển thị error phát sinh từ component B.
+
+## 8. Validation Inertia là redirect flow, không phải JSON 422 flow
+
+Đừng viết theo thói quen axios:
+
+```tsx
+// Không phải mental model mặc định của Inertia form.
+try {
+    await axios.post('/products', data)
+} catch (error) {
+    if (error.response?.status === 422) { /* map errors */ }
+}
+```
+
+Mental model đúng:
+
+```text
+POST
+ -> Laravel validation fail
+ -> redirect back + session errors
+ -> Inertia props.errors
+ -> onError(errors)
+ -> component state được preserve
+```
+
+```tsx
+form.post(route('products.store'), {
+    onError: (errors) => {
+        if (errors.name) nameRef.current?.focus()
+    },
+})
+```
+
+## 9. Loading phải đúng scope
+
+Một progress bar global không thay thế loading của button.
+
+```text
+Navigation      -> global progress
+Submit          -> form.processing
+Upload          -> form.progress
+Deferred panel  -> skeleton/fallback riêng
+Polling widget  -> subtle refreshing state
+Optimistic      -> immediate UI + rollback feedback
+```
+
+Ví dụ upload:
+
+```tsx
+{form.progress && (
+    <progress max="100" value={form.progress.percentage}>
+        {form.progress.percentage}%
+    </progress>
+)}
+```
+
+## 10. `preserveState` và `preserveScroll` không nên bật theo phản xạ
+
+Search/filter thường cần:
+
+```tsx
+router.get(url, data, {
+    preserveState: true,
+    preserveScroll: true,
+})
+```
+
+Nhưng navigation sang entity khác thường nên reset local component state.
+
+Một rule hữu ích:
+
+```text
+Cùng screen + thay dữ liệu query -> thường preserve
+Sang screen/entity semantics khác -> thường reset
+Validation fail -> preserve form
+Mutation thành công -> tùy UX, đừng giữ stale local state
+```
+
+## 11. Scroll container riêng phải khai báo scroll region
+
+Nếu layout dùng container scroll thay vì body:
+
+```tsx
+<div
+    scroll-region=""
+    className="h-[calc(100vh-64px)] overflow-y-auto"
+>
+    {children}
+</div>
+```
+
+Nếu quên, Back/Forward có thể restore scroll không như kỳ vọng.
+
+## 12. Prefetch: tối ưu latency, không phải miễn phí
+
+```tsx
+<Link
+    href={route('products.edit', product.id)}
+    prefetch
+    cacheFor="30s"
+>
+    Sửa
+</Link>
+```
+
+Prefetch hợp với link có xác suất click cao. Không nên prefetch hàng trăm row chỉ vì API tồn tại.
+
+Checklist:
+
+```text
+- request có tốn nhiều thời gian xử lý, truy vấn database hoặc tài nguyên máy chủ không?
+- user có khả năng click cao không?
+- response có dữ liệu nhạy cảm cần cân nhắc cache không?
+- cache TTL có phù hợp freshness requirement không?
+- hover prefetch có tạo wasted traffic lớn không?
+```
+
+## 13. Deferred props: tách critical path khỏi secondary data
+
+Server:
+
+```php
+return Inertia::render('Products/Index', [
+    'products' => ProductResource::collection($products),
+    'stats' => Inertia::defer(
+        fn () => $this->expensiveStats(),
+        'analytics',
+    ),
+]);
+```
+
+Client:
+
+```tsx
+<Deferred data="stats" fallback={<StatsSkeleton />}>
+    <ProductStats />
+</Deferred>
+```
+
+Không defer dữ liệu mà page bắt buộc phải có để quyết định access hoặc render cấu trúc chính.
+
+## 14. Optimistic update phải có reconciliation plan
+
+Toggle status là candidate tốt:
+
+```tsx
+router.patch(
+    route('products.toggle', product.id),
+    {},
+    {
+        preserveScroll: true,
+        optimistic: {
+            props: (current) => ({
+                products: updateProductStatus(current.products, product.id),
+            }),
+        },
+        onSuccess: () => {
+            router.reload({ only: ['stats'] })
+        },
+    },
+)
+```
+
+Tư duy cần đủ ba bước:
+
+```text
+optimistic local perception
+ -> server mutation
+ -> reconcile canonical server state
+```
+
+Không nên optimistic cho payment, inventory allocation, permission-sensitive action hoặc mutation có business rule dễ reject.
+
+## 15. Race condition: search request cũ không được thắng request mới
+
+Search debounce giảm request nhưng không loại bỏ mọi race. Khi interaction có thể spam request, hãy tận dụng lifecycle/cancel semantics phù hợp của router thay vì tự tạo nhiều `fetch` không quản lý.
+
+Một pattern UI đơn giản:
+
+```tsx
+const [isFiltering, setIsFiltering] = useState(false)
+
+router.get(url, params, {
+    only: ['products'],
+    preserveState: true,
+    replace: true,
+    onStart: () => setIsFiltering(true),
+    onFinish: () => setIsFiltering(false),
+})
+```
+
+Với workflow phức tạp, trace cả request identity trong DevTools thay vì chỉ nhìn kết quả cuối.
+
+## 16. Dùng `useHttp` khi request không phải page visit
+
+Inertia v3 có `useHttp` cho HTTP request độc lập. Ví dụ autocomplete gọi external/internal JSON endpoint không cần thay page:
+
+```tsx
+const search = useHttp({ query: '' })
+
+function lookup() {
+    search.get('/api/product-suggestions')
+}
+```
+
+Decision:
+
+```text
+Kết quả request thay đổi page props/navigation? -> router / form visit
+Chỉ cần JSON độc lập, không muốn page lifecycle? -> useHttp
+```
+
+Đừng dùng `useHttp` để tái tạo API layer cho mọi CRUD nếu redirect + props đã giải quyết tốt.
+
+## 17. Flash là notification, không phải canonical state
+
+Backend:
+
+```php
+return to_route('products.index')
+    ->with('success', 'Sản phẩm đã được cập nhật.');
+```
+
+Frontend:
+
+```tsx
+const { flash } = usePage<PageProps>().props
+
+{flash.success && <Toast>{flash.success}</Toast>}
+```
+
+Không dùng `flash.product` như nguồn dữ liệu thay cho prop `product`/DB.
+
+## 18. External redirect nên để server phát lệnh rõ ràng
+
+Ví dụ redirect sang cổng thanh toán hoặc external SSO:
+
+```php
+return Inertia::location($checkoutUrl);
+```
+
+Đừng trả một prop URL rồi bắt mọi component tự nhớ gọi `window.location` nếu redirect là kết quả nghiệp vụ của request server.
+
+## 19. Instrument router events để debug production
+
+Có thể gắn instrumentation ở bootstrap/layout:
+
+```tsx
+useEffect(() => {
+    const removeStart = router.on('start', (event) => {
+        performance.mark('inertia:start')
+    })
+
+    const removeFinish = router.on('finish', (event) => {
+        performance.mark('inertia:finish')
+        performance.measure(
+            'inertia:visit',
+            'inertia:start',
+            'inertia:finish',
+        )
+    })
+
+    return () => {
+        removeStart()
+        removeFinish()
+    }
+}, [])
+```
+
+Trong production, log có chọn lọc URL, method, duration và failure class. Tránh log payload nhạy cảm.
+
+## 20. Dev error modal không phải production error UX
+
+Local development có thể thấy non-Inertia response trong modal rất tiện. Production cần error page Inertia chuẩn:
+
+```php
+->withExceptions(function (Exceptions $exceptions) {
+    $exceptions->respond(function ($response, $exception, $request) {
+        if (app()->environment(['local', 'testing'])) {
+            return $response;
+        }
+
+        if (in_array($response->getStatusCode(), [403, 404, 500, 503], true)) {
+            return Inertia::render('Error', [
+                'status' => $response->getStatusCode(),
+            ])->toResponse($request)
+              ->setStatusCode($response->getStatusCode());
+        }
+
+        return $response;
+    });
+})
+```
+
+## 21. Asset version mismatch là một phần của deployment flow
+
+Sau deploy frontend asset mới, tab cũ có thể đang giữ page version cũ. Inertia có asset versioning để buộc full-page refresh khi version không còn khớp.
+
+Practical implication:
+
+```text
+Không tự hack retry vô hạn khi thấy 409.
+Kiểm tra asset version + X-Inertia-Location + deploy cache/CDN.
+```
+
+## 22. Authorization: UI hint khác security boundary
+
+Frontend:
+
+```tsx
+{can.updateProduct && (
+    <Link href={route('products.edit', product.id)}>Sửa</Link>
+)}
+```
+
+Backend vẫn bắt buộc:
+
+```php
+public function update(UpdateProductRequest $request, Product $product)
+{
+    $this->authorize('update', $product);
+
+    // ...
+}
+```
+
+Ẩn button chỉ cải thiện UX, không bảo vệ endpoint.
+
+## 23. Đừng gửi Eloquent model thô nếu page contract quan trọng
+
+Tốt hơn dùng resource/DTO shape rõ:
+
+```php
+'products' => ProductResource::collection($products),
+```
+
+```ts
+export type ProductListItem = {
+    id: number
+    name: string
+    sku: string
+    formatted_price: string
+    can: {
+        update: boolean
+        delete: boolean
+    }
+}
+```
+
+Điều này giảm accidental prop drift và tránh frontend phụ thuộc cột DB không chủ đích.
+
+## 24. N+1 vẫn là N+1 dù dùng Inertia
+
+```php
+$products = Product::query()
+    ->with('category:id,name')
+    ->paginate(20);
+```
+
+Inertia tối ưu transport/navigation, không sửa query architecture cho bạn. Luôn profile SQL riêng.
+
+## 25. Một request có nhiều concern: dùng prop boundary để tối ưu
+
+Page dashboard:
+
+```php
+return Inertia::render('Dashboard', [
+    'summary' => fn () => $summaryService->build(),
+    'recentOrders' => fn () => $orderService->recent(),
+    'heavyChart' => Inertia::defer(fn () => $chartService->build()),
+]);
+```
+
+Sau khi filter chart:
+
+```tsx
+router.reload({ only: ['heavyChart'] })
+```
+
+Thiết kế prop boundary tốt giúp partial reload meaningful; thiết kế một mega prop sẽ làm optimization khó hơn.
+
+## 26. Checklist trước khi thêm global client store
+
+Hỏi lần lượt:
+
+1. State này có canonical source ở DB/backend không?
+2. Nó có thể biểu diễn bằng URL không?
+3. Nó chỉ sống trong một form không?
+4. Nó chỉ là UI transient không?
+5. Nó có cần sống qua Back/Forward không?
+6. Inertia props/useForm/useRemember đã giải quyết chưa?
+
+Nếu 1-6 đều không phù hợp, lúc đó mới cân nhắc store riêng.
+
+## 27. Debugging playbook
+
+Khi một interaction “không chạy đúng”, trace theo lớp:
+
+```text
+1. DOM event có fire không?
+2. URL/method/data của Inertia visit đúng không?
+3. preserve/only/except/replace có đúng semantics không?
+4. Laravel route đúng không?
+5. middleware/policy/validation có chặn không?
+6. query có đúng và đủ eager-load không?
+7. controller trả props nào?
+8. có redirect không, redirect đi đâu?
+9. response có X-Inertia và component đúng không?
+10. React nhận prop mới nhưng local mirror state có che nó không?
+11. request cũ/new có race không?
+12. aggregate/cache/deferred prop đã reconcile chưa?
+```
+
+## 28. Production checklist ngắn
+
+Trước khi merge một feature Inertia, tự hỏi:
+
+```text
+[ ] URL có phản ánh state cần share/bookmark không?
+[ ] Server vẫn là source of truth cho business state?
+[ ] Shared props có nhỏ không?
+[ ] Partial reload có lazy server evaluation không?
+[ ] Loading/error/success có đúng scope không?
+[ ] Mutation có redirect/reconcile rõ không?
+[ ] Authorization có enforce ở server không?
+[ ] Back/Forward có behavior hợp lý không?
+[ ] Scroll/focus có bị reset ngoài ý muốn không?
+[ ] Query count/payload size có đo không?
+[ ] Failure 403/404/419/422-like validation/500/network có UX không?
+[ ] Test có cover happy path + validation + permission + stale/race case quan trọng không?
+```
+
+## Kết luận
+
+Inertia mạnh nhất khi bạn **không cố biến nó thành một SPA architecture khác**. Giữ business state ở server, navigation state ở URL, form state trong form helper, local state cho UI thật sự local; sau đó dùng partial reload, deferred, prefetch và optimistic update như các công cụ có semantics rõ ràng thay vì “bật cho nhanh”.
+
+## 29. Modal form/upload: cân nhắc `cancelOnUnmount`
+
+Một form nằm trong modal có thể bị unmount trong khi request vẫn đang chạy. Nếu user đóng modal mà bạn không muốn upload/submit tiếp tục, Inertia v3 `<Form>` hỗ trợ `cancelOnUnmount`:
+
+```tsx
+<Form
+    action={route('products.image', product.id)}
+    method="post"
+    cancelOnUnmount
+>
+    <input type="file" name="image" />
+    <button type="submit">Upload</button>
+</Form>
+```
+
+Không bật mặc định cho mọi form. Có workflow user đóng panel nhưng vẫn muốn background mutation hoàn tất.
+
+## 30. Real-time validation: ưu tiên Precognition thay vì duplicate rule ở client
+
+Nếu product SKU cần validate trước submit, Inertia v3 có tích hợp Precognition:
+
+```tsx
+const form = useForm({
+    name: '',
+    sku: '',
+}).withPrecognition('post', route('products.store'))
+```
+
+```tsx
+<input
+    value={form.data.sku}
+    onChange={(event) => form.setData('sku', event.target.value)}
+    onBlur={() => form.validate('sku')}
+/>
+
+{form.validating && <span>Đang kiểm tra…</span>}
+{form.invalid('sku') && <p>{form.errors.sku}</p>}
+```
+
+Giá trị chính: rule vẫn ở Laravel; client không phải copy regex/unique rule thành một hệ validation thứ hai.
+
+## 31. Phân biệt `httpException` và `networkError`
+
+Inertia v3 có event riêng cho non-Inertia HTTP response và lỗi mạng bất ngờ:
+
+```tsx
+const offHttp = router.on('httpException', (event) => {
+    console.error('Invalid/non-Inertia response', event.detail.response)
+})
+
+const offNetwork = router.on('networkError', (event) => {
+    console.error('Network failure', event.detail.error)
+})
+```
+
+Điều này giúp production telemetry phân loại đúng:
+
+```text
+server trả HTML/JSON sai protocol -> httpException
+mạng đứt / resolve component fail -> networkError
+validation Inertia bình thường      -> không phải hai loại trên
+```
+
+## 32. Prefetch cache có freshness và stale budget riêng
+
+Inertia v3 cho phép cấu hình `cacheFor`, kể cả fresh/stale duration dạng mảng. Đừng coi prefetch cache như dữ liệu sống mãi.
+
+```tsx
+<Link
+    href={route('products.show', product.id)}
+    prefetch
+    cacheFor={['20s', '1m']}
+>
+    Xem sản phẩm
+</Link>
+```
+
+Hãy document freshness requirement của từng page. Admin catalog có thể chấp nhận stale ngắn; màn permission hoặc inventory nhạy cảm có thể không nên cache cùng policy.
+
+## 33. Cache invalidation phải đi cùng mutation semantics
+
+Form v3 có option invalidate cache tags. Nếu app dùng prefetch cache/tag strategy, mutation nên nói rõ cache nào không còn đáng tin:
+
+```tsx
+<Form
+    action={route('products.update', product.id)}
+    method="put"
+    invalidateCacheTags={['products', `product:${product.id}`]}
+>
+    {/* fields */}
+</Form>
+```
+
+Tư duy quan trọng không phải tên option mà là:
+
+```text
+mutation thay đổi canonical state
+ -> cache nào chứa projection của state đó?
+ -> invalidate/reload/reconcile bằng cơ chế phù hợp
+```
+
+## 34. `withAllErrors()` chỉ dùng khi UX thực sự cần nhiều message/field
+
+Mặc định một error đầu tiên mỗi field thường dễ đọc hơn. Nếu product rule cần show toàn bộ lỗi:
+
+```tsx
+const form = useForm({
+    sku: '',
+}).withAllErrors()
+```
+
+Khi đó component phải biết `errors.sku` có thể là array. Đừng bật chỉ vì “nhiều thông tin hơn” rồi làm UI quá tải.

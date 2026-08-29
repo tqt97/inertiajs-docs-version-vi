@@ -1,0 +1,162 @@
+---
+title: "Upload file có progress và validation"
+description: "Sample upload avatar với Inertia.js, Laravel validation, progress bar, processing state, file preview cleanup và lưu ý khi update multipart."
+---
+
+# Upload file có progress và validation
+
+## Backend
+
+```php
+public function updateAvatar(\Illuminate\Http\Request $request): \Illuminate\Http\RedirectResponse
+{
+    $validated = $request->validate([
+        'avatar' => ['required', 'image', 'max:2048'],
+    ]);
+
+    $path = $validated['avatar']->store('avatars', 'public');
+
+    $request->user()->update(['avatar_path' => $path]);
+
+    return back()->with('success', 'Đã cập nhật ảnh đại diện.');
+}
+```
+
+## React
+
+```tsx
+import { useForm } from '@inertiajs/react'
+import { useEffect, useState } from 'react'
+
+export default function AvatarForm() {
+  const form = useForm<{ avatar: File | null }>({ avatar: null })
+  const [preview, setPreview] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!form.data.avatar) {
+      setPreview(null)
+      return
+    }
+
+    const url = URL.createObjectURL(form.data.avatar)
+    setPreview(url)
+
+    return () => URL.revokeObjectURL(url)
+  }, [form.data.avatar])
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault()
+        form.post('/profile/avatar', {
+          forceFormData: true,
+          preserveScroll: true,
+          onSuccess: () => form.reset('avatar'),
+        })
+      }}
+      className="space-y-4"
+    >
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => form.setData('avatar', e.target.files?.[0] ?? null)}
+      />
+
+      {preview && <img src={preview} alt="Xem trước avatar" className="h-24 w-24 rounded object-cover" />}
+
+      {form.errors.avatar && <p role="alert">{form.errors.avatar}</p>}
+
+      {form.progress && (
+        <progress value={form.progress.percentage} max="100">
+          {form.progress.percentage}%
+        </progress>
+      )}
+
+      <button type="submit" disabled={form.processing || !form.data.avatar}>
+        {form.processing ? 'Đang tải lên…' : 'Tải ảnh lên'}
+      </button>
+    </form>
+  )
+}
+```
+
+## Các lỗi thực tế hay gặp
+
+- Không revoke `URL.createObjectURL()` làm leak memory khi preview nhiều file.
+- Chỉ kiểm tra extension phía client nhưng không validate MIME/size phía server.
+- Cho submit nhiều lần trong lúc upload.
+- Giữ file object sau success làm người dùng tưởng chưa upload xong.
+- Dùng PUT/PATCH multipart với stack backend không parse như mong đợi; khi gặp case này hãy dùng method spoofing theo convention backend của bạn.
+
+## Preview ảnh đúng lifecycle
+
+```tsx
+const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+
+function chooseImage(file: File | null) {
+    form.setData('image', file)
+
+    setPreviewUrl((current) => {
+        if (current) URL.revokeObjectURL(current)
+        return file ? URL.createObjectURL(file) : null
+    })
+}
+
+useEffect(() => {
+    return () => {
+        if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+}, [previewUrl])
+```
+
+Không giữ object URL vĩnh viễn; browser memory cũng là resource.
+
+## Replace và remove là hai intent khác nhau
+
+```ts
+image: File | null
+remove_image: boolean
+```
+
+```text
+Chọn ảnh mới -> image = File, remove_image = false
+Bỏ ảnh mới  -> image = null, vẫn giữ ảnh persisted cũ
+Xóa ảnh cũ  -> image = null, remove_image = true
+```
+
+Nếu gom ba thao tác thành một boolean, UX Edit rất dễ xóa nhầm ảnh persisted.
+
+## Server storage phải transactional theo semantics
+
+DB transaction không tự rollback file system. Pattern an toàn thường là:
+
+```php
+$newPath = $request->file('image')?->store('products', 'public');
+$oldPath = $product->image_path;
+
+DB::transaction(function () use ($product, $validated, $newPath) {
+    $product->update([
+        ...$validated,
+        'image_path' => $newPath ?? $product->image_path,
+    ]);
+});
+
+if ($newPath && $oldPath) {
+    Storage::disk('public')->delete($oldPath);
+}
+```
+
+Tùy failure requirement, production app có thể cần cleanup compensating action nếu DB update fail sau khi file mới đã được store.
+
+## Upload test cases
+
+```text
+[ ] valid image
+[ ] invalid MIME disguised extension
+[ ] over max size
+[ ] replace old image
+[ ] clear newly selected preview without deleting old image
+[ ] remove persisted image
+[ ] DB failure after storage write
+[ ] user cancel request
+```

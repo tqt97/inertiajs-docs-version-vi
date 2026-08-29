@@ -1,0 +1,152 @@
+---
+title: "Optimistic update: nhanh nhưng phải rollback được"
+description: "Hướng dẫn dùng optimistic updates của Inertia.js v3 cho like, bookmark và todo; cách chọn action phù hợp, rollback semantics và tránh optimistic cho mutation rủi ro cao."
+---
+
+# Optimistic update: nhanh nhưng phải rollback được
+
+Optimistic update làm UI phản hồi trước khi server xác nhận. Inertia v3 hỗ trợ optimistic page-prop update và rollback khi request fail, nhưng **không phải mutation nào cũng phù hợp**.
+
+## Case tốt: Like
+
+```tsx
+import { router } from '@inertiajs/react'
+
+type Post = {
+  id: number
+  likes: number
+  liked_by_me: boolean
+}
+
+export function LikeButton({ post }: { post: Post }) {
+  const like = () => {
+    router
+      .optimistic((props: { post: Post }) => ({
+        post: {
+          ...props.post,
+          likes: props.post.likes + (props.post.liked_by_me ? -1 : 1),
+          liked_by_me: !props.post.liked_by_me,
+        },
+      }))
+      .post(`/posts/${post.id}/like`, {}, { preserveScroll: true })
+  }
+
+  return <button onClick={like}>{post.liked_by_me ? 'Bỏ thích' : 'Thích'} · {post.likes}</button>
+}
+```
+
+Điểm quan trọng là response server cuối cùng vẫn thay thế optimistic state. UI tạm đoán; server mới quyết định state thật.
+
+## Case tốt: Todo nhẹ
+
+```tsx
+import { useForm } from '@inertiajs/react'
+
+export default function TodoComposer({ todos }) {
+  const form = useForm({ title: '' })
+
+  const submit = (event: React.FormEvent) => {
+    event.preventDefault()
+
+    form
+      .optimistic((props) => ({
+        todos: [
+          ...props.todos,
+          { id: `temp-${Date.now()}`, title: form.data.title, done: false },
+        ],
+      }))
+      .post('/todos', {
+        onSuccess: () => form.reset(),
+      })
+  }
+
+  return (
+    <form onSubmit={submit}>
+      <input value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} />
+      <button disabled={form.processing}>Thêm</button>
+    </form>
+  )
+}
+```
+
+## Không nên optimistic khi nào?
+
+- Thanh toán hoặc hoàn tiền.
+- Booking có contention cao.
+- Mutation phụ thuộc inventory/limit/quota.
+- Action có nhiều downstream side effect.
+- User cần biết chắc server đã commit trước khi tiếp tục.
+
+Trong các case đó, loading state rõ ràng thường tốt hơn “giả thành công rồi rollback”.
+
+## Checklist trước khi bật optimistic
+
+1. Có thể tính optimistic state chỉ từ current props + input không?
+2. Nếu fail, rollback có đưa UI về trạng thái dễ hiểu không?
+3. Nếu server normalize dữ liệu khác dự đoán, response cuối có overwrite đúng không?
+4. Double-click/concurrent action có làm counter sai tạm thời không?
+5. Mutation có giá trị tài chính hoặc invariant nghiêm ngặt không? Nếu có, ưu tiên confirmed flow.
+
+## Pattern production: optimistic + aggregate reconciliation
+
+Ví dụ toggle active Product làm thay đổi cả row và dashboard count:
+
+```tsx
+router.patch(
+    route('products.toggle', product.id),
+    {},
+    {
+        optimistic: {
+            props: (current) => ({
+                products: toggleProductInPaginator(current.products, product.id),
+            }),
+        },
+        onSuccess: () => {
+            router.reload({ only: ['stats'] })
+        },
+    },
+)
+```
+
+Nếu chỉ patch row nhưng `stats.active` không reconcile, UI sẽ tự mâu thuẫn.
+
+## Không optimistic domain invariant khó dự đoán
+
+Ví dụ inventory:
+
+```text
+requested quantity = 2
+available quantity = 1
+concurrent reservation đang chạy
+```
+
+Frontend không đủ thông tin để biết mutation thành công. Hãy dùng pending UI thay vì giả success.
+
+```tsx
+form.post(route('orders.reserve'), {
+    onStart: () => setPending(true),
+    onFinish: () => setPending(false),
+})
+```
+
+## Double-click và idempotency
+
+Optimistic UX không thay thế backend idempotency. Với action có thể double-submit:
+
+```tsx
+<button disabled={processing} onClick={submit}>
+    {processing ? 'Đang xử lý…' : 'Xác nhận'}
+</button>
+```
+
+Với payment/external side effect, backend vẫn cần idempotency key nếu domain yêu cầu.
+
+## Test optimistic flow
+
+Test ít nhất ba state:
+
+```text
+1. UI đổi ngay trước server response
+2. success -> state canonical được giữ/reconcile
+3. failure -> UI rollback + user nhận feedback
+```

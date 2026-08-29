@@ -1,0 +1,580 @@
+---
+title: "State ownership: server, URL hay local UI?"
+description: "Mô hình state ownership chuyên sâu cho Inertia.js: server props, URL query, form draft, local UI, history state, shared props, optimistic state và cách tránh duplicate/stale state."
+---
+
+# State ownership: server, URL hay local UI?
+
+Phần lớn bug state trong ứng dụng Inertia không đến từ thiếu state manager. Chúng đến từ việc **một giá trị có hai hoặc ba owner cùng lúc**.
+
+Ví dụ xấu:
+
+```text
+?status=active             <- URL nói active
+filters.status = inactive  <- React local nói inactive
+props.filters.status=all   <- server props nói all
+```
+
+Khi ba nguồn đều có vẻ “đúng”, code sẽ cần `useEffect` để đồng bộ lẫn nhau và rất nhanh trở thành vòng lặp stale state.
+
+## 1. Nguyên tắc single owner
+
+Mỗi state quan trọng nên có **một canonical owner**. Các tầng khác chỉ giữ projection/draft/cache có lifecycle rõ.
+
+| Loại state | Canonical owner | Ví dụ |
+| --- | --- | --- |
+| Business state | Backend/DB | product status, permission, order total |
+| Query/navigation state | URL | search, filter, sort, page, active tab dữ liệu |
+| Form draft | `useForm` | name, price, selected file |
+| UI transient | React local state | dropdown open, hover, confirm dialog |
+| Back/Forward-restorable UI | `useRemember` / keyed form | wizard draft, unsaved filters panel |
+| Shared cross-page context | Shared props, nhỏ | current user summary, locale, flash |
+| Optimistic projection | Temporary client layer | toggle favorite trước response |
+| External ephemeral response | `useHttp` local state | autocomplete JSON, external quote |
+
+## 2. Decision tree thực chiến
+
+Khi chuẩn bị tạo `useState`, hỏi:
+
+```text
+State có quyết định business truth?
+  YES -> server/DB
+  NO
+   |
+Có cần copy URL để share/bookmark/reload?
+  YES -> URL
+  NO
+   |
+Có phải field đang edit/submit?
+  YES -> useForm
+  NO
+   |
+Có cần sống qua browser Back/Forward?
+  YES -> useRemember hoặc keyed useForm
+  NO
+   |
+Chỉ điều khiển UI ngắn hạn?
+  YES -> local state
+  NO
+   |
+Request JSON độc lập khỏi page lifecycle?
+  YES -> useHttp/local request state
+```
+
+## 3. Server state: đừng mirror props nếu không có lý do
+
+Anti-pattern:
+
+```tsx
+export default function Index({ products }: Props) {
+    const [rows, setRows] = useState(products.data)
+
+    return rows.map(/* ... */)
+}
+```
+
+Sau filter:
+
+```tsx
+router.reload({ only: ['products'] })
+```
+
+`products` mới về nhưng `rows` vẫn snapshot cũ.
+
+### Đúng khi chỉ render server state
+
+```tsx
+export default function Index({ products }: Props) {
+    return products.data.map((product) => (
+        <ProductRow product={product} key={product.id} />
+    ))
+}
+```
+
+### Local copy chỉ hợp lý khi có lifecycle khác
+
+Ví dụ drag reorder chưa save:
+
+```tsx
+const [draftOrder, setDraftOrder] = useState(() => products.data)
+
+function resetDraft() {
+    setDraftOrder(products.data)
+}
+
+function saveOrder() {
+    router.put(route('products.reorder'), {
+        ids: draftOrder.map((item) => item.id),
+    })
+}
+```
+
+Ở đây `draftOrder` có semantics rõ: **unsaved local draft**.
+
+## 4. URL state: state nào user kỳ vọng share được thì nên lên URL
+
+Ví dụ product list:
+
+```text
+/products?search=keyboard&status=active&sort=-price&page=2
+```
+
+Backend:
+
+```php
+public function index(Request $request)
+{
+    $filters = $request->validate([
+        'search' => ['nullable', 'string', 'max:100'],
+        'status' => ['nullable', Rule::in(['active', 'inactive'])],
+        'sort' => ['nullable', Rule::in(['name', '-name', 'price', '-price'])],
+        'page' => ['nullable', 'integer', 'min:1'],
+    ]);
+
+    return Inertia::render('Products/Index', [
+        'filters' => $filters,
+        'products' => fn () => $this->query($filters)->paginate(20)->withQueryString(),
+    ]);
+}
+```
+
+Frontend draft search:
+
+```tsx
+const [searchDraft, setSearchDraft] = useState(filters.search ?? '')
+
+function commitSearch(search: string) {
+    router.get(
+        route('products.index'),
+        {
+            ...filters,
+            search: search || undefined,
+            page: undefined,
+        },
+        {
+            only: ['products', 'filters'],
+            preserveState: true,
+            replace: true,
+        },
+    )
+}
+```
+
+Ở đây có hai state nhưng không duplicate ownership:
+
+```text
+searchDraft -> local typing buffer
+filters.search -> committed URL/server state
+```
+
+## 5. URL hay local cho tab?
+
+Không phải tab nào cũng giống nhau.
+
+### Tab dữ liệu nên URL-owned
+
+```text
+/products/42?tab=inventory
+```
+
+Nếu reload/share link phải vẫn mở Inventory, URL là owner.
+
+### Tab cosmetic có thể local
+
+```tsx
+const [panel, setPanel] = useState<'details' | 'help'>('details')
+```
+
+Nếu tab chỉ thay bố cục tạm thời và không đáng bookmark, local state đơn giản hơn.
+
+## 6. Form state là draft, không phải server truth
+
+Server prop:
+
+```tsx
+product.name === 'Keyboard'
+```
+
+Form draft:
+
+```tsx
+const form = useForm(`EditProduct:${product.id}`, {
+    name: product.name,
+    price: product.price,
+})
+```
+
+Sau khi user gõ:
+
+```text
+server product.name = Keyboard
+form.data.name       = Mechanical Keyboard
+```
+
+Đây không phải inconsistency. Hai state có semantics khác nhau.
+
+### Sai: sync prop vào form mỗi render/effect
+
+```tsx
+useEffect(() => {
+    form.setData('name', product.name)
+}, [product.name])
+```
+
+Effect này có thể xóa draft user đang nhập khi prop refresh.
+
+### Tốt hơn
+
+- khởi tạo draft khi component/entity identity thay đổi;
+- dùng key theo entity;
+- reset có chủ đích sau success.
+
+```tsx
+const form = useForm(`EditProduct:${product.id}`, {
+    name: product.name,
+    price: product.price,
+})
+```
+
+## 7. History state: khác server cache
+
+`useRemember` giải quyết:
+
+```text
+Page A -> user nhập draft -> Page B -> Back -> draft được phục hồi
+```
+
+Ví dụ:
+
+```tsx
+const [ui, setUi] = useRemember(
+    {
+        expandedFilters: false,
+        selectedIds: [] as number[],
+    },
+    'Products/Index:UI',
+)
+```
+
+Không dùng `useRemember` để “cache products khỏi phải query lại”. Server data freshness là bài toán khác.
+
+## 8. Shared props: context server-driven, không phải Redux replacement
+
+Phù hợp:
+
+```php
+'auth.user' => fn () => $request->user()?->only('id', 'name'),
+'locale' => app()->getLocale(),
+'flash.success' => fn () => session('success'),
+```
+
+Không phù hợp:
+
+```php
+'products' => Product::all(),
+'permissions' => Permission::all(),
+'notificationHistory' => Notification::latest()->get(),
+```
+
+Lý do không chỉ là payload. Shared props làm dependency trở nên implicit ở mọi page.
+
+## 9. Derived state: thường không cần owner riêng
+
+Sai:
+
+```tsx
+const [activeCount, setActiveCount] = useState(0)
+
+useEffect(() => {
+    setActiveCount(products.data.filter((p) => p.is_active).length)
+}, [products])
+```
+
+Nếu đây chỉ là derived UI value:
+
+```tsx
+const activeCount = products.data.filter((p) => p.is_active).length
+```
+
+Hoặc nếu count cần đúng toàn dataset, server phải sở hữu:
+
+```php
+'stats' => Inertia::defer(fn () => [
+    'active' => Product::where('is_active', true)->count(),
+]),
+```
+
+## 10. Optimistic state: temporary projection, không được chiếm canonical ownership
+
+```tsx
+router.patch(
+    route('products.toggle', product.id),
+    {},
+    {
+        optimistic: {
+            props: (current) => ({
+                products: toggleProduct(current.products, product.id),
+            }),
+        },
+        onSuccess: () => router.reload({ only: ['stats'] }),
+    },
+)
+```
+
+Mental model:
+
+```text
+Canonical: DB
+Projection: optimistic page props
+Failure: rollback projection
+Success: reconcile canonical props
+```
+
+Nếu bạn bắt đầu thêm một global `optimisticProductsStore` song song với Inertia props, hãy dừng và xác định lại ownership.
+
+## 11. Modal state: URL hay local?
+
+### Confirm delete -> local
+
+```tsx
+const [deleting, setDeleting] = useState<Product | null>(null)
+```
+
+Không cần URL vì refresh không cần giữ modal.
+
+### Deep-link edit drawer -> URL
+
+Nếu `/products?edit=42` phải share được, server/URL nên biết entity đang edit.
+
+Có thể render drawer dựa trên query prop:
+
+```php
+'editingProduct' => fn () => $request->integer('edit')
+    ? Product::findOrFail($request->integer('edit'))
+    : null,
+```
+
+Trade-off: URL-owned drawer phức tạp hơn nhưng có deep-link/back-button semantics tốt hơn.
+
+## 12. Pagination: URL là owner, selected rows thường local
+
+```text
+page=3 -> URL
+selectedIds=[3,5,8] -> local/history tùy UX
+```
+
+Nếu selection phải sống khi chuyển page, local state ở page component có thể chưa đủ. Hãy quyết định rõ:
+
+- reset selection khi page thay đổi;
+- remember selection qua history;
+- hoặc server-own một batch selection token nếu workflow lớn.
+
+Đừng vô thức giữ selected IDs của row không còn visible.
+
+## 13. Permission state: server là owner
+
+Server resource:
+
+```php
+return [
+    'id' => $this->id,
+    'name' => $this->name,
+    'can' => [
+        'update' => $request->user()->can('update', $this->resource),
+        'delete' => $request->user()->can('delete', $this->resource),
+    ],
+];
+```
+
+Frontend chỉ dùng cho UX:
+
+```tsx
+{product.can.update && <EditButton />}
+```
+
+Policy vẫn enforce lại endpoint. Frontend permission prop không bao giờ là security truth.
+
+## 14. Loading state cũng có owner
+
+Đừng tạo một global `isLoading` cho mọi async interaction.
+
+| Operation | Owner tốt |
+| --- | --- |
+| Form submit | `form.processing` |
+| Upload | `form.progress` |
+| Deferred prop | `<Deferred>` boundary |
+| Search navigation | local state qua visit lifecycle |
+| Polling widget | polling hook/state của widget |
+| External JSON | `useHttp.processing` |
+
+Loading state nên cùng lifecycle với operation sinh ra nó.
+
+## 15. Error state cũng có scope
+
+Validation field error:
+
+```tsx
+form.errors.name
+```
+
+Page-level 403/404:
+
+```text
+Error page / server response
+```
+
+Network failure:
+
+```text
+router event / request lifecycle feedback
+```
+
+External API error:
+
+```text
+useHttp instance
+```
+
+Dồn mọi lỗi vào `globalError` khiến UI khó biết lỗi thuộc interaction nào.
+
+## 16. Race condition là ownership theo thời gian
+
+Giả sử:
+
+```text
+Request A: search=a   (chậm)
+Request B: search=ab  (nhanh)
+```
+
+Nếu A về sau B và overwrite UI thì “request cũ” đã chiếm ownership sai thời điểm.
+
+Giải pháp không nhất thiết là global store. Trước hết:
+
+- debounce;
+- dùng Inertia visit lifecycle/cancellation semantics;
+- commit query vào URL;
+- không mirror prop vào local store.
+
+## 17. Anti-pattern: prop -> state -> effect -> router -> prop loop
+
+```tsx
+const [status, setStatus] = useState(filters.status)
+
+useEffect(() => {
+    router.get(route('products.index'), { status })
+}, [status])
+
+useEffect(() => {
+    setStatus(filters.status)
+}, [filters.status])
+```
+
+Đây là dấu hiệu ownership không rõ.
+
+Tốt hơn dùng event explicit:
+
+```tsx
+function changeStatus(status: string) {
+    router.get(
+        route('products.index'),
+        { ...filters, status, page: undefined },
+        { preserveState: true, replace: true },
+    )
+}
+```
+
+Input có thể lấy trực tiếp `filters.status` nếu không cần draft phase.
+
+## 18. Case study: Product Index hoàn chỉnh
+
+Phân loại state:
+
+```text
+products                 -> server props
+stats                    -> deferred server props
+filters.search           -> URL/server
+searchDraft              -> local transient draft
+filters.status/sort/page -> URL/server
+selectedIds              -> local UI hoặc remembered UI
+isFilterPanelOpen        -> local UI
+flash.success            -> shared ephemeral server message
+toggle optimistic state  -> temporary projection
+```
+
+Khi ownership rõ, component gần như không cần synchronization effects.
+
+## 19. Case study: Product Edit có image upload
+
+```text
+product.image_url        -> server prop/current persisted image
+form.data.image          -> local form draft File
+previewUrl               -> derived local object URL
+form.progress            -> upload operation state
+form.errors.image        -> server validation state projected vào form
+remove_image             -> form intent gửi server
+```
+
+Không nên set `product.image_url = previewUrl`. Preview không phải persisted image.
+
+## 20. Khi nào global client store thực sự hợp lý?
+
+Có, nhưng ít hơn bạn nghĩ. Ví dụ:
+
+- rich client editor có undo/redo phức tạp độc lập navigation;
+- realtime collaborative state cần merge event liên tục;
+- offline-first workflow;
+- highly interactive canvas/designer;
+- state cross-page không phù hợp URL, server props hay history state.
+
+Ngay cả lúc đó, vẫn nên định nghĩa boundary:
+
+```text
+DB/server truth
+    ↕ explicit sync
+client domain store
+    ↕
+Inertia page/navigation shell
+```
+
+Không để cùng một entity vừa canonical trong page props vừa canonical trong store.
+
+## 21. Ownership review checklist
+
+Khi review PR, hỏi:
+
+```text
+[ ] Mỗi state có canonical owner rõ chưa?
+[ ] Có mirror server prop vào useState không cần thiết không?
+[ ] URL có thiếu search/filter/sort/page cần bookmark không?
+[ ] Form draft có bị prop refresh overwrite không?
+[ ] useRemember có đang bị dùng như data cache không?
+[ ] Shared props có trở thành global dump không?
+[ ] Derived state có bị lưu thành state riêng không?
+[ ] Optimistic projection có rollback/reconcile không?
+[ ] Loading/error có scope đúng operation không?
+[ ] Back/Forward có phục hồi đúng thứ user kỳ vọng không?
+[ ] Có effect nào chỉ tồn tại để sync hai bản copy cùng một dữ liệu không?
+```
+
+## 22. Heuristic cuối cùng
+
+Nếu bạn thấy rất nhiều effect dạng:
+
+```tsx
+useEffect(() => setX(props.x), [props.x])
+useEffect(() => navigateFromX(x), [x])
+```
+
+đó thường không phải “React cần effect”. Đó là dấu hiệu **state ownership chưa được quyết định dứt khoát**.
+
+Một application Inertia dễ maintain thường có flow một chiều:
+
+```text
+user intent
+ -> URL/form/local event
+ -> server mutation/query
+ -> Inertia response
+ -> props render
+```
+
+Chỉ thêm lớp state khác khi lớp đó có lifecycle và trách nhiệm khác thật sự.

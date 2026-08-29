@@ -1,0 +1,79 @@
+---
+title: "Samples & Thực chiến"
+description: "Bộ bài thực hành Inertia.js v3 với Laravel và React: CRUD hoàn chỉnh, form, loading, validation, upload, performance, error handling, testing và kinh nghiệm production."
+---
+
+# Samples & Thực chiến
+
+Phần này **không phải bản dịch tài liệu chính thức**. Đây là bộ bài bổ sung dành cho người muốn đi từ “biết API Inertia.js” đến “ghép được một luồng production hoàn chỉnh”.
+
+Các ví dụ ưu tiên **Laravel + React + TypeScript + Inertia.js v3** vì đây là tổ hợp dễ thể hiện trọn vẹn server-driven flow. Ý tưởng về state, validation, partial reload, deferred props, prefetch và error handling vẫn áp dụng tương tự với Vue hoặc Svelte.
+
+<Warning>
+Luôn đối chiếu API với tài liệu chính thức khi nâng version. Phần sample cố ý giữ business rule ở backend, không biến Inertia thành một REST API + client router thu nhỏ.
+</Warning>
+
+## Bắt đầu bằng reference CRUD mới
+
+<CardGroup cols={2}>
+  <Card title="Product CRUD: full sức mạnh Inertia" href="/samples/crud/product-reference-app" icon="bolt">
+    Một feature duy nhất ghép form state, URL filter, partial reload, deferred, prefetch, optimistic update và redirect flow.
+  </Card>
+  <Card title="8 scenario tổng hợp" href="/samples/scenarios/inertia-patterns" icon="diagram-project">
+    Chọn capability theo bài toán thực tế thay vì học API rời rạc.
+  </Card>
+</CardGroup>
+
+Nếu chỉ có thời gian đọc một chuỗi bài, hãy bắt đầu bằng **Product CRUD**. Đây là reference sample mới và sâu hơn CRUD `User` tối giản bên dưới.
+
+## Lộ trình bổ sung
+
+<CardGroup cols={2}>
+  <Card title="1. CRUD end-to-end cơ bản" href="/samples/crud/full-flow">
+    Từ route, request, controller đến React pages, loading, validation, flash message và delete confirmation.
+  </Card>
+  <Card title="2. Search, filter, pagination" href="/samples/crud/search-filter-pagination">
+    Giữ URL là source of truth, debounce đúng chỗ và chỉ reload props cần thiết.
+  </Card>
+  <Card title="3. Form UX đầy đủ" href="/samples/forms/loading-validation-errors">
+    processing, errors, recentlySuccessful, dirty state, cancel và chống double submit.
+  </Card>
+  <Card title="4. Upload file" href="/samples/forms/file-upload-progress">
+    Progress bar, validation file, multipart và cleanup UX.
+  </Card>
+  <Card title="5. Performance" href="/samples/performance/partial-deferred-prefetch">
+    Partial reload, lazy evaluation, deferred props và prefetch theo chi phí dữ liệu.
+  </Card>
+  <Card title="6. Race condition & request lifecycle" href="/samples/performance/request-lifecycle">
+    Debounce, cancel request, stale response và nguyên tắc tránh UI nhảy ngược.
+  </Card>
+  <Card title="7. Production errors" href="/samples/production/error-handling">
+    Validation khác exception như thế nào, 403/404/500 nên render ra sao và cần log gì.
+  </Card>
+  <Card title="8. Testing" href="/samples/testing/crud-tests">
+    Feature test cho Inertia response, validation, authorization và redirect/flash.
+  </Card>
+</CardGroup>
+
+## Nguyên tắc xuyên suốt
+
+1. **Backend là source of truth** cho validation, authorization và business rule.
+2. **URL là source of truth** cho state có tính điều hướng như search/filter/page.
+3. Chỉ dùng local React state cho state thuần UI như modal mở/đóng hoặc text đang gõ trước debounce.
+4. Không dùng partial reload theo cảm tính. Chỉ tối ưu sau khi xác định prop nào thực sự tốn nhiều thời gian xử lý, truy vấn hoặc dung lượng truyền tải.
+5. Loading phải gắn với scope của action: submit form, upload file, deferred panel hay page navigation là các trạng thái khác nhau.
+6. Validation error là expected flow; exception 500 là failure flow. Đừng xử lý chúng như một loại lỗi duy nhất.
+7. Trước khi thêm optimistic update, hãy xác định rollback và conflict semantics.
+
+## Stack của sample
+
+```text
+Laravel
+  -> route/controller/form request/policy
+  -> Inertia response
+  -> React + TypeScript page
+  -> Inertia visit/form lifecycle
+  -> redirect + shared flash + refreshed props
+```
+
+Mục tiêu của section này là để bạn có thể **copy từng khối code, hiểu tại sao nó tồn tại, rồi điều chỉnh vào project thật** thay vì chỉ đọc một API snippet rời rạc.
