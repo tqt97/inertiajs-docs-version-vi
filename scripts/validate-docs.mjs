@@ -39,6 +39,38 @@ function walk(node) {
   }
 }
 
+function expectedOfficialUrl(page) {
+  const match = page.match(/^(v[123])\/(.+)$/);
+  if (!match) return "https://inertiajs.com/docs/v3/getting-started";
+
+  const [, version, rawSlug] = match;
+  const slug = rawSlug === "getting-started/index" ? "getting-started" : rawSlug;
+  return `https://inertiajs.com/docs/${version}/${slug}`;
+}
+
+function validatePage(page, content, rel) {
+  if (!content.startsWith("---")) errors.push(`Missing frontmatter: ${rel}`);
+  if (!/^title:\s*.+/m.test(content)) errors.push(`Missing title: ${rel}`);
+  if (/^description:\s*/m.test(content)) errors.push(`Description is not allowed in article frontmatter: ${rel}`);
+
+  const fences = content.match(/^```/gm)?.length ?? 0;
+  if (fences % 2 !== 0) errors.push(`Unbalanced code fences: ${rel}`);
+
+  if (!/^## Tài liệu chính thức$/m.test(content)) {
+    errors.push(`Missing official documentation footer: ${rel}`);
+  }
+
+  const officialUrl = expectedOfficialUrl(page);
+  if (!content.includes(officialUrl)) {
+    errors.push(`Missing expected official source link in ${rel}: ${officialUrl}`);
+  }
+
+  const tail = content.slice(-1200);
+  if (!tail.includes("## Tài liệu chính thức")) {
+    errors.push(`Official documentation link must be near the end of article: ${rel}`);
+  }
+}
+
 walk(config.navigation);
 
 for (const page of pages) {
@@ -49,12 +81,8 @@ for (const page of pages) {
   }
 
   const content = fs.readFileSync(file, "utf8");
-  if (!content.startsWith("---")) errors.push(`Missing frontmatter: ${page}.mdx`);
-  if (!/^description:\s*.+/m.test(content)) errors.push(`Missing description: ${page}.mdx`);
-  const fences = content.match(/^```/gm)?.length ?? 0;
-  if (fences % 2 !== 0) errors.push(`Unbalanced code fences: ${page}.mdx`);
+  validatePage(page, content, `${page}.mdx`);
 }
-
 
 const sampleFiles = [];
 
@@ -72,12 +100,6 @@ collectMdx(path.join(root, "samples"));
 for (const file of sampleFiles) {
   const content = fs.readFileSync(file, "utf8");
   const rel = path.relative(root, file);
-
-  if (!content.startsWith("---")) errors.push(`Missing frontmatter: ${rel}`);
-  if (!/^description:\s*.+/m.test(content)) errors.push(`Missing description: ${rel}`);
-
-  const fences = content.match(/^```/gm)?.length ?? 0;
-  if (fences % 2 !== 0) errors.push(`Unbalanced code fences: ${rel}`);
 
   for (const match of content.matchAll(/\]\((\/samples\/[^)#]+)(?:#[^)]+)?\)/g)) {
     const target = path.join(root, `${match[1].slice(1)}.mdx`);
@@ -116,7 +138,7 @@ if (errors.length) {
 }
 
 console.log("[PASS] docs.json is valid JSON");
-console.log(`[PASS] ${pages.length} navigation pages exist and include descriptions`);
+console.log(`[PASS] ${pages.length} navigation pages exist with title-only frontmatter and official-source footers`);
 console.log(`[PASS] ${versions.length} version trees keep their expected page counts`);
 console.log("[PASS] code fences are balanced");
-console.log(`[PASS] ${sampleFiles.length} sample pages pass frontmatter/link/fence checks`);
+console.log(`[PASS] ${sampleFiles.length} sample pages pass link/editorial checks`);
